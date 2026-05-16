@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+
 import {
   getDatabase,
   ref,
@@ -14,32 +15,52 @@ import {
   goOnline,
   set,
   update,
-  remove,
-  serverTimestamp
+  remove
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAk9fMAWy6AS4o2s5n5zSJj0M0GlJoyIWE", //hardcoded to assert Dominance 
+  apiKey: "AIzaSyAk9fMAWy6AS4o2s5n5zSJj0M0GlJoyIWE",
   authDomain: "new-tab-2-d6042.firebaseapp.com",
-  databaseURL: "https://new-tab-2-d6042-default-rtdb.firebaseio.com",
+  databaseURL:
+    "https://new-tab-2-d6042-default-rtdb.firebaseio.com",
   projectId: "new-tab-2-d6042",
-  storageBucket: "new-tab-2-d6042.firebasestorage.app",
+  storageBucket:
+    "new-tab-2-d6042.firebasestorage.app",
   messagingSenderId: "347559506222",
-  appId: "1:347559506222:web:e854997d9048686b988abf"
+  appId:
+    "1:347559506222:web:e854997d9048686b988abf"
 };
 
-const SESSION_ID_KEY = "game_hoster_session_id";
+const SESSION_ID_KEY =
+  "game_hoster_session_id";
+
 const SESSION_ID = getSessionId();
+
 const CHAT_NAME_KEY = "site_chat_name";
+
 const CHAT_MESSAGE_LIMIT = 10;
+
 const MAX_MESSAGE_LENGTH = 180;
+
 const MAX_NAME_LENGTH = 12;
-const CHAT_MESSAGE_TTL_MS = 6 * 60 * 60 * 1000;
-const CHAT_CLEANUP_INTERVAL_MS = 10 * 60 * 1000;
-const PRESENCE_HEARTBEAT_MS = 30 * 1000;
-const PRESENCE_STALE_MS = 2 * 60 * 1000;
-const PRESENCE_CLEANUP_INTERVAL_MS = 60 * 1000;
-const CHAT_ENABLED = window.CHAT_ENABLED !== false;
+
+const CHAT_MESSAGE_TTL_MS =
+  6 * 60 * 60 * 1000;
+
+const CHAT_CLEANUP_INTERVAL_MS =
+  10 * 60 * 1000;
+
+const PRESENCE_HEARTBEAT_MS =
+  30 * 1000;
+
+const PRESENCE_STALE_MS =
+  2 * 60 * 1000;
+
+const PRESENCE_CLEANUP_INTERVAL_MS =
+  60 * 1000;
+
+const CHAT_ENABLED =
+  window.CHAT_ENABLED !== false;
 
 const CENSOR_WORDS = [
   "nigger",
@@ -65,54 +86,66 @@ const CENSOR_REPLACEMENTS = [
   "Download the dairy queen app and use code Clinga2210!"
 ];
 
-const isConfigured = !Object.values(firebaseConfig).some((value) => value.includes("PASTE_YOUR"));
+const app = initializeApp(firebaseConfig);
 
-if (!isConfigured) {
-  console.warn("fix config error in firebase-presence.js to enable live player counts.");
-}
-
-const app = isConfigured ? initializeApp(firebaseConfig) : null;
-const database = app ? getDatabase(app) : null;
+const database = getDatabase(app);
 
 let activeGameId = null;
+
 let activeGameName = null;
+
 let activePresenceRef = null;
+
 let activeDisconnectRef = null;
+
 let unsubscribeCounts = null;
+
 let unsubscribeChat = null;
+
 let isOnline = false;
-let chatLoaded = false;
-let latestRenderedMessageKey = null;
+
 let presenceHeartbeatTimer = null;
+
 let lastPresenceCleanupAt = 0;
+
 let lastChatCleanupAt = 0;
 
-const chatToggle = document.getElementById("chatToggle");
-const siteChat = document.getElementById("siteChat");
-const chatActiveUsers = document.getElementById("chatActiveUsers");
-const chatMessages = document.getElementById("chatMessages");
-const chatForm = document.getElementById("chatForm");
-const chatName = document.getElementById("chatName");
-const chatInput = document.getElementById("chatInput");
-const chatSend = document.getElementById("chatSend");
+const chatToggle =
+  document.getElementById("chatToggle");
 
-function showFirebaseNotice(message) {
-  if (!chatMessages) return;
+const siteChat =
+  document.getElementById("siteChat");
 
-  chatMessages.innerHTML = "";
+const chatActiveUsers =
+  document.getElementById("chatActiveUsers");
 
-  const notice = document.createElement("div");
-  notice.className = "chat-empty";
-  notice.textContent = message;
-  chatMessages.appendChild(notice);
-}
+const chatMessages =
+  document.getElementById("chatMessages");
+
+const chatForm =
+  document.getElementById("chatForm");
+
+const chatName =
+  document.getElementById("chatName");
+
+const chatInput =
+  document.getElementById("chatInput");
+
+const chatSend =
+  document.getElementById("chatSend");
 
 function getSessionId() {
-  let id = sessionStorage.getItem(SESSION_ID_KEY);
+  let id = sessionStorage.getItem(
+    SESSION_ID_KEY
+  );
 
   if (!id) {
     id = createSessionId();
-    sessionStorage.setItem(SESSION_ID_KEY, id);
+
+    sessionStorage.setItem(
+      SESSION_ID_KEY,
+      id
+    );
   }
 
   return id;
@@ -123,306 +156,535 @@ function createSessionId() {
     return crypto.randomUUID();
   }
 
-  const values = new Uint32Array(4);
-  crypto?.getRandomValues?.(values);
-  const randomId = [...values]
-    .map((value) => value.toString(16).padStart(8, "0"))
-    .join("-");
-
-  return randomId || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return (
+    Date.now() +
+    "-" +
+    Math.random().toString(16).slice(2)
+  );
 }
 
 function gameIdFromName(name) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "game";
+  return (
+    name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "game"
+  );
+}
+
+function connectDatabase() {
+  if (isOnline) return;
+
+  goOnline(database);
+
+  isOnline = true;
+}
+
+function disconnectDatabase() {
+  clearActivePresence();
 }
 
 function setActiveGame(name) {
   if (!database) return;
 
   const gameId = gameIdFromName(name);
-  activeGameName = name;
 
-  if (document.visibilityState === "hidden") return;
+  activeGameName = name;
 
   if (gameId === activeGameId) return;
 
-  clearActivePresence({ cancelDisconnect: true });
+  clearActivePresence({
+    cancelDisconnect: true
+  });
+
   connectDatabase();
 
   activeGameId = gameId;
-  activePresenceRef = ref(database, `gamePresence/${gameId}/players/${SESSION_ID}`);
-  activeDisconnectRef = onDisconnect(activePresenceRef);
 
-  activeDisconnectRef.remove().catch(() => {});
+  activePresenceRef = ref(
+    database,
+    `gamePresence/${gameId}/players/${SESSION_ID}`
+  );
+
+  activeDisconnectRef =
+    onDisconnect(activePresenceRef);
+
+  activeDisconnectRef
+    .remove()
+    .catch(console.error);
+
+  const now = Date.now();
 
   set(activePresenceRef, {
     game: name,
-    joinedAt: serverTimestamp(),
-    lastSeenAt: serverTimestamp()
-  }).then(startPresenceHeartbeat).catch(() => {});
-}
-
-function watchGameCounts() {
-  if (!database) return;
-  if (unsubscribeCounts) return;
-
-  connectDatabase();
-
-  const countsRef = ref(database, "gamePresence");
-
-  unsubscribeCounts = onValue(countsRef, (snapshot) => {
-    const counts = {};
-    let totalPlayers = 0;
-
-    cleanupStalePresence();
-
-    snapshot.forEach((gameSnapshot) => {
-      const playerCount = gameSnapshot.child("players").numChildren();
-      counts[gameSnapshot.key] = playerCount;
-      totalPlayers += playerCount;
-    });
-
-    updateActiveUsers(totalPlayers);
-
-    document.querySelectorAll("[data-player-count-for]").forEach((badge) => {
-      const gameId = gameIdFromName(badge.dataset.playerCountFor);
-      const playerCount = counts[gameId] || 0;
-
-      badge.textContent = playerCount > 0 ? playerCount : "";
-      badge.classList.toggle("has-players", playerCount > 0);
-      badge.title = playerCount > 0
-        ? `${playerCount} player${playerCount === 1 ? "" : "s"} online`
-        : "No players online";
-    });
-  }, (error) => {
-    console.warn("Firebase player counts failed:", error);
-    updateActiveUsers(0);
-  });
-}
-
-function updateActiveUsers(totalPlayers) {
-  if (!chatActiveUsers) return;
-
-  chatActiveUsers.textContent = `${totalPlayers} active`;
-  chatActiveUsers.title = `${totalPlayers} active user${totalPlayers === 1 ? "" : "s"} across games`;
-
-  document.dispatchEvent(new CustomEvent("siteActiveUsersChanged", {
-    detail: { total: totalPlayers }
-  }));
+    joinedAt: now,
+    lastSeenAt: now
+  })
+    .then(() => {
+      startPresenceHeartbeat();
+    })
+    .catch(console.error);
 }
 
 function startPresenceHeartbeat() {
   stopPresenceHeartbeat();
 
-  presenceHeartbeatTimer = window.setInterval(() => {
-    if (!activePresenceRef || document.visibilityState === "hidden") return;
+  presenceHeartbeatTimer =
+    setInterval(() => {
+      if (!activePresenceRef) return;
 
-    update(activePresenceRef, {
-      lastSeenAt: serverTimestamp()
-    }).catch(() => {});
-  }, PRESENCE_HEARTBEAT_MS);
+      update(activePresenceRef, {
+        lastSeenAt: Date.now()
+      }).catch(console.error);
+    }, PRESENCE_HEARTBEAT_MS);
 }
 
 function stopPresenceHeartbeat() {
   if (!presenceHeartbeatTimer) return;
 
-  window.clearInterval(presenceHeartbeatTimer);
+  clearInterval(
+    presenceHeartbeatTimer
+  );
+
   presenceHeartbeatTimer = null;
 }
 
-function cleanupStalePresence() {
-  if (!database) return;
+function clearActivePresence({
+  cancelDisconnect = false
+} = {}) {
+  stopPresenceHeartbeat();
 
+  if (
+    activeDisconnectRef &&
+    cancelDisconnect
+  ) {
+    activeDisconnectRef
+      .cancel()
+      .catch(console.error);
+  }
+
+  if (activePresenceRef) {
+    remove(activePresenceRef).catch(
+      console.error
+    );
+
+    activePresenceRef = null;
+  }
+
+  activeDisconnectRef = null;
+
+  activeGameId = null;
+}
+
+function cleanupStalePresence() {
   const now = Date.now();
-  if (now - lastPresenceCleanupAt < PRESENCE_CLEANUP_INTERVAL_MS) return;
+
+  if (
+    now - lastPresenceCleanupAt <
+    PRESENCE_CLEANUP_INTERVAL_MS
+  ) {
+    return;
+  }
+
   lastPresenceCleanupAt = now;
 
-  get(ref(database, "gamePresence")).then((snapshot) => {
-    if (!snapshot.exists()) return;
+  get(ref(database, "gamePresence"))
+    .then((snapshot) => {
+      if (!snapshot.exists()) return;
 
-    const cutoff = Date.now() - PRESENCE_STALE_MS;
-    const removals = [];
+      const cutoff =
+        Date.now() -
+        PRESENCE_STALE_MS;
 
-    snapshot.forEach((gameSnapshot) => {
-      gameSnapshot.child("players").forEach((playerSnapshot) => {
-        const lastSeenAt = playerSnapshot.child("lastSeenAt").val();
+      const removals = [];
 
-        if (typeof lastSeenAt === "number" && lastSeenAt < cutoff) {
-          removals.push(remove(playerSnapshot.ref).catch(() => {}));
+      snapshot.forEach(
+        (gameSnapshot) => {
+          gameSnapshot
+            .child("players")
+            .forEach(
+              (playerSnapshot) => {
+                const player =
+                  playerSnapshot.val();
+
+                if (!player) return;
+
+                const lastSeenAt =
+                  Number(
+                    player.lastSeenAt || 0
+                  );
+
+                if (
+                  lastSeenAt < cutoff
+                ) {
+                  removals.push(
+                    remove(
+                      playerSnapshot.ref
+                    ).catch(
+                      console.error
+                    )
+                  );
+                }
+              }
+            );
         }
-      });
-    });
+      );
 
-    return Promise.all(removals);
-  }).catch(() => {});
+      return Promise.all(removals);
+    })
+    .catch(console.error);
+}
+
+function watchGameCounts() {
+  if (unsubscribeCounts) return;
+
+  connectDatabase();
+
+  const countsRef = ref(
+    database,
+    "gamePresence"
+  );
+
+  unsubscribeCounts = onValue(
+    countsRef,
+    (snapshot) => {
+      const counts = {};
+
+      let totalPlayers = 0;
+
+      cleanupStalePresence();
+
+      snapshot.forEach(
+        (gameSnapshot) => {
+          let playerCount = 0;
+
+          gameSnapshot
+            .child("players")
+            .forEach(
+              (playerSnapshot) => {
+                const data =
+                  playerSnapshot.val();
+
+                if (!data) return;
+
+                const cutoff =
+                  Date.now() -
+                  PRESENCE_STALE_MS;
+
+                const lastSeenAt =
+                  Number(
+                    data.lastSeenAt || 0
+                  );
+
+                if (
+                  lastSeenAt >= cutoff
+                ) {
+                  playerCount++;
+                }
+              }
+            );
+
+          counts[gameSnapshot.key] =
+            playerCount;
+
+          totalPlayers += playerCount;
+        }
+      );
+
+      updateActiveUsers(totalPlayers);
+
+      document
+        .querySelectorAll(
+          "[data-player-count-for]"
+        )
+        .forEach((badge) => {
+          const gameId =
+            gameIdFromName(
+              badge.dataset
+                .playerCountFor
+            );
+
+          const playerCount =
+            counts[gameId] || 0;
+
+          badge.textContent =
+            playerCount > 0
+              ? playerCount
+              : "";
+
+          badge.classList.toggle(
+            "has-players",
+            playerCount > 0
+          );
+
+          badge.title =
+            playerCount > 0
+              ? `${playerCount} player${
+                  playerCount === 1
+                    ? ""
+                    : "s"
+                } online`
+              : "No players online";
+        });
+    },
+    (error) => {
+      console.warn(
+        "Firebase player counts failed:",
+        error
+      );
+
+      updateActiveUsers(0);
+    }
+  );
+}
+
+function updateActiveUsers(
+  totalPlayers
+) {
+  if (!chatActiveUsers) return;
+
+  chatActiveUsers.textContent =
+    `${totalPlayers} active`;
+
+  chatActiveUsers.title =
+    `${totalPlayers} active user${
+      totalPlayers === 1 ? "" : "s"
+    } across games`;
 }
 
 function setupChat() {
-  if (!chatToggle || !siteChat || !chatForm || !chatName || !chatInput) return;
+  if (
+    !chatForm ||
+    !chatInput ||
+    !chatName
+  ) {
+    return;
+  }
 
-  chatName.value = cleanName(localStorage.getItem(CHAT_NAME_KEY) || "");
+  chatName.value = cleanName(
+    localStorage.getItem(
+      CHAT_NAME_KEY
+    ) || ""
+  );
 
-  document.addEventListener("siteChatToggled", (event) => {
-    if (event.detail?.open) {
-      watchChatMessages();
+  chatName.addEventListener(
+    "input",
+    () => {
+      localStorage.setItem(
+        CHAT_NAME_KEY,
+        cleanName(chatName.value)
+      );
     }
-  });
+  );
 
-  chatName.addEventListener("input", () => {
-    localStorage.setItem(CHAT_NAME_KEY, cleanName(chatName.value));
-  });
+  chatForm.addEventListener(
+    "submit",
+    (event) => {
+      event.preventDefault();
 
-  document.addEventListener("siteChatSubmit", () => {
-    sendChatMessage();
-  });
+      sendChatMessage();
+    }
+  );
 
-  if ((!database || !CHAT_ENABLED) && chatSend) {
-    chatSend.disabled = true;
-    chatInput.placeholder = CHAT_ENABLED ? "Chat needs Firebase first" : "Chat disabled";
-  }
-
-  if (siteChat.classList.contains("open")) {
-    watchChatMessages();
-  }
+  watchChatMessages();
 }
 
 function watchChatMessages() {
   if (!CHAT_ENABLED) return;
-  if (!database || unsubscribeChat) return;
 
-  connectDatabase();
+  if (unsubscribeChat) return;
+
   cleanupOldChatMessages();
 
-  const messagesRef = query(ref(database, "siteChat/messages"), limitToLast(CHAT_MESSAGE_LIMIT));
+  const messagesRef = query(
+    ref(database, "siteChat/messages"),
+    limitToLast(CHAT_MESSAGE_LIMIT)
+  );
 
-  unsubscribeChat = onValue(messagesRef, (snapshot) => {
-    if (!chatMessages) return;
+  unsubscribeChat = onValue(
+    messagesRef,
+    (snapshot) => {
+      if (!chatMessages) return;
 
-    chatMessages.innerHTML = "";
+      chatMessages.innerHTML = "";
 
-    if (!snapshot.exists()) {
-      latestRenderedMessageKey = null;
-      chatMessages.innerHTML = '<div class="chat-empty">No messages yet.</div>';
-      return;
+      if (!snapshot.exists()) {
+        chatMessages.innerHTML =
+          '<div class="chat-empty">No messages yet.</div>';
+
+        return;
+      }
+
+      snapshot.forEach(
+        (messageSnapshot) => {
+          renderMessage(
+            messageSnapshot.key,
+            messageSnapshot.val()
+          );
+        }
+      );
+
+      chatMessages.scrollTop =
+        chatMessages.scrollHeight;
     }
-
-    snapshot.forEach((messageSnapshot) => {
-      latestRenderedMessageKey = messageSnapshot.key;
-      renderMessage(messageSnapshot.key, messageSnapshot.val());
-    });
-
-    chatLoaded = true;
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }, (error) => {
-    console.warn("Firebase chat failed:", error);
-    showFirebaseNotice(`Firebase chat error: ${error.message || error.code || "check database rules"}`);
-  });
+  );
 }
 
 function renderMessage(key, message) {
-  if (!chatMessages || !message) return;
+  if (!chatMessages) return;
 
-  const item = document.createElement("div");
-  item.className = `chat-message${message.sid === SESSION_ID ? " own" : ""}`;
-  item.dataset.messageKey = key;
+  const item =
+    document.createElement("div");
 
-  const meta = document.createElement("div");
+  item.className =
+    "chat-message";
+
+  const meta =
+    document.createElement("div");
+
   meta.className = "message-meta";
 
-  const name = document.createElement("span");
-  name.className = "message-name";
-  name.textContent = cleanName(message.name) || "Guest";
+  const name =
+    document.createElement("span");
 
-  const time = document.createElement("span");
-  time.textContent = formatMessageTime(message.createdAt);
+  name.className =
+    "message-name";
 
-  const text = document.createElement("div");
-  text.className = "message-text";
-  text.textContent = cleanMessageText(message.text);
+  name.textContent =
+    cleanName(message.name) ||
+    "Guest";
+
+  const time =
+    document.createElement("span");
+
+  time.textContent =
+    formatMessageTime(
+      message.createdAt
+    );
+
+  const text =
+    document.createElement("div");
+
+  text.className =
+    "message-text";
+
+  text.textContent =
+    cleanMessageText(
+      message.text
+    );
 
   meta.append(name, time);
+
   item.append(meta, text);
+
   chatMessages.appendChild(item);
 }
 
 function sendChatMessage() {
-  if (!CHAT_ENABLED) return;
-  if (!database || !chatInput || !chatName) return;
+  const rawText =
+    chatInput.value.trim();
 
-  const rawText = chatInput.value.trim();
   if (!rawText) return;
 
-  const name = cleanName(chatName.value) || `Guest-${SESSION_ID.slice(0, 4)}`;
-  const text = applyCensor(rawText);
+  const name =
+    cleanName(chatName.value) ||
+    `Guest-${SESSION_ID.slice(
+      0,
+      4
+    )}`;
 
-  chatName.value = name;
-  localStorage.setItem(CHAT_NAME_KEY, name);
+  const text =
+    applyCensor(rawText);
+
   chatInput.value = "";
 
-  connectDatabase();
-
-  push(ref(database, "siteChat/messages"), {
-    name,
-    text,
-    sid: SESSION_ID,
-    createdAt: serverTimestamp()
-  }).then(() => {
-    cleanupOldChatMessages();
-  }).catch((error) => {
-    console.warn("Firebase message send failed:", error);
-    showFirebaseNotice(`Message failed: ${error.message || error.code || "check database rules"}`);
-    chatInput.value = rawText;
-  });
+  push(
+    ref(database, "siteChat/messages"),
+    {
+      name,
+      text,
+      sid: SESSION_ID,
+      createdAt: Date.now()
+    }
+  )
+    .then(() => {
+      cleanupOldChatMessages();
+    })
+    .catch(console.error);
 }
 
 function cleanupOldChatMessages() {
-  if (!database || !CHAT_ENABLED) return;
-
   const now = Date.now();
-  if (now - lastChatCleanupAt < CHAT_CLEANUP_INTERVAL_MS) return;
+
+  if (
+    now - lastChatCleanupAt <
+    CHAT_CLEANUP_INTERVAL_MS
+  ) {
+    return;
+  }
+
   lastChatCleanupAt = now;
 
-  const cutoff = now - CHAT_MESSAGE_TTL_MS;
+  const cutoff =
+    now - CHAT_MESSAGE_TTL_MS;
+
   const oldMessagesRef = query(
     ref(database, "siteChat/messages"),
     orderByChild("createdAt"),
     endAt(cutoff)
   );
 
-  get(oldMessagesRef).then((snapshot) => {
-    if (!snapshot.exists()) return;
+  get(oldMessagesRef)
+    .then((snapshot) => {
+      if (!snapshot.exists()) return;
 
-    const removals = [];
-    snapshot.forEach((messageSnapshot) => {
-      removals.push(remove(messageSnapshot.ref).catch(() => {}));
-    });
+      const removals = [];
 
-    return Promise.all(removals);
-  }).catch(() => {});
+      snapshot.forEach(
+        (messageSnapshot) => {
+          removals.push(
+            remove(
+              messageSnapshot.ref
+            ).catch(console.error)
+          );
+        }
+      );
+
+      return Promise.all(removals);
+    })
+    .catch(console.error);
 }
 
 function applyCensor(text) {
-  const cleaned = cleanMessageText(text);
+  const cleaned =
+    cleanMessageText(text);
 
-  if (!CENSOR_WORDS.length || !CENSOR_REPLACEMENTS.length) {
+  const hasBlockedWord =
+    CENSOR_WORDS.some((word) =>
+      new RegExp(
+        `\\b${escapeRegExp(
+          word
+        )}\\b`,
+        "i"
+      ).test(cleaned)
+    );
+
+  if (!hasBlockedWord) {
     return cleaned;
   }
 
-  const hasBlockedWord = CENSOR_WORDS.some((word) => {
-    const normalizedWord = String(word || "").trim();
-    if (!normalizedWord) return false;
+  const randomIndex =
+    Math.floor(
+      Math.random() *
+        CENSOR_REPLACEMENTS.length
+    );
 
-    return new RegExp(`\\b${escapeRegExp(normalizedWord)}\\b`, "i").test(cleaned);
-  });
-
-  if (!hasBlockedWord) return cleaned;
-
-  const randomIndex = Math.floor(Math.random() * CENSOR_REPLACEMENTS.length);
-  return cleanMessageText(CENSOR_REPLACEMENTS[randomIndex] || "Message filtered.");
+  return cleanMessageText(
+    CENSOR_REPLACEMENTS[
+      randomIndex
+    ]
+  );
 }
 
 function cleanMessageText(value) {
@@ -440,93 +702,38 @@ function cleanName(value) {
 }
 
 function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return value.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  );
 }
 
-function formatMessageTime(timestamp) {
-  if (!timestamp || typeof timestamp !== "number") return "now";
+function formatMessageTime(
+  timestamp
+) {
+  if (!timestamp) return "now";
 
-  return new Intl.DateTimeFormat([], {
-    hour: "numeric",
-    minute: "2-digit"
-  }).format(new Date(timestamp));
+  return new Intl.DateTimeFormat(
+    [],
+    {
+      hour: "numeric",
+      minute: "2-digit"
+    }
+  ).format(new Date(timestamp));
 }
 
-function connectDatabase() {
-  if (!database || isOnline) return;
-
-  goOnline(database);
-  isOnline = true;
-}
-
-function clearActivePresence({ cancelDisconnect = false } = {}) {
-  stopPresenceHeartbeat();
-
-  if (activeDisconnectRef && cancelDisconnect) {
-    activeDisconnectRef.cancel().catch(() => {});
-    activeDisconnectRef = null;
+window.addEventListener(
+  "beforeunload",
+  () => {
+    clearActivePresence();
   }
-
-  if (activePresenceRef) {
-    remove(activePresenceRef).catch(() => {});
-    activePresenceRef = null;
-  }
-
-  activeDisconnectRef = null;
-  activeGameId = null;
-}
-
-function stopWatchingGameCounts() {
-  if (!unsubscribeCounts) return;
-
-  unsubscribeCounts();
-  unsubscribeCounts = null;
-}
-
-function stopWatchingChat() {
-  if (!unsubscribeChat) return;
-
-  unsubscribeChat();
-  unsubscribeChat = null;
-  chatLoaded = false;
-  latestRenderedMessageKey = null;
-}
-
-function disconnectDatabase() {
-  if (!database || !isOnline) return;
-
-  stopWatchingGameCounts();
-  stopWatchingChat();
-  clearActivePresence();
-  goOffline(database);
-  isOnline = false;
-}
-
-function resumeDatabase() {
-  if (!database || document.visibilityState === "hidden") return;
-
-  watchGameCounts();
-
-  if (activeGameName) {
-    setActiveGame(activeGameName);
-  }
-}
-
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") {
-    disconnectDatabase();
-  } else {
-    resumeDatabase();
-  }
-});
-
-window.addEventListener("pagehide", disconnectDatabase);
-window.addEventListener("beforeunload", disconnectDatabase);
+);
 
 window.gamePresence = {
   setActiveGame,
   disconnect: disconnectDatabase
 };
 
+watchGameCounts();
+
 setupChat();
-resumeDatabase();
