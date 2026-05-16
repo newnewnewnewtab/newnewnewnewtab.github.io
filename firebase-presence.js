@@ -96,15 +96,40 @@ const chatName = document.getElementById("chatName");
 const chatInput = document.getElementById("chatInput");
 const chatSend = document.getElementById("chatSend");
 
+function showFirebaseNotice(message) {
+  if (!chatMessages) return;
+
+  chatMessages.innerHTML = "";
+
+  const notice = document.createElement("div");
+  notice.className = "chat-empty";
+  notice.textContent = message;
+  chatMessages.appendChild(notice);
+}
+
 function getSessionId() {
   let id = sessionStorage.getItem(SESSION_ID_KEY);
 
   if (!id) {
-    id = crypto.randomUUID();
+    id = createSessionId();
     sessionStorage.setItem(SESSION_ID_KEY, id);
   }
 
   return id;
+}
+
+function createSessionId() {
+  if (crypto?.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  const values = new Uint32Array(4);
+  crypto?.getRandomValues?.(values);
+  const randomId = [...values]
+    .map((value) => value.toString(16).padStart(8, "0"))
+    .join("-");
+
+  return randomId || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function gameIdFromName(name) {
@@ -156,7 +181,7 @@ function watchGameCounts() {
     cleanupStalePresence();
 
     snapshot.forEach((gameSnapshot) => {
-      const playerCount = gameSnapshot.child("players").size;
+      const playerCount = gameSnapshot.child("players").numChildren();
       counts[gameSnapshot.key] = playerCount;
       totalPlayers += playerCount;
     });
@@ -173,6 +198,9 @@ function watchGameCounts() {
         ? `${playerCount} player${playerCount === 1 ? "" : "s"} online`
         : "No players online";
     });
+  }, (error) => {
+    console.warn("Firebase player counts failed:", error);
+    updateActiveUsers(0);
   });
 }
 
@@ -289,6 +317,9 @@ function watchChatMessages() {
 
     chatLoaded = true;
     chatMessages.scrollTop = chatMessages.scrollHeight;
+  }, (error) => {
+    console.warn("Firebase chat failed:", error);
+    showFirebaseNotice(`Firebase chat error: ${error.message || error.code || "check database rules"}`);
   });
 }
 
@@ -341,7 +372,9 @@ function sendChatMessage() {
     createdAt: serverTimestamp()
   }).then(() => {
     cleanupOldChatMessages();
-  }).catch(() => {
+  }).catch((error) => {
+    console.warn("Firebase message send failed:", error);
+    showFirebaseNotice(`Message failed: ${error.message || error.code || "check database rules"}`);
     chatInput.value = rawText;
   });
 }
