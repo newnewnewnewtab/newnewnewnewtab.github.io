@@ -618,6 +618,8 @@ function setupAuth() {
     currentUser = user;
     updateChatAuthState(user);
   });
+
+  window.firebaseChatAuthReady = true;
 }
 
 function openAuthForm(mode) {
@@ -665,6 +667,7 @@ function openAuthForm(mode) {
 
   if (authForm) {
     authForm.hidden = false;
+    authForm.dataset.mode = mode;
   }
 
   setGateFeedback("");
@@ -683,6 +686,7 @@ function closeAuthForm() {
       copy: "Use a verified Firebase email so everyone knows who is talking.",
       showChoices: true,
       showVerify: false,
+      showRefresh: false,
       showForm: false,
       feedback: ""
     });
@@ -733,6 +737,8 @@ async function checkVerificationStatus() {
 }
 
 function submitAuthForm() {
+  authMode = authForm?.dataset.mode || authMode;
+
   const email = authEmail.value.trim();
   const password = authPassword.value;
 
@@ -774,6 +780,8 @@ function submitAuthForm() {
 
   authAction
     .then((user) => {
+      currentUser = user;
+
       if (authMode === "create") {
         setAuthFeedback(
           "Account created. Check your email for the verification link.",
@@ -837,6 +845,7 @@ function updateChatAuthState(user) {
       copy: "Use a verified Firebase email so everyone knows who is talking.",
       showChoices: true,
       showVerify: false,
+      showRefresh: false,
       showForm: false,
       feedback: ""
     });
@@ -846,8 +855,9 @@ function updateChatAuthState(user) {
       copy: `${user.email} is signed in, but chat stays locked until the email is verified.`,
       showChoices: false,
       showVerify: true,
+      showRefresh: true,
       showForm: false,
-      feedback: "Click the verification link in your email, then refresh this page."
+      feedback: "Click the verification link in your email, then press the unlock button."
     });
   } else {
     setGateContent({
@@ -855,6 +865,7 @@ function updateChatAuthState(user) {
       copy: `Chatting as ${user.email}`,
       showChoices: false,
       showVerify: false,
+      showRefresh: false,
       showForm: false,
       feedback: ""
     });
@@ -906,6 +917,7 @@ function setGateContent({
   copy,
   showChoices,
   showVerify,
+  showRefresh,
   showForm,
   feedback
 }) {
@@ -916,6 +928,9 @@ function setGateContent({
   }
   if (authVerify) {
     authVerify.hidden = !showVerify;
+  }
+  if (authRefresh) {
+    authRefresh.hidden = !showRefresh;
   }
   if (authForm) {
     authForm.hidden = !showForm;
@@ -1105,7 +1120,12 @@ function sendChatMessage() {
     .then(() => {
       cleanupOldChatMessages();
     })
-    .catch(console.error);
+    .catch((error) => {
+      console.error(error);
+      chatInput.placeholder =
+        "Message failed. Check Firebase database rules.";
+      chatInput.value = rawText;
+    });
 }
 
 function cleanupOldChatMessages() {
