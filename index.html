@@ -338,11 +338,12 @@ nav {
   border-left: 1px solid rgba(148, 163, 184, 0.26);
   box-shadow: -24px 0 60px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(18px);
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   transform: translateX(100%);
   transition: transform 0.28s ease;
   z-index: 1700;
+  overflow: hidden;
 }
 
 .site-chat.open {
@@ -380,29 +381,21 @@ nav {
   white-space: nowrap;
 }
 
-.auth-row {
-  display: grid;
-  gap: 8px;
-}
-
-.auth-status {
+.chat-user-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
 }
 
-.auth-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.auth-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.chat-user-status span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .auth-input,
@@ -418,30 +411,200 @@ nav {
 }
 
 .auth-input {
-  height: 38px;
-  padding: 0 12px;
-  font-size: 13px;
+  height: 48px;
+  padding: 0 14px;
+  font-size: 15px;
 }
 
 .auth-button {
-  min-height: 34px;
+  min-height: 40px;
   border: 1px solid rgba(56, 189, 248, 0.45);
   border-radius: 10px;
   background: rgba(14, 116, 144, 0.28);
   color: #e0f2fe;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
-  padding: 0 10px;
+  padding: 0 14px;
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
 }
 
 .auth-button:hover {
   background: rgba(14, 116, 144, 0.46);
+  transform: translateY(-1px);
 }
 
 .auth-button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.auth-button.primary {
+  border-color: rgba(56, 189, 248, 0.8);
+  background: #38bdf8;
+  color: #031018;
+}
+
+.auth-button.ghost {
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+}
+
+.chat-auth-gate {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  padding: 28px;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.98)),
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.22), transparent 42%);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
+}
+
+.chat-auth-gate.hidden {
+  display: none;
+}
+
+.auth-gate-title {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+.auth-gate-copy {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.auth-gate-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-gate-actions[hidden],
+.auth-form[hidden],
+.chat-messages[hidden],
+.chat-form[hidden] {
+  display: none;
+}
+
+.auth-big-button {
+  min-height: 72px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 12px;
+  background: rgba(30, 41, 59, 0.82);
+  color: var(--text);
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  text-align: left;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.auth-big-button strong {
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.auth-big-button span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.auth-big-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.62);
+  background: rgba(14, 116, 144, 0.34);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+}
+
+.auth-gate-feedback {
+  min-height: 20px;
+  color: #bae6fd;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.auth-gate-feedback.success {
+  color: #bbf7d0;
+}
+
+.auth-gate-feedback.error {
+  color: #fecaca;
+}
+
+.auth-gate-feedback.loading::after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 8px;
+  border: 2px solid rgba(186, 230, 253, 0.35);
+  border-top-color: #bae6fd;
+  border-radius: 999px;
+  animation: authSpin 0.7s linear infinite;
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.auth-form-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.auth-feedback {
+  min-height: 38px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 10px;
+  color: #cbd5e1;
+  background: rgba(2, 6, 23, 0.32);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+  padding: 10px 12px;
+}
+
+.auth-feedback.success {
+  border-color: rgba(34, 197, 94, 0.36);
+  color: #bbf7d0;
+}
+
+.auth-feedback.error {
+  border-color: rgba(248, 113, 113, 0.42);
+  color: #fecaca;
+}
+
+.auth-feedback.loading::after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-left: 8px;
+  border: 2px solid rgba(186, 230, 253, 0.35);
+  border-top-color: #bae6fd;
+  border-radius: 999px;
+  animation: authSpin 0.7s linear infinite;
+}
+
+@keyframes authSpin {
+  to { transform: rotate(360deg); }
 }
 
 .auth-input:focus,
@@ -561,6 +724,10 @@ nav {
   .chat-toggle.open {
     right: min(92vw, 420px);
   }
+
+  .auth-form-actions {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
@@ -602,23 +769,42 @@ nav {
       <div class="chat-title">Live Chat</div>
       <div id="chatActiveUsers" class="active-users">0 active</div>
     </div>
-    <div class="auth-row">
-      <div id="authStatus" class="auth-status">Sign in with Firebase to chat.</div>
-      <div id="authFields" class="auth-fields">
-        <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email" />
-        <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password" />
-      </div>
-      <div class="auth-actions">
-        <button id="authSignIn" class="auth-button" type="button">Sign in</button>
-        <button id="authCreate" class="auth-button" type="button">Create account</button>
-        <button id="authVerify" class="auth-button" type="button">Send verification</button>
-        <button id="authSignOut" class="auth-button" type="button">Sign out</button>
-      </div>
+    <div id="chatUserStatus" class="chat-user-status" hidden>
+      <span id="chatUserEmail"></span>
+      <button id="authSignOut" class="auth-button ghost" type="button">Sign out</button>
     </div>
   </header>
 
   <div id="chatMessages" class="chat-messages">
     <div class="chat-empty">Open chat to load the latest messages.</div>
+  </div>
+
+  <div id="chatAuthGate" class="chat-auth-gate">
+    <div>
+      <div id="authGateTitle" class="auth-gate-title">Sign in to chat</div>
+      <div id="authGateCopy" class="auth-gate-copy">Use a verified Firebase email so everyone knows who is talking.</div>
+    </div>
+    <div id="authGateActions" class="auth-gate-actions">
+      <button id="authOpenSignIn" class="auth-big-button" type="button">
+        <strong>Sign in</strong>
+        <span>Already have an account</span>
+      </button>
+      <button id="authOpenCreate" class="auth-big-button" type="button">
+        <strong>Create account</strong>
+        <span>New here? Verify your email after signup</span>
+      </button>
+    </div>
+    <div id="authGateFeedback" class="auth-gate-feedback"></div>
+    <button id="authVerify" class="auth-button primary" type="button" hidden>Send verification email</button>
+    <form id="authForm" class="auth-form" hidden>
+      <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email" />
+      <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password" />
+      <div id="authFeedback" class="auth-feedback">Enter your email and password.</div>
+      <div class="auth-form-actions">
+        <button id="authSubmit" class="auth-button primary" type="submit">Sign in</button>
+        <button id="authBack" class="auth-button ghost" type="button">Back</button>
+      </div>
+    </form>
   </div>
 
   <form id="chatForm" class="chat-form">
@@ -742,27 +928,12 @@ function toggleDropdown() {
   moreDropdown.classList.toggle("open");
 }
 
-function setChatOpen(isOpen) {
-  siteChat.classList.toggle("open", isOpen);
-  chatToggle.classList.toggle("open", isOpen);
-  chatToggle.textContent = isOpen ? "›" : "‹";
-  chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
-  chatToggle.title = isOpen ? "Close chat" : "Open chat";
-
-  document.dispatchEvent(new CustomEvent("siteChatToggled", {
-    detail: { open: isOpen }
-  }));
-
-  if (isOpen) {
-    chatInput.focus();
-  }
-}
 
 chatToggle.addEventListener("click", () => {
   setChatOpen(!siteChat.classList.contains("open"));
 });
 
-setChatOpen = function(isOpen) {
+function setChatOpen(isOpen) {
   siteChat.classList.toggle("open", isOpen);
   chatToggle.classList.toggle("open", isOpen);
   chatToggle.textContent = isOpen ? ">" : "<";
@@ -778,24 +949,13 @@ setChatOpen = function(isOpen) {
     detail: { open: isOpen }
   }));
 
-  if (isOpen && CHAT_ENABLED) {
+  if (isOpen && CHAT_ENABLED && window.chatAuthState?.canChat) {
     chatInput.focus();
   }
-};
+}
 
 chatToggle.textContent = "<";
 chatSend.textContent = ">";
-
-chatForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  if (!CHAT_ENABLED) {
-    updateChatPanelState();
-    return;
-  }
-
-  document.dispatchEvent(new CustomEvent("siteChatSubmit"));
-});
 
 document.addEventListener("siteActiveUsersChanged", (event) => {
   latestFirebaseActiveUsers = event.detail?.total || 0;
@@ -807,9 +967,13 @@ function updateChatPanelState() {
 
   chatInput.disabled = !CHAT_ENABLED || !signedInAndVerified;
   chatSend.disabled = !CHAT_ENABLED || !signedInAndVerified;
+  chatMessages.hidden = CHAT_ENABLED && !signedInAndVerified;
+  chatForm.hidden = CHAT_ENABLED && !signedInAndVerified;
 
   if (!CHAT_ENABLED) {
     chatInput.placeholder = "Chat Disabled";
+    chatMessages.hidden = false;
+    chatForm.hidden = true;
     chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming 5/20</div>';
     return;
   }
@@ -820,7 +984,7 @@ function updateChatPanelState() {
     chatInput.placeholder = "Message everyone... ";
   }
 
-  if (!chatMessages.querySelector(".chat-message")) {
+  if (signedInAndVerified && !chatMessages.querySelector(".chat-message")) {
     chatMessages.innerHTML = '<div class="chat-empty">Loading messages...</div>';
   }
 }
