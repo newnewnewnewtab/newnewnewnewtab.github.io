@@ -119,6 +119,8 @@ let lastChatCleanupAt = 0;
 
 let currentUser = null;
 
+let authMode = "sign-in";
+
 const chatToggle =
   document.getElementById("chatToggle");
 
@@ -140,11 +142,29 @@ const chatInput =
 const chatSend =
   document.getElementById("chatSend");
 
-const authStatus =
-  document.getElementById("authStatus");
+const chatAuthGate =
+  document.getElementById("chatAuthGate");
 
-const authFields =
-  document.getElementById("authFields");
+const authGateTitle =
+  document.getElementById("authGateTitle");
+
+const authGateCopy =
+  document.getElementById("authGateCopy");
+
+const authGateActions =
+  document.getElementById("authGateActions");
+
+const authGateFeedback =
+  document.getElementById("authGateFeedback");
+
+const authOpenSignIn =
+  document.getElementById("authOpenSignIn");
+
+const authOpenCreate =
+  document.getElementById("authOpenCreate");
+
+const authForm =
+  document.getElementById("authForm");
 
 const authEmail =
   document.getElementById("authEmail");
@@ -152,17 +172,29 @@ const authEmail =
 const authPassword =
   document.getElementById("authPassword");
 
-const authSignIn =
-  document.getElementById("authSignIn");
+const authSubmit =
+  document.getElementById("authSubmit");
 
-const authCreate =
-  document.getElementById("authCreate");
+const authBack =
+  document.getElementById("authBack");
 
 const authVerify =
   document.getElementById("authVerify");
 
+const authRefresh =
+  document.getElementById("authRefresh");
+
 const authSignOut =
   document.getElementById("authSignOut");
+
+const authFeedback =
+  document.getElementById("authFeedback");
+
+const chatUserStatus =
+  document.getElementById("chatUserStatus");
+
+const chatUserEmail =
+  document.getElementById("chatUserEmail");
 
 function getSessionId() {
   let id = sessionStorage.getItem(
@@ -487,106 +519,96 @@ function setupAuth() {
   if (
     !authEmail ||
     !authPassword ||
-    !authSignIn ||
-    !authCreate ||
+    !authSubmit ||
+    !authForm ||
+    !authOpenSignIn ||
+    !authOpenCreate ||
     !authVerify ||
+    !authRefresh ||
     !authSignOut
   ) {
     updateChatAuthState(null);
     return;
   }
 
-  authSignIn.addEventListener(
+  authOpenSignIn.addEventListener(
     "click",
     () => {
-      const email = authEmail.value.trim();
-      const password = authPassword.value;
-
-      if (!email || !password) {
-        setAuthStatus(
-          "Enter your email and password first."
-        );
-        return;
-      }
-
-      signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      ).catch((error) => {
-        setAuthStatus(
-          getAuthErrorMessage(error)
-        );
-      });
+      openAuthForm("sign-in");
     }
   );
 
-  authCreate.addEventListener(
+  authOpenCreate.addEventListener(
     "click",
     () => {
-      const email = authEmail.value.trim();
-      const password = authPassword.value;
-
-      if (!email || !password) {
-        setAuthStatus(
-          "Enter an email and password to create an account."
-        );
-        return;
-      }
-
-      createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      )
-        .then(({ user }) =>
-          sendEmailVerification(user)
-        )
-        .then(() => {
-          setAuthStatus(
-            "Account created. Check your email, verify it, then sign in again."
-          );
-        })
-        .catch((error) => {
-          setAuthStatus(
-            getAuthErrorMessage(error)
-          );
-        });
+      openAuthForm("create");
     }
+  );
+
+  authForm.addEventListener(
+    "submit",
+    (event) => {
+      event.preventDefault();
+      submitAuthForm();
+    }
+  );
+
+  authBack?.addEventListener(
+    "click",
+    closeAuthForm
   );
 
   authVerify.addEventListener(
     "click",
-    () => {
+    async () => {
       if (!auth.currentUser) {
-        setAuthStatus(
-          "Sign in before sending a verification email."
+        setGateFeedback(
+          "Sign in before sending a verification email.",
+          "error"
         );
         return;
       }
 
-      sendEmailVerification(
-        auth.currentUser
-      )
-        .then(() => {
-          setAuthStatus(
-            "Verification email sent. Refresh after verifying."
-          );
-        })
-        .catch((error) => {
-          setAuthStatus(
-            getAuthErrorMessage(error)
-          );
-        });
+      setGateFeedback(
+        "Sending verification email...",
+        "loading"
+      );
+
+      try {
+        await sendEmailVerification(
+          auth.currentUser
+        );
+
+        setGateFeedback(
+          "Verification sent. Click the link in your email, then press the unlock button here.",
+          "success"
+        );
+      } catch (error) {
+        setGateFeedback(
+          getAuthErrorMessage(error),
+          "error"
+        );
+      }
     }
+  );
+
+  authRefresh.addEventListener(
+    "click",
+    checkVerificationStatus
   );
 
   authSignOut.addEventListener(
     "click",
     () => {
+      setGateFeedback(
+        "Signing out...",
+        "loading"
+      );
+
       signOut(auth).catch((error) => {
-        setAuthStatus(
-          getAuthErrorMessage(error)
+        setGateFeedback(
+          getAuthErrorMessage(error),
+          "error"
         );
       });
     }
@@ -596,6 +618,203 @@ function setupAuth() {
     currentUser = user;
     updateChatAuthState(user);
   });
+}
+
+function openAuthForm(mode) {
+  authMode = mode;
+
+  if (authGateTitle) {
+    authGateTitle.textContent =
+      mode === "create"
+        ? "Create account"
+        : "Sign in";
+  }
+
+  if (authGateCopy) {
+    authGateCopy.textContent =
+      mode === "create"
+        ? "Make an account, then verify your email before chatting."
+        : "Sign in with your verified Firebase email.";
+  }
+
+  if (authSubmit) {
+    authSubmit.textContent =
+      mode === "create"
+        ? "Create account"
+        : "Sign in";
+    authSubmit.disabled = false;
+  }
+
+  if (authPassword) {
+    authPassword.autocomplete =
+      mode === "create"
+        ? "new-password"
+        : "current-password";
+  }
+
+  setAuthFeedback(
+    mode === "create"
+      ? "Use at least 6 characters for your password."
+      : "Enter your email and password.",
+    ""
+  );
+
+  if (authGateActions) {
+    authGateActions.hidden = true;
+  }
+
+  if (authForm) {
+    authForm.hidden = false;
+  }
+
+  setGateFeedback("");
+
+  setTimeout(() => authEmail?.focus(), 80);
+}
+
+function closeAuthForm() {
+  if (authForm) {
+    authForm.hidden = true;
+  }
+
+  if (!currentUser) {
+    setGateContent({
+      title: "Sign in to chat",
+      copy: "Use a verified Firebase email so everyone knows who is talking.",
+      showChoices: true,
+      showVerify: false,
+      showForm: false,
+      feedback: ""
+    });
+  } else {
+    updateChatAuthState(currentUser);
+  }
+
+  if (authSubmit) {
+    authSubmit.disabled = false;
+  }
+}
+
+async function checkVerificationStatus() {
+  if (!auth.currentUser) {
+    updateChatAuthState(null);
+    return;
+  }
+
+  setGateFeedback(
+    "Checking your verification status...",
+    "loading"
+  );
+
+  try {
+    await auth.currentUser.reload();
+
+    currentUser = auth.currentUser;
+
+    updateChatAuthState(currentUser);
+
+    if (currentUser.emailVerified) {
+      setGateFeedback(
+        "Email verified. Chat unlocked.",
+        "success"
+      );
+    } else {
+      setGateFeedback(
+        "Still not verified. Open the email link, then try again.",
+        "error"
+      );
+    }
+  } catch (error) {
+    setGateFeedback(
+      getAuthErrorMessage(error),
+      "error"
+    );
+  }
+}
+
+function submitAuthForm() {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  if (!email || !password) {
+    setAuthFeedback(
+      "Enter your email and password first.",
+      "error"
+    );
+    return;
+  }
+
+  setAuthFeedback(
+    authMode === "create"
+      ? "Creating your account..."
+      : "Signing you in...",
+    "loading"
+  );
+
+  if (authSubmit) {
+    authSubmit.disabled = true;
+  }
+
+  const authAction =
+    authMode === "create"
+      ? createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        ).then(({ user }) =>
+          sendEmailVerification(user).then(
+            () => user
+          )
+        )
+      : signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        ).then(({ user }) => user);
+
+  authAction
+    .then((user) => {
+      if (authMode === "create") {
+        setAuthFeedback(
+          "Account created. Check your email for the verification link.",
+          "success"
+        );
+        setGateFeedback(
+          "Account created. Verify your email, then press the unlock button.",
+          "success"
+        );
+        closeAuthForm();
+        updateChatAuthState(user);
+      } else if (user.emailVerified) {
+        setAuthFeedback(
+          "Signed in. Opening chat...",
+          "success"
+        );
+        updateChatAuthState(user);
+      } else {
+        setAuthFeedback(
+          "Signed in, but your email is not verified yet.",
+          "error"
+        );
+        setGateFeedback(
+          "Your email still needs verification before chat unlocks.",
+          "error"
+        );
+        closeAuthForm();
+        updateChatAuthState(user);
+      }
+    })
+    .catch((error) => {
+      setAuthFeedback(
+        getAuthErrorMessage(error),
+        "error"
+      );
+    })
+    .finally(() => {
+      if (authSubmit) {
+        authSubmit.disabled = false;
+      }
+    });
 }
 
 function updateChatAuthState(user) {
@@ -613,31 +832,51 @@ function updateChatAuthState(user) {
   }
 
   if (!user) {
-    setAuthStatus(
-      "Sign in with Firebase to chat."
-    );
+    setGateContent({
+      title: "Sign in to chat",
+      copy: "Use a verified Firebase email so everyone knows who is talking.",
+      showChoices: true,
+      showVerify: false,
+      showForm: false,
+      feedback: ""
+    });
   } else if (!user.emailVerified) {
-    setAuthStatus(
-      `${user.email} is signed in, but the email is not verified yet.`
-    );
+    setGateContent({
+      title: "Verify your email",
+      copy: `${user.email} is signed in, but chat stays locked until the email is verified.`,
+      showChoices: false,
+      showVerify: true,
+      showForm: false,
+      feedback: "Click the verification link in your email, then refresh this page."
+    });
   } else {
-    setAuthStatus(
-      `Chatting as ${user.email}`
-    );
+    setGateContent({
+      title: "Chat unlocked",
+      copy: `Chatting as ${user.email}`,
+      showChoices: false,
+      showVerify: false,
+      showForm: false,
+      feedback: ""
+    });
   }
 
-  if (authFields) {
-    authFields.style.display = user
-      ? "none"
-      : "grid";
+  chatAuthGate?.classList.toggle(
+    "hidden",
+    canChat
+  );
+
+  if (chatUserStatus) {
+    chatUserStatus.hidden = !user;
   }
 
-  if (authSignIn) authSignIn.hidden = Boolean(user);
-  if (authCreate) authCreate.hidden = Boolean(user);
-  if (authVerify) {
-    authVerify.hidden = !user?.email ||
-      user.emailVerified;
+  if (chatUserEmail) {
+    chatUserEmail.textContent = user?.email
+      ? user.emailVerified
+        ? user.email
+        : `${user.email} (unverified)`
+      : "";
   }
+
   if (authSignOut) {
     authSignOut.hidden = !user;
   }
@@ -652,12 +891,52 @@ function updateChatAuthState(user) {
   if (chatSend) {
     chatSend.disabled = !canChat;
   }
+
+  if (chatMessages) {
+    chatMessages.hidden = !canChat;
+  }
+
+  if (chatForm) {
+    chatForm.hidden = !canChat;
+  }
 }
 
-function setAuthStatus(message) {
-  if (!authStatus) return;
+function setGateContent({
+  title,
+  copy,
+  showChoices,
+  showVerify,
+  showForm,
+  feedback
+}) {
+  if (authGateTitle) authGateTitle.textContent = title;
+  if (authGateCopy) authGateCopy.textContent = copy;
+  if (authGateActions) {
+    authGateActions.hidden = !showChoices;
+  }
+  if (authVerify) {
+    authVerify.hidden = !showVerify;
+  }
+  if (authForm) {
+    authForm.hidden = !showForm;
+  }
+  setGateFeedback(feedback || "");
+}
 
-  authStatus.textContent = message;
+function setGateFeedback(message, state = "") {
+  if (!authGateFeedback) return;
+
+  authGateFeedback.textContent = message;
+  authGateFeedback.className =
+    `auth-gate-feedback ${state}`.trim();
+}
+
+function setAuthFeedback(message, state = "") {
+  if (!authFeedback) return;
+
+  authFeedback.textContent = message;
+  authFeedback.className =
+    `auth-feedback ${state}`.trim();
 }
 
 function getAuthErrorMessage(error) {
