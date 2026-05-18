@@ -587,7 +587,7 @@ nav {
 
 <script src="games.js"></script>
 <script>
-window.CHAT_ENABLED = true; // master chat switch
+window.CHAT_ENABLED = false; // master chat switch
 </script>
 <script type="module" src="firebase-presence.js"></script>
 
@@ -772,7 +772,7 @@ function updateChatPanelState() {
 
   if (!CHAT_ENABLED) {
     chatInput.placeholder = "Chat Disabled";
-    chatMessages.innerHTML = '<div class="chat-disabled-notice">Chat Disabled</div>';
+    chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming 5/20</div>';
     return;
   }
 
