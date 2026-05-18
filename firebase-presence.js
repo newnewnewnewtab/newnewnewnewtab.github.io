@@ -79,11 +79,11 @@ const CENSOR_WORDS = [
 ];
 
 const CENSOR_REPLACEMENTS = [
-  "I hope you have a great day!",
-  "I wish your family the best!",
-  "You're a kind and loving person!",
-  "I hope all your pets go unharmed.",
-  "Download the dairy queen app and use code Clinga2210!"
+  "I hope you have a great day! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾",
+  "I wish your family the best! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾",
+  "You're a kind and loving person! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾",
+  "I hope all your pets go unharmed. ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾",
+  "Download the Dairy Queen app and use code Clinga2210! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾"
 ];
 
 const app = initializeApp(firebaseConfig);
