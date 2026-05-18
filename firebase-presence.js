@@ -1,6 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 
 import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+import {
   getDatabase,
   ref,
   get,
@@ -36,13 +45,9 @@ const SESSION_ID_KEY =
 
 const SESSION_ID = getSessionId();
 
-const CHAT_NAME_KEY = "site_chat_name";
-
 const CHAT_MESSAGE_LIMIT = 10;
 
 const MAX_MESSAGE_LENGTH = 180;
-
-const MAX_NAME_LENGTH = 12;
 
 const CHAT_MESSAGE_TTL_MS =
   6 * 60 * 60 * 1000;
@@ -90,6 +95,8 @@ const app = initializeApp(firebaseConfig);
 
 const database = getDatabase(app);
 
+const auth = getAuth(app);
+
 let activeGameId = null;
 
 let activeGameName = null;
@@ -110,6 +117,8 @@ let lastPresenceCleanupAt = 0;
 
 let lastChatCleanupAt = 0;
 
+let currentUser = null;
+
 const chatToggle =
   document.getElementById("chatToggle");
 
@@ -125,14 +134,35 @@ const chatMessages =
 const chatForm =
   document.getElementById("chatForm");
 
-const chatName =
-  document.getElementById("chatName");
-
 const chatInput =
   document.getElementById("chatInput");
 
 const chatSend =
   document.getElementById("chatSend");
+
+const authStatus =
+  document.getElementById("authStatus");
+
+const authFields =
+  document.getElementById("authFields");
+
+const authEmail =
+  document.getElementById("authEmail");
+
+const authPassword =
+  document.getElementById("authPassword");
+
+const authSignIn =
+  document.getElementById("authSignIn");
+
+const authCreate =
+  document.getElementById("authCreate");
+
+const authVerify =
+  document.getElementById("authVerify");
+
+const authSignOut =
+  document.getElementById("authSignOut");
 
 function getSessionId() {
   let id = sessionStorage.getItem(
@@ -453,30 +483,210 @@ function updateActiveUsers(
     } across games`;
 }
 
-function setupChat() {
+function setupAuth() {
   if (
-    !chatForm ||
-    !chatInput ||
-    !chatName
+    !authEmail ||
+    !authPassword ||
+    !authSignIn ||
+    !authCreate ||
+    !authVerify ||
+    !authSignOut
   ) {
+    updateChatAuthState(null);
     return;
   }
 
-  chatName.value = cleanName(
-    localStorage.getItem(
-      CHAT_NAME_KEY
-    ) || ""
-  );
-
-  chatName.addEventListener(
-    "input",
+  authSignIn.addEventListener(
+    "click",
     () => {
-      localStorage.setItem(
-        CHAT_NAME_KEY,
-        cleanName(chatName.value)
-      );
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+
+      if (!email || !password) {
+        setAuthStatus(
+          "Enter your email and password first."
+        );
+        return;
+      }
+
+      signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      ).catch((error) => {
+        setAuthStatus(
+          getAuthErrorMessage(error)
+        );
+      });
     }
   );
+
+  authCreate.addEventListener(
+    "click",
+    () => {
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+
+      if (!email || !password) {
+        setAuthStatus(
+          "Enter an email and password to create an account."
+        );
+        return;
+      }
+
+      createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+        .then(({ user }) =>
+          sendEmailVerification(user)
+        )
+        .then(() => {
+          setAuthStatus(
+            "Account created. Check your email, verify it, then sign in again."
+          );
+        })
+        .catch((error) => {
+          setAuthStatus(
+            getAuthErrorMessage(error)
+          );
+        });
+    }
+  );
+
+  authVerify.addEventListener(
+    "click",
+    () => {
+      if (!auth.currentUser) {
+        setAuthStatus(
+          "Sign in before sending a verification email."
+        );
+        return;
+      }
+
+      sendEmailVerification(
+        auth.currentUser
+      )
+        .then(() => {
+          setAuthStatus(
+            "Verification email sent. Refresh after verifying."
+          );
+        })
+        .catch((error) => {
+          setAuthStatus(
+            getAuthErrorMessage(error)
+          );
+        });
+    }
+  );
+
+  authSignOut.addEventListener(
+    "click",
+    () => {
+      signOut(auth).catch((error) => {
+        setAuthStatus(
+          getAuthErrorMessage(error)
+        );
+      });
+    }
+  );
+
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    updateChatAuthState(user);
+  });
+}
+
+function updateChatAuthState(user) {
+  const canChat = Boolean(
+    user?.email && user.emailVerified
+  );
+
+  window.chatAuthState = {
+    canChat,
+    email: user?.email || ""
+  };
+
+  if (!CHAT_ENABLED) {
+    return;
+  }
+
+  if (!user) {
+    setAuthStatus(
+      "Sign in with Firebase to chat."
+    );
+  } else if (!user.emailVerified) {
+    setAuthStatus(
+      `${user.email} is signed in, but the email is not verified yet.`
+    );
+  } else {
+    setAuthStatus(
+      `Chatting as ${user.email}`
+    );
+  }
+
+  if (authFields) {
+    authFields.style.display = user
+      ? "none"
+      : "grid";
+  }
+
+  if (authSignIn) authSignIn.hidden = Boolean(user);
+  if (authCreate) authCreate.hidden = Boolean(user);
+  if (authVerify) {
+    authVerify.hidden = !user?.email ||
+      user.emailVerified;
+  }
+  if (authSignOut) {
+    authSignOut.hidden = !user;
+  }
+
+  if (chatInput) {
+    chatInput.disabled = !canChat;
+    chatInput.placeholder = canChat
+      ? "Message everyone... "
+      : "Sign in with a verified email to chat";
+  }
+
+  if (chatSend) {
+    chatSend.disabled = !canChat;
+  }
+}
+
+function setAuthStatus(message) {
+  if (!authStatus) return;
+
+  authStatus.textContent = message;
+}
+
+function getAuthErrorMessage(error) {
+  switch (error?.code) {
+    case "auth/email-already-in-use":
+      return "That email already has an account. Try signing in.";
+    case "auth/invalid-email":
+      return "Enter a valid email address.";
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+      return "The email or password was not accepted.";
+    case "auth/weak-password":
+      return "Use a password with at least 6 characters.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Wait a bit and try again.";
+    default:
+      return error?.message ||
+        "Firebase authentication failed.";
+  }
+}
+
+function setupChat() {
+  if (
+    !chatForm ||
+    !chatInput
+  ) {
+    return;
+  }
 
   chatForm.addEventListener(
     "submit",
@@ -552,7 +762,7 @@ function renderMessage(key, message) {
     "message-name";
 
   name.textContent =
-    cleanName(message.name) ||
+    cleanEmail(message.email || message.name) ||
     "Guest";
 
   const time =
@@ -587,12 +797,16 @@ function sendChatMessage() {
 
   if (!rawText) return;
 
-  const name =
-    cleanName(chatName.value) ||
-    `Guest-${SESSION_ID.slice(
-      0,
-      4
-    )}`;
+  if (
+    !currentUser?.email ||
+    !currentUser.emailVerified
+  ) {
+    updateChatAuthState(currentUser);
+    return;
+  }
+
+  const email =
+    cleanEmail(currentUser.email);
 
   const text =
     applyCensor(rawText);
@@ -602,8 +816,9 @@ function sendChatMessage() {
   push(
     ref(database, "siteChat/messages"),
     {
-      name,
+      email,
       text,
+      uid: currentUser.uid,
       sid: SESSION_ID,
       createdAt: Date.now()
     }
@@ -694,11 +909,11 @@ function cleanMessageText(value) {
     .slice(0, MAX_MESSAGE_LENGTH);
 }
 
-function cleanName(value) {
+function cleanEmail(value) {
   return String(value || "")
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, MAX_NAME_LENGTH);
+    .slice(0, 80);
 }
 
 function escapeRegExp(value) {
@@ -735,5 +950,7 @@ window.gamePresence = {
 };
 
 watchGameCounts();
+
+setupAuth();
 
 setupChat();
