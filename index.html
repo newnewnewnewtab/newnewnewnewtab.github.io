@@ -380,21 +380,32 @@ nav {
   white-space: nowrap;
 }
 
-.name-row {
+.auth-row {
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.name-row label {
+.auth-status {
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
-  text-transform: uppercase;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
-.chat-name,
+.auth-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-input,
 .chat-input {
   width: 100%;
   min-width: 0;
@@ -406,12 +417,34 @@ nav {
   font: inherit;
 }
 
-.chat-name {
+.auth-input {
   height: 38px;
   padding: 0 12px;
+  font-size: 13px;
 }
 
-.chat-name:focus,
+.auth-button {
+  min-height: 34px;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 10px;
+  background: rgba(14, 116, 144, 0.28);
+  color: #e0f2fe;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 10px;
+}
+
+.auth-button:hover {
+  background: rgba(14, 116, 144, 0.46);
+}
+
+.auth-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.auth-input:focus,
 .chat-input:focus {
   border-color: rgba(56, 189, 248, 0.72);
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
@@ -569,9 +602,18 @@ nav {
       <div class="chat-title">Live Chat</div>
       <div id="chatActiveUsers" class="active-users">0 active</div>
     </div>
-    <div class="name-row">
-      <label for="chatName">Name</label>
-      <input id="chatName" class="chat-name" maxlength="24" autocomplete="nickname" placeholder="Enter name" />
+    <div class="auth-row">
+      <div id="authStatus" class="auth-status">Sign in with Firebase to chat.</div>
+      <div id="authFields" class="auth-fields">
+        <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email" />
+        <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password" />
+      </div>
+      <div class="auth-actions">
+        <button id="authSignIn" class="auth-button" type="button">Sign in</button>
+        <button id="authCreate" class="auth-button" type="button">Create account</button>
+        <button id="authVerify" class="auth-button" type="button">Send verification</button>
+        <button id="authSignOut" class="auth-button" type="button">Sign out</button>
+      </div>
     </div>
   </header>
 
@@ -587,7 +629,8 @@ nav {
 
 <script src="games.js"></script>
 <script>
-window.CHAT_ENABLED = false; // master chat switch
+window.CHAT_ENABLED = true; // master chat switch
+window.chatAuthState = { canChat: false, email: "" };
 </script>
 <script type="module" src="firebase-presence.js"></script>
 
@@ -601,13 +644,11 @@ const chatToggle = document.getElementById("chatToggle");
 const siteChat = document.getElementById("siteChat");
 const chatInput = document.getElementById("chatInput");
 const chatForm = document.getElementById("chatForm");
-const chatName = document.getElementById("chatName");
 const chatMessages = document.getElementById("chatMessages");
 const chatSend = document.getElementById("chatSend");
 const chatActiveUsers = document.getElementById("chatActiveUsers");
 
 const MAX_VISIBLE = 8;
-const CHAT_NAME_KEY = "site_chat_name";
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
 let latestFirebaseActiveUsers = null;
 
@@ -744,11 +785,6 @@ setChatOpen = function(isOpen) {
 
 chatToggle.textContent = "<";
 chatSend.textContent = ">";
-chatName.value = localStorage.getItem(CHAT_NAME_KEY) || "";
-
-chatName.addEventListener("input", () => {
-  localStorage.setItem(CHAT_NAME_KEY, chatName.value.trim().slice(0, 24));
-});
 
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -767,13 +803,21 @@ document.addEventListener("siteActiveUsersChanged", (event) => {
 });
 
 function updateChatPanelState() {
-  chatInput.disabled = !CHAT_ENABLED;
-  chatSend.disabled = !CHAT_ENABLED;
+  const signedInAndVerified = window.chatAuthState?.canChat !== false;
+
+  chatInput.disabled = !CHAT_ENABLED || !signedInAndVerified;
+  chatSend.disabled = !CHAT_ENABLED || !signedInAndVerified;
 
   if (!CHAT_ENABLED) {
     chatInput.placeholder = "Chat Disabled";
     chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming 5/20</div>';
     return;
+  }
+
+  if (!signedInAndVerified) {
+    chatInput.placeholder = "Sign in with a verified email to chat";
+  } else {
+    chatInput.placeholder = "Message everyone... ";
   }
 
   if (!chatMessages.querySelector(".chat-message")) {
