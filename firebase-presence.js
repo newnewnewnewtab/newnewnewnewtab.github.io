@@ -165,9 +165,6 @@ const chatUserName =
 const chatGradeBadge =
   document.getElementById("chatGradeBadge");
 
-const authSignOut =
-  document.getElementById("authSignOut");
-
 function getSessionId() {
   let id = sessionStorage.getItem(
     SESSION_ID_KEY
@@ -496,13 +493,6 @@ function setupAuth() {
     }
   );
 
-  authSignOut?.addEventListener(
-    "click",
-    () => {
-      signOut();
-    }
-  );
-
   // Check for existing account in localStorage
   const savedName = localStorage.getItem("chatUserName");
   const savedGrade = localStorage.getItem("chatUserGrade");
@@ -573,18 +563,6 @@ function loginUser(name, grade) {
   updateChatAuthState(name, grade);
 }
 
-function signOut() {
-  localStorage.removeItem("chatUserName");
-  localStorage.removeItem("chatUserGrade");
-  
-  currentUserName = null;
-  currentUserGrade = null;
-  currentUserGroup = null;
-  
-  updateChatAuthState(null, null);
-  showAuthForm();
-}
-
 function updateChatAuthState(name, grade) {
   const canChat = Boolean(name && grade);
 
@@ -626,10 +604,6 @@ function updateChatAuthState(name, grade) {
   if (chatGradeBadge && canChat) {
     const gradeLabel = Object.values(GRADE_GROUPS).find(g => g.grades.includes(grade))?.label;
     chatGradeBadge.textContent = `${gradeLabel}`;
-  }
-
-  if (authSignOut) {
-    authSignOut.hidden = !canChat;
   }
 
   if (chatInput) {
