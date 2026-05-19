@@ -288,6 +288,31 @@ nav {
   pointer-events: none;
 }
 
+.nav-spacer {
+  flex: 1;
+}
+
+.nav-chat-button {
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-chat-button:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 #viewer {
   position: fixed;
   top: var(--nav-height);
@@ -317,6 +342,7 @@ nav {
   z-index: 1800;
   pointer-events: auto;
   transition: right 0.28s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  display: none;
 }
 
 .chat-toggle:hover {
@@ -370,15 +396,16 @@ nav {
   letter-spacing: 0;
 }
 
-.active-users {
-  border: 1px solid rgba(34, 197, 94, 0.45);
+.grade-badge {
+  border: 1px solid rgba(56, 189, 248, 0.45);
   border-radius: 999px;
-  padding: 5px 10px;
-  color: #bbf7d0;
-  background: rgba(22, 101, 52, 0.26);
-  font-size: 12px;
+  padding: 5px 12px;
+  color: #bae6fd;
+  background: rgba(14, 116, 144, 0.26);
+  font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .chat-user-status {
@@ -484,87 +511,52 @@ nav {
   line-height: 1.45;
 }
 
-.auth-gate-actions {
-  display: grid;
-  gap: 12px;
-}
-
-.auth-gate-actions[hidden],
-.auth-form[hidden],
-.chat-messages[hidden],
-.chat-form[hidden] {
-  display: none;
-}
-
-.auth-big-button {
-  min-height: 72px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  border-radius: 12px;
-  background: rgba(30, 41, 59, 0.82);
-  color: var(--text);
-  cursor: pointer;
-  display: grid;
-  gap: 4px;
-  padding: 14px 16px;
-  text-align: left;
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-}
-
-.auth-big-button strong {
-  font-size: 18px;
-  font-weight: 900;
-}
-
-.auth-big-button span {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.auth-big-button:hover {
-  transform: translateY(-2px);
-  border-color: rgba(56, 189, 248, 0.62);
-  background: rgba(14, 116, 144, 0.34);
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
-}
-
-.auth-gate-feedback {
-  min-height: 20px;
-  color: #bae6fd;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.35;
-}
-
-.auth-gate-feedback.success {
-  color: #bbf7d0;
-}
-
-.auth-gate-feedback.error {
-  color: #fecaca;
-}
-
-.auth-gate-feedback.loading::after {
-  content: "";
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-left: 8px;
-  border: 2px solid rgba(186, 230, 253, 0.35);
-  border-top-color: #bae6fd;
-  border-radius: 999px;
-  animation: authSpin 0.7s linear infinite;
-}
-
 .auth-form {
   display: grid;
   gap: 12px;
   padding-top: 4px;
 }
 
+.grade-selector {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.grade-option {
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.82);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.grade-option:hover {
+  border-color: rgba(56, 189, 248, 0.62);
+  background: rgba(14, 116, 144, 0.34);
+}
+
+.grade-option.selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #031018;
+}
+
+.grade-note {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 8px;
+}
+
 .auth-form-actions {
   display: grid;
-  grid-template-columns: 1fr auto;
   gap: 10px;
   margin-top: 4px;
 }
@@ -628,17 +620,6 @@ nav {
   text-align: center;
   line-height: 1.5;
   max-width: 240px;
-}
-
-.chat-disabled-notice {
-  margin: auto;
-  max-width: 280px;
-  text-align: center;
-  color: #fecaca;
-  font-size: 30px;
-  font-weight: 900;
-  line-height: 1.12;
-  text-transform: uppercase;
 }
 
 .chat-message {
@@ -728,6 +709,10 @@ nav {
   .auth-form-actions {
     grid-template-columns: 1fr;
   }
+
+  .grade-selector {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 </style>
 </head>
@@ -757,6 +742,9 @@ nav {
       <div class="dropdown-menu" id="tabsMore"></div>
     </div>
   </div>
+
+  <div class="nav-spacer"></div>
+  <button id="navChatButton" class="nav-chat-button" type="button" aria-label="Open chat" title="Open chat">💬 Chat</button>
 </nav>
 
 <iframe id="viewer"></iframe>
@@ -767,10 +755,10 @@ nav {
   <header class="chat-header">
     <div class="chat-title-row">
       <div class="chat-title">Live Chat</div>
-      <div id="chatActiveUsers" class="active-users">0 active</div>
+      <div id="chatGradeBadge" class="grade-badge" hidden></div>
     </div>
     <div id="chatUserStatus" class="chat-user-status" hidden>
-      <span id="chatUserEmail"></span>
+      <span id="chatUserName"></span>
       <button id="authSignOut" class="auth-button ghost" type="button">Sign out</button>
     </div>
   </header>
@@ -781,29 +769,34 @@ nav {
 
   <div id="chatAuthGate" class="chat-auth-gate">
     <div>
-      <div id="authGateTitle" class="auth-gate-title">Sign in to chat</div>
-      <div id="authGateCopy" class="auth-gate-copy">Use a verified Firebase email so everyone knows who is talking.</div>
+      <div id="authGateTitle" class="auth-gate-title">Create Account</div>
+      <div id="authGateCopy" class="auth-gate-copy">Enter your name and select your grade to start chatting with students in your group.</div>
     </div>
-    <div id="authGateActions" class="auth-gate-actions">
-      <button id="authOpenSignIn" class="auth-big-button" type="button">
-        <strong>Sign in</strong>
-        <span>Already have an account</span>
-      </button>
-      <button id="authOpenCreate" class="auth-big-button" type="button">
-        <strong>Create account</strong>
-        <span>New to chat?</span>
-      </button>
-    </div>
-    <div id="authGateFeedback" class="auth-gate-feedback"></div>
-    <button id="authVerify" class="auth-button primary" type="button" hidden>Send verification email</button>
-    <button id="authRefresh" class="auth-button ghost" type="button" hidden>I verified my email</button>
-    <form id="authForm" class="auth-form" hidden>
-      <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email" />
-      <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password" />
-      <div id="authFeedback" class="auth-feedback">Enter your email and password.</div>
+    <form id="authForm" class="auth-form">
+      <input id="authName" class="auth-input" type="text" placeholder="Your name" maxlength="30" />
+      
+      <div>
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Select your grade:</div>
+        <div class="grade-selector" id="gradeSelector">
+          <button class="grade-option" type="button" data-grade="1">1st</button>
+          <button class="grade-option" type="button" data-grade="2">2nd</button>
+          <button class="grade-option" type="button" data-grade="3">3rd</button>
+          <button class="grade-option" type="button" data-grade="4">4th</button>
+          <button class="grade-option" type="button" data-grade="5">5th</button>
+          <button class="grade-option" type="button" data-grade="6">6th</button>
+          <button class="grade-option" type="button" data-grade="7">7th</button>
+          <button class="grade-option" type="button" data-grade="8">8th</button>
+          <button class="grade-option" type="button" data-grade="9">9th</button>
+          <button class="grade-option" type="button" data-grade="10">10th</button>
+          <button class="grade-option" type="button" data-grade="11">11th</button>
+          <button class="grade-option" type="button" data-grade="12">12th</button>
+        </div>
+        <div class="grade-note">⚠️ Permanent - affects who you chat with</div>
+      </div>
+
+      <div id="authFeedback" class="auth-feedback"></div>
       <div class="auth-form-actions">
-        <button id="authSubmit" class="auth-button primary" type="submit">Sign in</button>
-        <button id="authBack" class="auth-button ghost" type="button">Back</button>
+        <button id="authSubmit" class="auth-button primary" type="submit">Create Account</button>
       </div>
     </form>
   </div>
@@ -816,8 +809,8 @@ nav {
 
 <script src="games.js"></script>
 <script>
-window.CHAT_ENABLED = false; // master chat switch
-window.chatAuthState = { canChat: false, email: "" };
+window.CHAT_ENABLED = true; // enable chat
+window.chatAuthState = { canChat: false, name: "", grade: "" };
 </script>
 <script type="module" src="firebase-presence.js"></script>
 
@@ -828,70 +821,17 @@ const moreDropdown = document.getElementById("moreDropdown");
 const statusText = document.getElementById("status");
 const iframe = document.getElementById("viewer");
 const chatToggle = document.getElementById("chatToggle");
+const navChatButton = document.getElementById("navChatButton");
 const siteChat = document.getElementById("siteChat");
 const chatInput = document.getElementById("chatInput");
 const chatForm = document.getElementById("chatForm");
 const chatMessages = document.getElementById("chatMessages");
 const chatSend = document.getElementById("chatSend");
-const chatActiveUsers = document.getElementById("chatActiveUsers");
-const authGateTitle = document.getElementById("authGateTitle");
-const authGateCopy = document.getElementById("authGateCopy");
-const authGateActions = document.getElementById("authGateActions");
-const authOpenSignIn = document.getElementById("authOpenSignIn");
-const authOpenCreate = document.getElementById("authOpenCreate");
-const authForm = document.getElementById("authForm");
-const authEmail = document.getElementById("authEmail");
-const authPassword = document.getElementById("authPassword");
-const authFeedback = document.getElementById("authFeedback");
-const authSubmit = document.getElementById("authSubmit");
-const authBack = document.getElementById("authBack");
+const gradeSelector = document.getElementById("gradeSelector");
 
 const MAX_VISIBLE = 8;
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
 let latestFirebaseActiveUsers = null;
-
-function showAuthForm(mode) {
-  const isCreate = mode === "create";
-
-  authGateTitle.textContent = isCreate ? "Create account" : "Sign in";
-  authGateCopy.textContent = isCreate
-    ? "Make an account before chatting."
-    : "Sign in with your email.";
-  authSubmit.textContent = isCreate ? "Create account" : "Sign in";
-  authPassword.autocomplete = isCreate ? "new-password" : "current-password";
-  authFeedback.className = "auth-feedback";
-  authFeedback.textContent = isCreate
-    ? "Use at least 6 characters for your password."
-    : "Enter your email and password.";
-
-  authGateActions.hidden = true;
-  authForm.hidden = false;
-  authForm.dataset.mode = mode;
-  authEmail.focus();
-
-  document.dispatchEvent(new CustomEvent("siteChatAuthModeChanged", {
-    detail: { mode }
-  }));
-}
-
-function showAuthChoices() {
-  authForm.hidden = true;
-  authGateActions.hidden = false;
-  authGateTitle.textContent = "Sign in to chat";
-  authGateCopy.textContent = "Log in so everyone can see who you are.";
-}
-
-authOpenSignIn.addEventListener("click", () => showAuthForm("sign-in"));
-authOpenCreate.addEventListener("click", () => showAuthForm("create"));
-authBack.addEventListener("click", showAuthChoices);
-
-authForm.addEventListener("submit", (event) => {
-  if (window.firebaseChatAuthReady) return;
-
-  event.preventDefault();
-  authFeedback.className = "auth-feedback loading";
-  authFeedback.textContent = "Database is loading. Try again in a second.";
-});
 
 function getGameData(data) {
   if (typeof data === "string") {
@@ -983,8 +923,20 @@ function toggleDropdown() {
   moreDropdown.classList.toggle("open");
 }
 
+// Grade selector handling
+gradeSelector.querySelectorAll(".grade-option").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    gradeSelector.querySelectorAll(".grade-option").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+  });
+});
 
 chatToggle.addEventListener("click", () => {
+  setChatOpen(!siteChat.classList.contains("open"));
+});
+
+navChatButton.addEventListener("click", () => {
   setChatOpen(!siteChat.classList.contains("open"));
 });
 
@@ -994,124 +946,7 @@ function setChatOpen(isOpen) {
   chatToggle.textContent = isOpen ? ">" : "<";
   chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
   chatToggle.title = isOpen ? "Close chat" : "Open chat";
-
-  if (isOpen) {
-    updateChatPanelState();
-    updateActiveUsersFromBadges();
-  }
-
-  document.dispatchEvent(new CustomEvent("siteChatToggled", {
-    detail: { open: isOpen }
-  }));
-
-  if (isOpen && CHAT_ENABLED && window.chatAuthState?.canChat) {
-    chatInput.focus();
-  }
 }
-
-chatToggle.textContent = "<";
-chatSend.textContent = ">";
-
-document.addEventListener("siteActiveUsersChanged", (event) => {
-  latestFirebaseActiveUsers = event.detail?.total || 0;
-  updateActiveUsers(latestFirebaseActiveUsers);
-});
-
-function updateChatPanelState() {
-  const signedInAndVerified = window.chatAuthState?.canChat !== false;
-
-  chatInput.disabled = !CHAT_ENABLED || !signedInAndVerified;
-  chatSend.disabled = !CHAT_ENABLED || !signedInAndVerified;
-  chatMessages.hidden = CHAT_ENABLED && !signedInAndVerified;
-  chatForm.hidden = CHAT_ENABLED && !signedInAndVerified;
-
-  if (!CHAT_ENABLED) {
-    chatInput.placeholder = "Chat Disabled";
-    chatMessages.hidden = false;
-    chatForm.hidden = true;
-    chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming 5/20</div>';
-    return;
-  }
-
-  if (!signedInAndVerified) {
-    chatInput.placeholder = "Sign in with a verified email to chat";
-  } else {
-    chatInput.placeholder = "Message everyone... ";
-  }
-
-  if (signedInAndVerified && !chatMessages.querySelector(".chat-message")) {
-    chatMessages.innerHTML = '<div class="chat-empty">Chat looks empty...</div>';
-  }
-}
-
-function updateActiveUsersFromBadges() {
-  const total = [...document.querySelectorAll("[data-player-count-for]")]
-    .reduce((sum, badge) => sum + (Number.parseInt(badge.textContent, 10) || 0), 0);
-
-  if (total > 0 || latestFirebaseActiveUsers === null) {
-    updateActiveUsers(total);
-  }
-}
-
-function updateActiveUsers(total) {
-  chatActiveUsers.textContent = `${total} active`;
-  chatActiveUsers.title = `${total} active user${total === 1 ? "" : "s"} across games`;
-}
-
-const activeUsersObserver = new MutationObserver(updateActiveUsersFromBadges);
-activeUsersObserver.observe(tabsMain, {
-  childList: true,
-  subtree: true,
-  characterData: true
-});
-activeUsersObserver.observe(tabsMore, {
-  childList: true,
-  subtree: true,
-  characterData: true
-});
-
-window.addEventListener("click", (e) => {
-  if (!e.target.closest("#moreDropdown")) {
-    moreDropdown.classList.remove("open");
-  }
-});
-
-/* POPUP LOGIC */
-const emailPopup = document.getElementById("emailPopup");
-const yesBtn = document.getElementById("yesBtn");
-const noBtn = document.getElementById("noBtn");
-const FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSc_Z4B0MP1d0rs0b_KwGbnqhzUBPhroF-XNbbVWlTNww77zfg/viewform?usp=header";
-
-if (!localStorage.getItem("email_prompt_dismissed")) {
-  setTimeout(() => {
-    emailPopup.classList.add("active");
-
-    let count = 5;
-    const timer = setInterval(() => {
-      count--;
-
-      if (count > 0) {
-        noBtn.textContent = `No (${count})`;
-      } else {
-        noBtn.textContent = "No";
-        noBtn.disabled = false;
-        clearInterval(timer);
-      }
-    }, 1000);
-  }, 500);
-}
-
-function dismiss() {
-  emailPopup.classList.remove("active");
-  localStorage.setItem("email_prompt_dismissed", "true");
-}
-
-yesBtn.onclick = () => {
-  window.open(FORM_LINK, "_blank");
-  dismiss();
-};
-
-noBtn.onclick = dismiss;
 
 build();
 </script>
