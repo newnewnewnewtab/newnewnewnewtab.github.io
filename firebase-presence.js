@@ -11,7 +11,6 @@ import {
   limitToLast,
   orderByChild,
   endAt,
-  goOffline,
   goOnline,
   set,
   update,
@@ -21,56 +20,27 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyAk9fMAWy6AS4o2s5n5zSJj0M0GlJoyIWE",
   authDomain: "new-tab-2-d6042.firebaseapp.com",
-  databaseURL:
-    "https://new-tab-2-d6042-default-rtdb.firebaseio.com",
+  databaseURL: "https://new-tab-2-d6042-default-rtdb.firebaseio.com",
   projectId: "new-tab-2-d6042",
-  storageBucket:
-    "new-tab-2-d6042.firebasestorage.app",
+  storageBucket: "new-tab-2-d6042.firebasestorage.app",
   messagingSenderId: "347559506222",
-  appId:
-    "1:347559506222:web:e854997d9048686b988abf"
+  appId: "1:347559506222:web:e854997d9048686b988abf"
 };
 
-const SESSION_ID_KEY =
-  "game_hoster_session_id";
-
+const SESSION_ID_KEY = "game_hoster_session_id";
 const SESSION_ID = getSessionId();
-
 const CHAT_MESSAGE_LIMIT = 10;
-
 const MAX_MESSAGE_LENGTH = 180;
-
-const CHAT_MESSAGE_TTL_MS =
-  6 * 60 * 60 * 1000;
-
+const CHAT_MESSAGE_TTL_MS = 6 * 60 * 60 * 1000;
 const CHAT_CLEANUP_INTERVAL_MS = 0;
-
-const PRESENCE_HEARTBEAT_MS =
-  30 * 1000;
-
-const PRESENCE_STALE_MS =
-  2 * 60 * 1000;
-
-const PRESENCE_CLEANUP_INTERVAL_MS =
-  60 * 1000;
-
-const CHAT_ENABLED =
-  window.CHAT_ENABLED !== false;
+const PRESENCE_HEARTBEAT_MS = 30 * 1000;
+const PRESENCE_STALE_MS = 2 * 60 * 1000;
+const PRESENCE_CLEANUP_INTERVAL_MS = 60 * 1000;
+const CHAT_ENABLED = window.CHAT_ENABLED !== false;
 
 const CENSOR_WORDS = [
-  "nigger",
-  "nigga",
-  "faggot",
-  "fag",
-  "chink",
-  "retard",
-  "niggers",
-  "niggas",
-  "faggots",
-  "fags",
-  "chinks",
-  "retards",
-  "testcensor"
+  "nigger", "nigga", "faggot", "fag", "chink", "retard",
+  "niggers", "niggas", "faggots", "fags", "chinks", "retards", "testcensor"
 ];
 
 const CENSOR_REPLACEMENTS = [
@@ -88,110 +58,51 @@ const GRADE_GROUPS = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const database = getDatabase(app);
 
 let activeGameId = null;
-
 let activeGameName = null;
-
 let activePresenceRef = null;
-
 let activeDisconnectRef = null;
-
 let unsubscribeCounts = null;
-
 let unsubscribeChat = null;
-
 let isOnline = false;
-
 let presenceHeartbeatTimer = null;
-
 let lastPresenceCleanupAt = 0;
-
 let lastChatCleanupAt = 0;
-
 let currentUserName = null;
-
 let currentUserGrade = null;
-
 let currentUserGroup = null;
 
-const chatToggle =
-  document.getElementById("chatToggle");
-
-const siteChat =
-  document.getElementById("siteChat");
-
-const chatMessages =
-  document.getElementById("chatMessages");
-
-const chatForm =
-  document.getElementById("chatForm");
-
-const chatInput =
-  document.getElementById("chatInput");
-
-const chatSend =
-  document.getElementById("chatSend");
-
-const chatAuthGate =
-  document.getElementById("chatAuthGate");
-
-const authGateTitle =
-  document.getElementById("authGateTitle");
-
-const authGateCopy =
-  document.getElementById("authGateCopy");
-
-const authForm =
-  document.getElementById("authForm");
-
-const authName =
-  document.getElementById("authName");
-
-const authSubmit =
-  document.getElementById("authSubmit");
-
-const authFeedback =
-  document.getElementById("authFeedback");
-
-const chatUserStatus =
-  document.getElementById("chatUserStatus");
-
-const chatUserName =
-  document.getElementById("chatUserName");
-
-const chatGradeBadge =
-  document.getElementById("chatGradeBadge");
+const chatToggle = document.getElementById("chatToggle");
+const siteChat = document.getElementById("siteChat");
+const chatMessages = document.getElementById("chatMessages");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const chatSend = document.getElementById("chatSend");
+const chatAuthGate = document.getElementById("chatAuthGate");
+const authGateTitle = document.getElementById("authGateTitle");
+const authGateCopy = document.getElementById("authGateCopy");
+const authForm = document.getElementById("authForm");
+const authName = document.getElementById("authName");
+const authSubmit = document.getElementById("authSubmit");
+const authFeedback = document.getElementById("authFeedback");
+const chatUserStatus = document.getElementById("chatUserStatus");
+const chatUserName = document.getElementById("chatUserName");
+const chatGradeBadge = document.getElementById("chatGradeBadge");
 
 function getSessionId() {
-  let id = sessionStorage.getItem(
-    SESSION_ID_KEY
-  );
-
+  let id = sessionStorage.getItem(SESSION_ID_KEY);
   if (!id) {
     id = createSessionId();
-
-    sessionStorage.setItem(
-      SESSION_ID_KEY,
-      id
-    );
+    sessionStorage.setItem(SESSION_ID_KEY, id);
   }
-
   return id;
 }
 
 function createSessionId() {
-  if (crypto?.randomUUID) {
-    return crypto.randomUUID();
-  }
-
-  return (
-    Date.now() +
-    "-" +
-    Math.random().toString(16).slice(2)
-  );
+  if (crypto?.randomUUID) return crypto.randomUUID();
+  return Date.now() + "-" + Math.random().toString(16).slice(2);
 }
 
 function gameIdFromName(name) {
@@ -206,126 +117,70 @@ function gameIdFromName(name) {
 
 function getGradeGroup(grade) {
   for (const [groupId, groupData] of Object.entries(GRADE_GROUPS)) {
-    if (groupData.grades.includes(grade)) {
-      return groupId;
-    }
+    if (groupData.grades.includes(grade)) return groupId;
   }
   return null;
 }
 
 function connectDatabase() {
   if (isOnline) return;
-
   goOnline(database);
-
   isOnline = true;
-}
-
-function disconnectDatabase() {
-  clearActivePresence();
 }
 
 function setActiveGame(name) {
   if (!database) return;
 
   const gameId = gameIdFromName(name);
-
   activeGameName = name;
 
   if (gameId === activeGameId) return;
 
-  clearActivePresence({
-    cancelDisconnect: true
-  });
-
+  clearActivePresence({ cancelDisconnect: true });
   connectDatabase();
 
   activeGameId = gameId;
+  activePresenceRef = ref(database, `gamePresence/${gameId}/players/${SESSION_ID}`);
+  activeDisconnectRef = onDisconnect(activePresenceRef);
 
-  activePresenceRef = ref(
-    database,
-    `gamePresence/${gameId}/players/${SESSION_ID}`
-  );
-
-  activeDisconnectRef =
-    onDisconnect(activePresenceRef);
-
-  activeDisconnectRef
-    .remove()
-    .catch(console.error);
+  activeDisconnectRef.remove().catch(console.error);
 
   const now = Date.now();
-
-  set(activePresenceRef, {
-    game: name,
-    joinedAt: now,
-    lastSeenAt: now
-  })
-    .then(() => {
-      startPresenceHeartbeat();
-    })
+  set(activePresenceRef, { game: name, joinedAt: now, lastSeenAt: now })
+    .then(() => startPresenceHeartbeat())
     .catch(console.error);
 }
 
 function startPresenceHeartbeat() {
   stopPresenceHeartbeat();
-
-  presenceHeartbeatTimer =
-    setInterval(() => {
-      if (!activePresenceRef) return;
-
-      update(activePresenceRef, {
-        lastSeenAt: Date.now()
-      }).catch(console.error);
-    }, PRESENCE_HEARTBEAT_MS);
+  presenceHeartbeatTimer = setInterval(() => {
+    if (!activePresenceRef) return;
+    update(activePresenceRef, { lastSeenAt: Date.now() }).catch(console.error);
+  }, PRESENCE_HEARTBEAT_MS);
 }
 
 function stopPresenceHeartbeat() {
   if (!presenceHeartbeatTimer) return;
-
-  clearInterval(
-    presenceHeartbeatTimer
-  );
-
+  clearInterval(presenceHeartbeatTimer);
   presenceHeartbeatTimer = null;
 }
 
-function clearActivePresence({
-  cancelDisconnect = false
-} = {}) {
+function clearActivePresence({ cancelDisconnect = false } = {}) {
   stopPresenceHeartbeat();
-
-  if (
-    activeDisconnectRef &&
-    cancelDisconnect
-  ) {
-    activeDisconnectRef
-      .cancel()
-      .catch(console.error);
+  if (activeDisconnectRef && cancelDisconnect) {
+    activeDisconnectRef.cancel().catch(console.error);
   }
-
   if (activePresenceRef) {
-    remove(activePresenceRef).catch(
-      console.error
-    );
-
+    remove(activePresenceRef).catch(console.error);
     activePresenceRef = null;
   }
-
   activeDisconnectRef = null;
-
   activeGameId = null;
 }
 
 function cleanupStalePresence() {
   const now = Date.now();
-
-  if (
-    now - lastPresenceCleanupAt <
-    PRESENCE_CLEANUP_INTERVAL_MS
-  ) {
-    return;
-  }
+  if (now - lastPresenceCleanupAt < PRESENCE_CLEANUP_INTERVAL_MS) return;
 
   lastPresenceCleanupAt = now;
 
@@ -333,43 +188,20 @@ function cleanupStalePresence() {
     .then((snapshot) => {
       if (!snapshot.exists()) return;
 
-      const cutoff =
-        Date.now() -
-        PRESENCE_STALE_MS;
-
+      const cutoff = Date.now() - PRESENCE_STALE_MS;
       const removals = [];
 
-      snapshot.forEach(
-        (gameSnapshot) => {
-          gameSnapshot
-            .child("players")
-            .forEach(
-              (playerSnapshot) => {
-                const player =
-                  playerSnapshot.val();
+      snapshot.forEach((gameSnapshot) => {
+        gameSnapshot.child("players").forEach((playerSnapshot) => {
+          const player = playerSnapshot.val();
+          if (!player) return;
 
-                if (!player) return;
-
-                const lastSeenAt =
-                  Number(
-                    player.lastSeenAt || 0
-                  );
-
-                if (
-                  lastSeenAt < cutoff
-                ) {
-                  removals.push(
-                    remove(
-                      playerSnapshot.ref
-                    ).catch(
-                      console.error
-                    )
-                  );
-                }
-              }
-            );
-        }
-      );
+          const lastSeenAt = Number(player.lastSeenAt || 0);
+          if (lastSeenAt < cutoff) {
+            removals.push(remove(playerSnapshot.ref).catch(console.error));
+          }
+        });
+      });
 
       return Promise.all(removals);
     })
@@ -381,117 +213,58 @@ function watchGameCounts() {
 
   connectDatabase();
 
-  const countsRef = ref(
-    database,
-    "gamePresence"
-  );
+  const countsRef = ref(database, "gamePresence");
 
   unsubscribeCounts = onValue(
     countsRef,
     (snapshot) => {
       const counts = {};
-
       let totalPlayers = 0;
 
       cleanupStalePresence();
 
-      snapshot.forEach(
-        (gameSnapshot) => {
-          let playerCount = 0;
+      snapshot.forEach((gameSnapshot) => {
+        let playerCount = 0;
 
-          gameSnapshot
-            .child("players")
-            .forEach(
-              (playerSnapshot) => {
-                const data =
-                  playerSnapshot.val();
+        gameSnapshot.child("players").forEach((playerSnapshot) => {
+          const data = playerSnapshot.val();
+          if (!data) return;
 
-                if (!data) return;
+          const cutoff = Date.now() - PRESENCE_STALE_MS;
+          const lastSeenAt = Number(data.lastSeenAt || 0);
 
-                const cutoff =
-                  Date.now() -
-                  PRESENCE_STALE_MS;
-
-                const lastSeenAt =
-                  Number(
-                    data.lastSeenAt || 0
-                  );
-
-                if (
-                  lastSeenAt >= cutoff
-                ) {
-                  playerCount++;
-                }
-              }
-            );
-
-          counts[gameSnapshot.key] =
-            playerCount;
-
-          totalPlayers += playerCount;
-        }
-      );
-
-      document
-        .querySelectorAll(
-          "[data-player-count-for]"
-        )
-        .forEach((badge) => {
-          const gameId =
-            gameIdFromName(
-              badge.dataset
-                .playerCountFor
-            );
-
-          const playerCount =
-            counts[gameId] || 0;
-
-          badge.textContent =
-            playerCount > 0
-              ? playerCount
-              : "";
-
-          badge.classList.toggle(
-            "has-players",
-            playerCount > 0
-          );
-
-          badge.title =
-            playerCount > 0
-              ? `${playerCount} player${
-                  playerCount === 1
-                    ? ""
-                    : "s"
-                } online`
-              : "No players online";
+          if (lastSeenAt >= cutoff) playerCount++;
         });
+
+        counts[gameSnapshot.key] = playerCount;
+        totalPlayers += playerCount;
+      });
+
+      document.querySelectorAll("[data-player-count-for]").forEach((badge) => {
+        const gameId = gameIdFromName(badge.dataset.playerCountFor);
+        const playerCount = counts[gameId] || 0;
+
+        badge.textContent = playerCount > 0 ? playerCount : "";
+        badge.classList.toggle("has-players", playerCount > 0);
+        badge.title = playerCount > 0 
+          ? `${playerCount} player${playerCount === 1 ? "" : "s"} online`
+          : "No players online";
+      });
     },
-    (error) => {
-      console.warn(
-        "Firebase player counts failed:",
-        error
-      );
-    }
+    (error) => console.warn("Firebase player counts failed:", error)
   );
 }
 
 function setupAuth() {
-  if (
-    !authName ||
-    !authSubmit ||
-    !authForm
-  ) {
+  if (!authName || !authSubmit || !authForm) {
     updateChatAuthState(null);
     return;
   }
 
-  authForm.addEventListener(
-    "submit",
-    (event) => {
-      event.preventDefault();
-      submitAuthForm();
-    }
-  );
+  authForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    submitAuthForm();
+  });
 
   // Check for existing account in localStorage
   const savedName = localStorage.getItem("chatUserName");
@@ -507,15 +280,8 @@ function setupAuth() {
 }
 
 function showAuthForm() {
-  if (authForm) {
-    authForm.hidden = false;
-  }
-  if (chatAuthGate) {
-    chatAuthGate.classList.remove("hidden");
-  }
-  if (authName) {
-    authName.focus();
-  }
+  if (chatAuthGate) chatAuthGate.classList.remove("hidden");
+  if (authName) authName.focus();
 }
 
 function submitAuthForm() {
@@ -545,9 +311,7 @@ function submitAuthForm() {
   try {
     localStorage.setItem("chatUserName", name);
     localStorage.setItem("chatUserGrade", grade);
-    
     loginUser(name, grade);
-    
     setAuthFeedback("Account created!", "success");
   } catch (error) {
     setAuthFeedback("Failed to create account.", "error");
@@ -559,7 +323,6 @@ function loginUser(name, grade) {
   currentUserName = name;
   currentUserGrade = grade;
   currentUserGroup = getGradeGroup(grade);
-  
   updateChatAuthState(name, grade);
 }
 
@@ -572,29 +335,15 @@ function updateChatAuthState(name, grade) {
     grade: grade || ""
   };
 
-  if (!CHAT_ENABLED) {
-    return;
-  }
+  if (!CHAT_ENABLED) return;
 
   if (!canChat) {
-    if (chatAuthGate) {
-      chatAuthGate.classList.remove("hidden");
-    }
-    if (authForm) {
-      authForm.hidden = false;
-    }
+    if (chatAuthGate) chatAuthGate.classList.remove("hidden");
   } else {
-    if (chatAuthGate) {
-      chatAuthGate.classList.add("hidden");
-    }
-    if (authForm) {
-      authForm.hidden = true;
-    }
+    if (chatAuthGate) chatAuthGate.classList.add("hidden");
   }
 
-  if (chatUserStatus) {
-    chatUserStatus.hidden = !canChat;
-  }
+  if (chatUserStatus) chatUserStatus.hidden = !canChat;
 
   if (chatUserName && canChat) {
     const gradeLabel = Object.values(GRADE_GROUPS).find(g => g.grades.includes(grade))?.label;
@@ -608,60 +357,33 @@ function updateChatAuthState(name, grade) {
 
   if (chatInput) {
     chatInput.disabled = !canChat;
-    chatInput.placeholder = canChat
-      ? "Message everyone... "
-      : "Create an account to chat";
+    chatInput.placeholder = canChat ? "Message everyone... " : "Create an account to chat";
   }
 
-  if (chatSend) {
-    chatSend.disabled = !canChat;
-  }
+  if (chatSend) chatSend.disabled = !canChat;
+  if (chatMessages) chatMessages.hidden = !canChat;
+  if (chatForm) chatForm.hidden = !canChat;
 
-  if (chatMessages) {
-    chatMessages.hidden = !canChat;
-  }
-
-  if (chatForm) {
-    chatForm.hidden = !canChat;
-  }
-
-  if (canChat) {
-    watchChatMessages();
-  }
+  if (canChat) watchChatMessages();
 }
 
 function setAuthFeedback(message, state = "") {
   if (!authFeedback) return;
-
   authFeedback.textContent = message;
-  authFeedback.className =
-    `auth-feedback ${state}`.trim();
+  authFeedback.className = `auth-feedback ${state}`.trim();
 }
 
 function setupChat() {
-  if (
-    !chatForm ||
-    !chatInput
-  ) {
-    return;
-  }
+  if (!chatForm || !chatInput) return;
 
-  chatForm.addEventListener(
-    "submit",
-    (event) => {
-      event.preventDefault();
-
-      sendChatMessage();
-    }
-  );
+  chatForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    sendChatMessage();
+  });
 }
 
 function watchChatMessages() {
-  if (!CHAT_ENABLED) return;
-
-  if (unsubscribeChat) return;
-
-  if (!currentUserGroup) return;
+  if (!CHAT_ENABLED || unsubscribeChat || !currentUserGroup) return;
 
   lastChatCleanupAt = 0;
   cleanupOldChatMessages();
@@ -671,130 +393,82 @@ function watchChatMessages() {
     limitToLast(CHAT_MESSAGE_LIMIT)
   );
 
-  unsubscribeChat = onValue(
-    messagesRef,
-    (snapshot) => {
-      if (!chatMessages) return;
+  unsubscribeChat = onValue(messagesRef, (snapshot) => {
+    if (!chatMessages) return;
 
-      chatMessages.innerHTML = "";
+    chatMessages.innerHTML = "";
 
-      if (!snapshot.exists()) {
-        chatMessages.innerHTML =
-          '<div class="chat-empty">No messages yet.</div>';
-
-        return;
-      }
-
-      snapshot.forEach(
-        (messageSnapshot) => {
-          renderMessage(
-            messageSnapshot.key,
-            messageSnapshot.val()
-          );
-        }
-      );
-
-      chatMessages.scrollTop =
-        chatMessages.scrollHeight;
+    if (!snapshot.exists()) {
+      chatMessages.innerHTML = '<div class="chat-empty">No messages yet.</div>';
+      return;
     }
-  );
+
+    snapshot.forEach((messageSnapshot) => {
+      renderMessage(messageSnapshot.key, messageSnapshot.val());
+    });
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
 }
 
 function renderMessage(key, message) {
   if (!chatMessages) return;
 
-  const item =
-    document.createElement("div");
-
-  item.className =
-    "chat-message";
+  const item = document.createElement("div");
+  item.className = "chat-message";
 
   if (message.name === currentUserName) {
     item.classList.add("own");
   }
 
-  const meta =
-    document.createElement("div");
-
+  const meta = document.createElement("div");
   meta.className = "message-meta";
 
-  const name =
-    document.createElement("span");
+  const name = document.createElement("span");
+  name.className = "message-name";
+  name.textContent = cleanName(message.name) || "Guest";
 
-  name.className =
-    "message-name";
+  const time = document.createElement("span");
+  time.textContent = formatMessageTime(message.createdAt);
 
-  name.textContent =
-    cleanName(message.name) ||
-    "Guest";
-
-  const time =
-    document.createElement("span");
-
-  time.textContent =
-    formatMessageTime(
-      message.createdAt
-    );
-
-  const text =
-    document.createElement("div");
-
-  text.className =
-    "message-text";
-
-  text.textContent =
-    cleanMessageText(
-      message.text
-    );
+  const text = document.createElement("div");
+  text.className = "message-text";
+  text.textContent = cleanMessageText(message.text);
 
   meta.append(name, time);
-
   item.append(meta, text);
-
   chatMessages.appendChild(item);
 }
 
 function sendChatMessage() {
-  const rawText =
-    chatInput.value.trim();
+  const rawText = chatInput.value.trim();
 
   if (!rawText) return;
 
-  if (
-    !currentUserName ||
-    !currentUserGrade ||
-    !currentUserGroup
-  ) {
+  if (!currentUserName || !currentUserGrade || !currentUserGroup) {
     updateChatAuthState(null, null);
     return;
   }
 
-  const name =
-    cleanName(currentUserName);
-
-  const text =
-    applyCensor(rawText);
+  const name = cleanName(currentUserName);
+  const text = applyCensor(rawText);
 
   chatInput.value = "";
 
-  push(
-    ref(database, `siteChat/${currentUserGroup}/messages`),
-    {
-      name,
-      text,
-      grade: currentUserGrade,
-      sid: SESSION_ID,
-      createdAt: Date.now()
-    }
-  )
+  push(ref(database, `siteChat/${currentUserGroup}/messages`), {
+    name,
+    text,
+    grade: currentUserGrade,
+    sid: SESSION_ID,
+    createdAt: Date.now()
+  })
     .then(() => {
       lastChatCleanupAt = Date.now() - CHAT_CLEANUP_INTERVAL_MS + 60_000;
       cleanupOldChatMessages();
     })
     .catch((error) => {
       console.error(error);
-      chatInput.placeholder =
-        "Message failed. Check Firebase database rules.";
+      chatInput.placeholder = "Message failed. Check Firebase database rules.";
       chatInput.value = rawText;
     });
 }
@@ -803,46 +477,29 @@ async function cleanupOldChatMessages() {
   if (!currentUserGroup) return;
 
   const now = Date.now();
-
   if (now - lastChatCleanupAt < CHAT_CLEANUP_INTERVAL_MS) return;
 
   lastChatCleanupAt = now;
 
   const messagesRoot = ref(database, `siteChat/${currentUserGroup}/messages`);
-
   const cutoff = now - CHAT_MESSAGE_TTL_MS;
 
-  const oldQ = query(
-    messagesRoot,
-    orderByChild("createdAt"),
-    endAt(cutoff)
-  );
-
+  const oldQ = query(messagesRoot, orderByChild("createdAt"), endAt(cutoff));
   const oldSnap = await get(oldQ).catch(() => null);
 
   if (oldSnap?.exists()) {
     const removals = [];
-
-    oldSnap.forEach((s) =>
-      removals.push(remove(s.ref).catch(console.error))
-    );
-
+    oldSnap.forEach((s) => removals.push(remove(s.ref).catch(console.error)));
     await Promise.all(removals);
   }
 
   const allSnap = await get(messagesRoot).catch(() => null);
-
   if (!allSnap?.exists()) return;
 
   const keys = [];
-
   allSnap.forEach((s) => keys.push(s.key));
 
-  const toDelete = keys.slice(
-    0,
-    Math.max(0, keys.length - CHAT_MESSAGE_LIMIT)
-  );
-
+  const toDelete = keys.slice(0, Math.max(0, keys.length - CHAT_MESSAGE_LIMIT));
   await Promise.all(
     toDelete.map((k) =>
       remove(ref(database, `siteChat/${currentUserGroup}/messages/${k}`)).catch(console.error)
@@ -851,34 +508,16 @@ async function cleanupOldChatMessages() {
 }
 
 function applyCensor(text) {
-  const cleaned =
-    cleanMessageText(text);
+  const cleaned = cleanMessageText(text);
 
-  const hasBlockedWord =
-    CENSOR_WORDS.some((word) =>
-      new RegExp(
-        `\\b${escapeRegExp(
-          word
-        )}\\b`,
-        "i"
-      ).test(cleaned)
-    );
-
-  if (!hasBlockedWord) {
-    return cleaned;
-  }
-
-  const randomIndex =
-    Math.floor(
-      Math.random() *
-        CENSOR_REPLACEMENTS.length
-    );
-
-  return cleanMessageText(
-    CENSOR_REPLACEMENTS[
-      randomIndex
-    ]
+  const hasBlockedWord = CENSOR_WORDS.some((word) =>
+    new RegExp(`\\b${escapeRegExp(word)}\\b`, "i").test(cleaned)
   );
+
+  if (!hasBlockedWord) return cleaned;
+
+  const randomIndex = Math.floor(Math.random() * CENSOR_REPLACEMENTS.length);
+  return cleanMessageText(CENSOR_REPLACEMENTS[randomIndex]);
 }
 
 function cleanMessageText(value) {
@@ -896,40 +535,24 @@ function cleanName(value) {
 }
 
 function escapeRegExp(value) {
-  return value.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&"
-  );
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function formatMessageTime(
-  timestamp
-) {
+function formatMessageTime(timestamp) {
   if (!timestamp) return "now";
-
-  return new Intl.DateTimeFormat(
-    [],
-    {
-      hour: "numeric",
-      minute: "2-digit"
-    }
-  ).format(new Date(timestamp));
+  return new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" })
+    .format(new Date(timestamp));
 }
 
-window.addEventListener(
-  "beforeunload",
-  () => {
-    clearActivePresence();
-  }
-);
+window.addEventListener("beforeunload", () => {
+  clearActivePresence();
+});
 
 window.gamePresence = {
   setActiveGame,
-  disconnect: disconnectDatabase
+  disconnect: () => { goOnline(database); }
 };
 
 watchGameCounts();
-
 setupAuth();
-
 setupChat();
