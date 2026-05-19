@@ -10,7 +10,6 @@ import {
   query,
   limitToLast,
   orderByChild,
-  endAt,
   goOffline,
   goOnline,
   set,
@@ -43,12 +42,6 @@ const CHAT_MESSAGE_LIMIT = 10;
 const MAX_MESSAGE_LENGTH = 180;
 
 const MAX_NAME_LENGTH = 12;
-
-const CHAT_MESSAGE_TTL_MS =
-  6 * 60 * 60 * 1000;
-
-const CHAT_CLEANUP_INTERVAL_MS =
-  10 * 60 * 1000;
 
 const PRESENCE_HEARTBEAT_MS =
   30 * 1000;
@@ -107,8 +100,6 @@ let isOnline = false;
 let presenceHeartbeatTimer = null;
 
 let lastPresenceCleanupAt = 0;
-
-let lastChatCleanupAt = 0;
 
 const chatToggle =
   document.getElementById("chatToggle");
@@ -499,6 +490,7 @@ function watchChatMessages() {
 
   const messagesRef = query(
     ref(database, "siteChat/messages"),
+    orderByChild("createdAt"),
     limitToLast(CHAT_MESSAGE_LIMIT)
   );
 
@@ -615,45 +607,60 @@ function sendChatMessage() {
 }
 
 function cleanupOldChatMessages() {
-  const now = Date.now();
-
-  if (
-    now - lastChatCleanupAt <
-    CHAT_CLEANUP_INTERVAL_MS
-  ) {
-    return;
-  }
-
-  lastChatCleanupAt = now;
-
-  const cutoff =
-    now - CHAT_MESSAGE_TTL_MS;
-
-  const oldMessagesRef = query(
-    ref(database, "siteChat/messages"),
-    orderByChild("createdAt"),
-    endAt(cutoff)
-  );
-
-  get(oldMessagesRef)
+  get(ref(database, "siteChat/messages"))
     .then((snapshot) => {
       if (!snapshot.exists()) return;
 
-      const removals = [];
+      const messages = [];
 
-      snapshot.forEach(
-        (messageSnapshot) => {
-          removals.push(
-            remove(
-              messageSnapshot.ref
-            ).catch(console.error)
-          );
-        }
+      snapshot.forEach((messageSnapshot) => {
+        const data =
+          messageSnapshot.val() || {};
+
+        messages.push({
+          key: messageSnapshot.key,
+          createdAt:
+            Number(data.createdAt) || 0
+        });
+      });
+
+      // oldest -> newest
+      messages.sort(
+        (a, b) =>
+          a.createdAt -
+          b.createdAt
       );
+
+      // delete old messages
+      const deleteCount = Math.max(
+        0,
+        messages.length -
+          CHAT_MESSAGE_LIMIT
+      );
+
+      if (deleteCount <= 0) return;
+
+      const messagesToDelete =
+        messages.slice(0, deleteCount);
+
+      const removals =
+        messagesToDelete.map((msg) =>
+          remove(
+            ref(
+              database,
+              `siteChat/messages/${msg.key}`
+            )
+          )
+        );
 
       return Promise.all(removals);
     })
-    .catch(console.error);
+    .catch((error) => {
+      console.error(
+        "Chat cleanup failed:",
+        error
+      );
+    });
 }
 
 function applyCensor(text) {
