@@ -52,8 +52,7 @@ const MAX_MESSAGE_LENGTH = 180;
 const CHAT_MESSAGE_TTL_MS =
   6 * 60 * 60 * 1000;
 
-const CHAT_CLEANUP_INTERVAL_MS =
-  10 * 60 * 1000;
+const CHAT_CLEANUP_INTERVAL_MS = 0; // always run on first call; throttled after
 
 const PRESENCE_HEARTBEAT_MS =
   30 * 1000;
@@ -999,6 +998,8 @@ function watchChatMessages() {
 
   if (unsubscribeChat) return;
 
+  // Reset so cleanup always fires on first load
+  lastChatCleanupAt = 0;
   cleanupOldChatMessages();
 
   const messagesRef = query(
@@ -1118,6 +1119,8 @@ function sendChatMessage() {
     }
   )
     .then(() => {
+      // Allow cleanup to run again 60s after each send
+      lastChatCleanupAt = Date.now() - CHAT_CLEANUP_INTERVAL_MS + 60_000;
       cleanupOldChatMessages();
     })
     .catch((error) => {
@@ -1128,46 +1131,56 @@ function sendChatMessage() {
     });
 }
 
-function cleanupOldChatMessages() {
+async function cleanupOldChatMessages() {
   const now = Date.now();
 
-  if (
-    now - lastChatCleanupAt <
-    CHAT_CLEANUP_INTERVAL_MS
-  ) {
-    return;
-  }
+  if (now - lastChatCleanupAt < CHAT_CLEANUP_INTERVAL_MS) return;
 
   lastChatCleanupAt = now;
 
-  const cutoff =
-    now - CHAT_MESSAGE_TTL_MS;
+  const messagesRoot = ref(database, "siteChat/messages");
 
-  const oldMessagesRef = query(
-    ref(database, "siteChat/messages"),
+  // Step 1: delete messages older than 6 hours
+  const cutoff = now - CHAT_MESSAGE_TTL_MS;
+
+  const oldQ = query(
+    messagesRoot,
     orderByChild("createdAt"),
     endAt(cutoff)
   );
 
-  get(oldMessagesRef)
-    .then((snapshot) => {
-      if (!snapshot.exists()) return;
+  const oldSnap = await get(oldQ).catch(() => null);
 
-      const removals = [];
+  if (oldSnap?.exists()) {
+    const removals = [];
 
-      snapshot.forEach(
-        (messageSnapshot) => {
-          removals.push(
-            remove(
-              messageSnapshot.ref
-            ).catch(console.error)
-          );
-        }
-      );
+    oldSnap.forEach((s) =>
+      removals.push(remove(s.ref).catch(console.error))
+    );
 
-      return Promise.all(removals);
-    })
-    .catch(console.error);
+    await Promise.all(removals);
+  }
+
+  // Step 2: delete everything beyond the newest CHAT_MESSAGE_LIMIT records
+  const allSnap = await get(messagesRoot).catch(() => null);
+
+  if (!allSnap?.exists()) return;
+
+  const keys = [];
+
+  allSnap.forEach((s) => keys.push(s.key));
+
+  // Firebase returns push keys in insertion order (oldest first)
+  const toDelete = keys.slice(
+    0,
+    Math.max(0, keys.length - CHAT_MESSAGE_LIMIT)
+  );
+
+  await Promise.all(
+    toDelete.map((k) =>
+      remove(ref(database, `siteChat/messages/${k}`)).catch(console.error)
+    )
+  );
 }
 
 function applyCensor(text) {
