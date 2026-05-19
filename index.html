@@ -7,6 +7,7 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
+
   gtag('config', 'G-1XQJN7ZWG6');
 </script>
 <meta charset="UTF-8" />
@@ -37,34 +38,86 @@ body {
   overflow: hidden;
 }
 
-/* FULLSCREEN CHAT DISABLED OVERLAY */
-.chat-disabled-overlay {
+/* FULLSCREEN BLACKOUT POPUP */
+.overlay {
   position: fixed;
   inset: 0;
   background: #000000;
-  display: none;
-  flex-direction: column;
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
 }
 
-.chat-disabled-overlay.active {
-  display: flex;
+.overlay.active {
+  opacity: 1;
+  visibility: visible;
 }
 
-.chat-disabled-content {
+.overlay-content {
   text-align: center;
+  max-width: 900px;
   padding: 40px;
+  width: 100%;
 }
 
-.chat-disabled-content h1 {
+.overlay-content h1 {
   color: #ffffff;
   font-size: clamp(2rem, 8vw, 4rem);
   font-weight: 800;
-  margin: 0 0 20px 0;
+  margin-bottom: 50px;
   line-height: 1.1;
   letter-spacing: -2px;
+}
+
+.overlay-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+}
+
+.btn-yes {
+  background: #ffffff;
+  color: #000000;
+  padding: 24px 80px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  max-width: 400px;
+  transition: transform 0.2s, background-color 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-yes:hover {
+  transform: scale(1.05);
+  background: #f0f0f0;
+}
+
+.btn-no {
+  background: transparent;
+  color: #666666;
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.btn-no:hover:not(:disabled) {
+  color: #999999;
+}
+
+.btn-no:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 /* NAVBAR */
@@ -213,6 +266,7 @@ nav {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -232,31 +286,6 @@ nav {
   box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   z-index: 10;
   pointer-events: none;
-}
-
-.nav-spacer {
-  flex: 1;
-}
-
-.nav-chat-button {
-  padding: 8px 16px;
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 13px;
-  border: 1px solid var(--border);
-  color: var(--text);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-}
-
-.nav-chat-button:hover {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: var(--accent);
-  color: var(--accent);
 }
 
 #viewer {
@@ -288,7 +317,6 @@ nav {
   z-index: 1800;
   pointer-events: auto;
   transition: right 0.28s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  display: none;
 }
 
 .chat-toggle:hover {
@@ -310,12 +338,11 @@ nav {
   border-left: 1px solid rgba(148, 163, 184, 0.26);
   box-shadow: -24px 0 60px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(18px);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   transform: translateX(100%);
   transition: transform 0.28s ease;
   z-index: 1700;
-  overflow: hidden;
 }
 
 .site-chat.open {
@@ -342,35 +369,32 @@ nav {
   letter-spacing: 0;
 }
 
-.grade-badge {
-  border: 1px solid rgba(56, 189, 248, 0.45);
+.active-users {
+  border: 1px solid rgba(34, 197, 94, 0.45);
   border-radius: 999px;
-  padding: 5px 12px;
-  color: #bae6fd;
-  background: rgba(14, 116, 144, 0.26);
-  font-size: 11px;
+  padding: 5px 10px;
+  color: #bbf7d0;
+  background: rgba(22, 101, 52, 0.26);
+  font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
-  text-transform: uppercase;
 }
 
-.chat-user-status {
-  display: flex;
+.name-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 10px;
+}
+
+.name-row label {
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
+  text-transform: uppercase;
 }
 
-.chat-user-status span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.auth-input,
+.chat-name,
 .chat-input {
   width: 100%;
   min-width: 0;
@@ -382,172 +406,12 @@ nav {
   font: inherit;
 }
 
-.auth-input {
-  height: 48px;
-  padding: 0 14px;
-  font-size: 15px;
+.chat-name {
+  height: 38px;
+  padding: 0 12px;
 }
 
-.auth-button {
-  min-height: 40px;
-  border: 1px solid rgba(56, 189, 248, 0.45);
-  border-radius: 10px;
-  background: rgba(14, 116, 144, 0.28);
-  color: #e0f2fe;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 800;
-  padding: 0 14px;
-  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
-}
-
-.auth-button:hover {
-  background: rgba(14, 116, 144, 0.46);
-  transform: translateY(-1px);
-}
-
-.auth-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.auth-button.primary {
-  border-color: rgba(56, 189, 248, 0.8);
-  background: #38bdf8;
-  color: #031018;
-}
-
-.chat-close-btn {
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 20px;
-  padding: 4px 8px;
-  transition: color 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.chat-close-btn:hover {
-  color: var(--text);
-}
-
-.chat-auth-gate {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  display: grid;
-  align-content: center;
-  gap: 18px;
-  padding: 28px;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.98)), radial-gradient(circle at top, rgba(56, 189, 248, 0.22), transparent 42%);
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s ease;
-}
-
-.chat-auth-gate.hidden {
-  display: none;
-}
-
-.auth-gate-title {
-  font-size: 28px;
-  font-weight: 900;
-  letter-spacing: 0;
-  line-height: 1.05;
-}
-
-.auth-gate-copy {
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 650;
-  line-height: 1.45;
-}
-
-.auth-form {
-  display: grid;
-  gap: 12px;
-  padding-top: 4px;
-}
-
-.grade-selector {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 12px 0;
-}
-
-.grade-option {
-  padding: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  border-radius: 8px;
-  background: rgba(30, 41, 59, 0.82);
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-  transition: all 0.2s ease;
-  text-align: center;
-}
-
-.grade-option:hover {
-  border-color: rgba(56, 189, 248, 0.62);
-  background: rgba(14, 116, 144, 0.34);
-}
-
-.grade-option.selected {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: #031018;
-}
-
-.auth-form-actions {
-  display: grid;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.auth-feedback {
-  min-height: 38px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 10px;
-  color: #cbd5e1;
-  background: rgba(2, 6, 23, 0.32);
-  font-size: 13px;
-  font-weight: 750;
-  line-height: 1.35;
-  padding: 10px 12px;
-}
-
-.auth-feedback.success {
-  border-color: rgba(34, 197, 94, 0.36);
-  color: #bbf7d0;
-}
-
-.auth-feedback.error {
-  border-color: rgba(248, 113, 113, 0.42);
-  color: #fecaca;
-}
-
-.auth-feedback.loading::after {
-  content: "";
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  margin-left: 8px;
-  border: 2px solid rgba(186, 230, 253, 0.35);
-  border-top-color: #bae6fd;
-  border-radius: 999px;
-  animation: authSpin 0.7s linear infinite;
-}
-
-@keyframes authSpin {
-  to { transform: rotate(360deg); }
-}
-
-.auth-input:focus,
+.chat-name:focus,
 .chat-input:focus {
   border-color: rgba(56, 189, 248, 0.72);
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
@@ -568,6 +432,17 @@ nav {
   text-align: center;
   line-height: 1.5;
   max-width: 240px;
+}
+
+.chat-disabled-notice {
+  margin: auto;
+  max-width: 280px;
+  text-align: center;
+  color: #fecaca;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.12;
+  text-transform: uppercase;
 }
 
 .chat-message {
@@ -653,23 +528,19 @@ nav {
   .chat-toggle.open {
     right: min(92vw, 420px);
   }
-
-  .auth-form-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .grade-selector {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 </style>
 </head>
 
 <body>
 
-<div id="chatDisabledOverlay" class="chat-disabled-overlay">
-  <div class="chat-disabled-content">
-    <h1>Coming 5/20</h1>
+<div id="emailPopup" class="overlay">
+  <div class="overlay-content">
+    <h1>Would you like to be sent the new URL when this site is blocked?</h1>
+    <div class="overlay-btns">
+      <button id="yesBtn" class="btn-yes">YES</button>
+      <button id="noBtn" class="btn-no" disabled>No (5)</button>
+    </div>
   </div>
 </div>
 
@@ -686,9 +557,6 @@ nav {
       <div class="dropdown-menu" id="tabsMore"></div>
     </div>
   </div>
-
-  <div class="nav-spacer"></div>
-  <button id="navChatButton" class="nav-chat-button" type="button" aria-label="Open chat" title="Open chat">💬 Chat</button>
 </nav>
 
 <iframe id="viewer"></iframe>
@@ -699,53 +567,19 @@ nav {
   <header class="chat-header">
     <div class="chat-title-row">
       <div class="chat-title">Live Chat</div>
-      <button id="chatCloseBtn" class="chat-close-btn" type="button" aria-label="Close chat" title="Close chat">✕</button>
+      <div id="chatActiveUsers" class="active-users">0 active</div>
     </div>
-    <div id="chatGradeBadge" class="grade-badge" hidden></div>
-    <div id="chatUserStatus" class="chat-user-status" hidden>
-      <span id="chatUserName"></span>
+    <div class="name-row">
+      <label for="chatName">Name</label>
+      <input id="chatName" class="chat-name" maxlength="24" autocomplete="nickname" placeholder="Enter name" />
     </div>
   </header>
 
-  <div id="chatMessages" class="chat-messages" hidden>
+  <div id="chatMessages" class="chat-messages">
     <div class="chat-empty">Open chat to load the latest messages.</div>
   </div>
 
-  <div id="chatAuthGate" class="chat-auth-gate">
-    <div>
-      <div id="authGateTitle" class="auth-gate-title">Create Account</div>
-      <div id="authGateCopy" class="auth-gate-copy">Enter your name and select your grade to start chatting with students in your group.</div>
-    </div>
-    <form id="authForm" class="auth-form">
-      <input id="authName" class="auth-input" type="text" placeholder="Your name" maxlength="30" />
-      
-      <div>
-        <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Select your grade:</div>
-        <div class="grade-selector" id="gradeSelector">
-          <button class="grade-option" type="button" data-grade="1">1st</button>
-          <button class="grade-option" type="button" data-grade="2">2nd</button>
-          <button class="grade-option" type="button" data-grade="3">3rd</button>
-          <button class="grade-option" type="button" data-grade="4">4th</button>
-          <button class="grade-option" type="button" data-grade="5">5th</button>
-          <button class="grade-option" type="button" data-grade="6">6th</button>
-          <button class="grade-option" type="button" data-grade="7">7th</button>
-          <button class="grade-option" type="button" data-grade="8">8th</button>
-          <button class="grade-option" type="button" data-grade="9">9th</button>
-          <button class="grade-option" type="button" data-grade="10">10th</button>
-          <button class="grade-option" type="button" data-grade="11">11th</button>
-          <button class="grade-option" type="button" data-grade="12">12th</button>
-        </div>
-        <div style="font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px;">⚠️ Permanent - affects who you chat with</div>
-      </div>
-
-      <div id="authFeedback" class="auth-feedback"></div>
-      <div class="auth-form-actions">
-        <button id="authSubmit" class="auth-button primary" type="submit">Create Account</button>
-      </div>
-    </form>
-  </div>
-
-  <form id="chatForm" class="chat-form" hidden>
+  <form id="chatForm" class="chat-form">
     <input id="chatInput" class="chat-input" maxlength="240" autocomplete="off" placeholder="Message everyone... " />
     <button id="chatSend" class="chat-send" type="submit" aria-label="Send message" title="Send">›</button>
   </form>
@@ -753,8 +587,7 @@ nav {
 
 <script src="games.js"></script>
 <script>
-window.CHAT_ENABLED = false;
-window.chatAuthState = { canChat: false, name: "", grade: "" };
+window.CHAT_ENABLED = false; // master chat switch
 </script>
 <script type="module" src="firebase-presence.js"></script>
 
@@ -765,23 +598,18 @@ const moreDropdown = document.getElementById("moreDropdown");
 const statusText = document.getElementById("status");
 const iframe = document.getElementById("viewer");
 const chatToggle = document.getElementById("chatToggle");
-const navChatButton = document.getElementById("navChatButton");
 const siteChat = document.getElementById("siteChat");
 const chatInput = document.getElementById("chatInput");
 const chatForm = document.getElementById("chatForm");
+const chatName = document.getElementById("chatName");
 const chatMessages = document.getElementById("chatMessages");
 const chatSend = document.getElementById("chatSend");
-const gradeSelector = document.getElementById("gradeSelector");
-const chatCloseBtn = document.getElementById("chatCloseBtn");
-const chatDisabledOverlay = document.getElementById("chatDisabledOverlay");
+const chatActiveUsers = document.getElementById("chatActiveUsers");
 
 const MAX_VISIBLE = 8;
+const CHAT_NAME_KEY = "site_chat_name";
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
-
-// Show disabled overlay when chat is off
-if (!CHAT_ENABLED) {
-  chatDisabledOverlay.classList.add("active");
-}
+let latestFirebaseActiveUsers = null;
 
 function getGameData(data) {
   if (typeof data === "string") {
@@ -823,6 +651,7 @@ function build() {
   const entries = Object.entries(PAGES)
     .map(([name, data], originalIndex) => {
       const game = getGameData(data);
+
       return {
         name,
         data: game,
@@ -872,33 +701,154 @@ function toggleDropdown() {
   moreDropdown.classList.toggle("open");
 }
 
-gradeSelector.querySelectorAll(".grade-option").forEach(btn => {
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
-    gradeSelector.querySelectorAll(".grade-option").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-  });
-});
+function setChatOpen(isOpen) {
+  siteChat.classList.toggle("open", isOpen);
+  chatToggle.classList.toggle("open", isOpen);
+  chatToggle.textContent = isOpen ? "›" : "‹";
+  chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
+  chatToggle.title = isOpen ? "Close chat" : "Open chat";
+
+  document.dispatchEvent(new CustomEvent("siteChatToggled", {
+    detail: { open: isOpen }
+  }));
+
+  if (isOpen) {
+    chatInput.focus();
+  }
+}
 
 chatToggle.addEventListener("click", () => {
   setChatOpen(!siteChat.classList.contains("open"));
 });
 
-navChatButton.addEventListener("click", () => {
-  setChatOpen(!siteChat.classList.contains("open"));
-});
-
-chatCloseBtn.addEventListener("click", () => {
-  setChatOpen(false);
-});
-
-function setChatOpen(isOpen) {
+setChatOpen = function(isOpen) {
   siteChat.classList.toggle("open", isOpen);
   chatToggle.classList.toggle("open", isOpen);
   chatToggle.textContent = isOpen ? ">" : "<";
   chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
   chatToggle.title = isOpen ? "Close chat" : "Open chat";
+
+  if (isOpen) {
+    updateChatPanelState();
+    updateActiveUsersFromBadges();
+  }
+
+  document.dispatchEvent(new CustomEvent("siteChatToggled", {
+    detail: { open: isOpen }
+  }));
+
+  if (isOpen && CHAT_ENABLED) {
+    chatInput.focus();
+  }
+};
+
+chatToggle.textContent = "<";
+chatSend.textContent = ">";
+chatName.value = localStorage.getItem(CHAT_NAME_KEY) || "";
+
+chatName.addEventListener("input", () => {
+  localStorage.setItem(CHAT_NAME_KEY, chatName.value.trim().slice(0, 24));
+});
+
+chatForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (!CHAT_ENABLED) {
+    updateChatPanelState();
+    return;
+  }
+
+  document.dispatchEvent(new CustomEvent("siteChatSubmit"));
+});
+
+document.addEventListener("siteActiveUsersChanged", (event) => {
+  latestFirebaseActiveUsers = event.detail?.total || 0;
+  updateActiveUsers(latestFirebaseActiveUsers);
+});
+
+function updateChatPanelState() {
+  chatInput.disabled = !CHAT_ENABLED;
+  chatSend.disabled = !CHAT_ENABLED;
+
+  if (!CHAT_ENABLED) {
+    chatInput.placeholder = "Chat Disabled";
+    chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming 5/20</div>';
+    return;
+  }
+
+  if (!chatMessages.querySelector(".chat-message")) {
+    chatMessages.innerHTML = '<div class="chat-empty">Loading messages...</div>';
+  }
 }
+
+function updateActiveUsersFromBadges() {
+  const total = [...document.querySelectorAll("[data-player-count-for]")]
+    .reduce((sum, badge) => sum + (Number.parseInt(badge.textContent, 10) || 0), 0);
+
+  if (total > 0 || latestFirebaseActiveUsers === null) {
+    updateActiveUsers(total);
+  }
+}
+
+function updateActiveUsers(total) {
+  chatActiveUsers.textContent = `${total} active`;
+  chatActiveUsers.title = `${total} active user${total === 1 ? "" : "s"} across games`;
+}
+
+const activeUsersObserver = new MutationObserver(updateActiveUsersFromBadges);
+activeUsersObserver.observe(tabsMain, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});
+activeUsersObserver.observe(tabsMore, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});
+
+window.addEventListener("click", (e) => {
+  if (!e.target.closest("#moreDropdown")) {
+    moreDropdown.classList.remove("open");
+  }
+});
+
+/* POPUP LOGIC */
+const emailPopup = document.getElementById("emailPopup");
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSc_Z4B0MP1d0rs0b_KwGbnqhzUBPhroF-XNbbVWlTNww77zfg/viewform?usp=header";
+
+if (!localStorage.getItem("email_prompt_dismissed")) {
+  setTimeout(() => {
+    emailPopup.classList.add("active");
+
+    let count = 5;
+    const timer = setInterval(() => {
+      count--;
+
+      if (count > 0) {
+        noBtn.textContent = `No (${count})`;
+      } else {
+        noBtn.textContent = "No";
+        noBtn.disabled = false;
+        clearInterval(timer);
+      }
+    }, 1000);
+  }, 500);
+}
+
+function dismiss() {
+  emailPopup.classList.remove("active");
+  localStorage.setItem("email_prompt_dismissed", "true");
+}
+
+yesBtn.onclick = () => {
+  window.open(FORM_LINK, "_blank");
+  dismiss();
+};
+
+noBtn.onclick = dismiss;
 
 build();
 </script>
