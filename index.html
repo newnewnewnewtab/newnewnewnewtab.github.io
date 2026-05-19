@@ -791,12 +791,12 @@ nav {
       </button>
       <button id="authOpenCreate" class="auth-big-button" type="button">
         <strong>Create account</strong>
-        <span>New here? Verify your email after signup</span>
+        <span>New to chat?</span>
       </button>
     </div>
     <div id="authGateFeedback" class="auth-gate-feedback"></div>
     <button id="authVerify" class="auth-button primary" type="button" hidden>Send verification email</button>
-    <button id="authRefresh" class="auth-button ghost" type="button" hidden>I verified, unlock chat</button>
+    <button id="authRefresh" class="auth-button ghost" type="button" hidden>I verified my email</button>
     <form id="authForm" class="auth-form" hidden>
       <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email" />
       <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password" />
@@ -855,8 +855,8 @@ function showAuthForm(mode) {
 
   authGateTitle.textContent = isCreate ? "Create account" : "Sign in";
   authGateCopy.textContent = isCreate
-    ? "Make an account, then verify your email before chatting."
-    : "Sign in with your verified Firebase email.";
+    ? "Make an account before chatting."
+    : "Sign in with your email.";
   authSubmit.textContent = isCreate ? "Create account" : "Sign in";
   authPassword.autocomplete = isCreate ? "new-password" : "current-password";
   authFeedback.className = "auth-feedback";
@@ -878,7 +878,7 @@ function showAuthChoices() {
   authForm.hidden = true;
   authGateActions.hidden = false;
   authGateTitle.textContent = "Sign in to chat";
-  authGateCopy.textContent = "Use a verified Firebase email so everyone knows who is talking.";
+  authGateCopy.textContent = "Log in so everyone can see who you are.";
 }
 
 authOpenSignIn.addEventListener("click", () => showAuthForm("sign-in"));
@@ -890,7 +890,7 @@ authForm.addEventListener("submit", (event) => {
 
   event.preventDefault();
   authFeedback.className = "auth-feedback loading";
-  authFeedback.textContent = "Firebase is loading. Try again in a second.";
+  authFeedback.textContent = "Database is loading. Try again in a second.";
 });
 
 function getGameData(data) {
@@ -1040,7 +1040,7 @@ function updateChatPanelState() {
   }
 
   if (signedInAndVerified && !chatMessages.querySelector(".chat-message")) {
-    chatMessages.innerHTML = '<div class="chat-empty">Loading messages...</div>';
+    chatMessages.innerHTML = '<div class="chat-empty">Chat looks empty...</div>';
   }
 }
 
