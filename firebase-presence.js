@@ -1,15 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 
 import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendEmailVerification,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-import {
   getDatabase,
   ref,
   get,
@@ -52,7 +43,7 @@ const MAX_MESSAGE_LENGTH = 180;
 const CHAT_MESSAGE_TTL_MS =
   6 * 60 * 60 * 1000;
 
-const CHAT_CLEANUP_INTERVAL_MS = 0; // always run on first call; throttled after
+const CHAT_CLEANUP_INTERVAL_MS = 0;
 
 const PRESENCE_HEARTBEAT_MS =
   30 * 1000;
@@ -90,11 +81,15 @@ const CENSOR_REPLACEMENTS = [
   "Download the Dairy Queen app and use code Clinga2210! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾"
 ];
 
+const GRADE_GROUPS = {
+  "elementary": { grades: ["1", "2", "3", "4", "5"], label: "1st-5th" },
+  "middle": { grades: ["6", "7", "8"], label: "6-8th" },
+  "high": { grades: ["9", "10", "11", "12"], label: "9-12th" }
+};
+
 const app = initializeApp(firebaseConfig);
 
 const database = getDatabase(app);
-
-const auth = getAuth(app);
 
 let activeGameId = null;
 
@@ -116,18 +111,17 @@ let lastPresenceCleanupAt = 0;
 
 let lastChatCleanupAt = 0;
 
-let currentUser = null;
+let currentUserName = null;
 
-let authMode = "sign-in";
+let currentUserGrade = null;
+
+let currentUserGroup = null;
 
 const chatToggle =
   document.getElementById("chatToggle");
 
 const siteChat =
   document.getElementById("siteChat");
-
-const chatActiveUsers =
-  document.getElementById("chatActiveUsers");
 
 const chatMessages =
   document.getElementById("chatMessages");
@@ -150,41 +144,14 @@ const authGateTitle =
 const authGateCopy =
   document.getElementById("authGateCopy");
 
-const authGateActions =
-  document.getElementById("authGateActions");
-
-const authGateFeedback =
-  document.getElementById("authGateFeedback");
-
-const authOpenSignIn =
-  document.getElementById("authOpenSignIn");
-
-const authOpenCreate =
-  document.getElementById("authOpenCreate");
-
 const authForm =
   document.getElementById("authForm");
 
-const authEmail =
-  document.getElementById("authEmail");
-
-const authPassword =
-  document.getElementById("authPassword");
+const authName =
+  document.getElementById("authName");
 
 const authSubmit =
   document.getElementById("authSubmit");
-
-const authBack =
-  document.getElementById("authBack");
-
-const authVerify =
-  document.getElementById("authVerify");
-
-const authRefresh =
-  document.getElementById("authRefresh");
-
-const authSignOut =
-  document.getElementById("authSignOut");
 
 const authFeedback =
   document.getElementById("authFeedback");
@@ -192,8 +159,14 @@ const authFeedback =
 const chatUserStatus =
   document.getElementById("chatUserStatus");
 
-const chatUserEmail =
-  document.getElementById("chatUserEmail");
+const chatUserName =
+  document.getElementById("chatUserName");
+
+const chatGradeBadge =
+  document.getElementById("chatGradeBadge");
+
+const authSignOut =
+  document.getElementById("authSignOut");
 
 function getSessionId() {
   let id = sessionStorage.getItem(
@@ -232,6 +205,15 @@ function gameIdFromName(name) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "") || "game"
   );
+}
+
+function getGradeGroup(grade) {
+  for (const [groupId, groupData] of Object.entries(GRADE_GROUPS)) {
+    if (groupData.grades.includes(grade)) {
+      return groupId;
+    }
+  }
+  return null;
 }
 
 function connectDatabase() {
@@ -453,8 +435,6 @@ function watchGameCounts() {
         }
       );
 
-      updateActiveUsers(totalPlayers);
-
       document
         .querySelectorAll(
           "[data-player-count-for]"
@@ -494,55 +474,19 @@ function watchGameCounts() {
         "Firebase player counts failed:",
         error
       );
-
-      updateActiveUsers(0);
     }
   );
-}
-
-function updateActiveUsers(
-  totalPlayers
-) {
-  if (!chatActiveUsers) return;
-
-  chatActiveUsers.textContent =
-    `${totalPlayers} active`;
-
-  chatActiveUsers.title =
-    `${totalPlayers} active user${
-      totalPlayers === 1 ? "" : "s"
-    } across games`;
 }
 
 function setupAuth() {
   if (
-    !authEmail ||
-    !authPassword ||
+    !authName ||
     !authSubmit ||
-    !authForm ||
-    !authOpenSignIn ||
-    !authOpenCreate ||
-    !authVerify ||
-    !authRefresh ||
-    !authSignOut
+    !authForm
   ) {
     updateChatAuthState(null);
     return;
   }
-
-  authOpenSignIn.addEventListener(
-    "click",
-    () => {
-      openAuthForm("sign-in");
-    }
-  );
-
-  authOpenCreate.addEventListener(
-    "click",
-    () => {
-      openAuthForm("create");
-    }
-  );
 
   authForm.addEventListener(
     "submit",
@@ -552,350 +496,147 @@ function setupAuth() {
     }
   );
 
-  authBack?.addEventListener(
-    "click",
-    closeAuthForm
-  );
-
-  authVerify.addEventListener(
-    "click",
-    async () => {
-      if (!auth.currentUser) {
-        setGateFeedback(
-          "Sign in before sending a verification email.",
-          "error"
-        );
-        return;
-      }
-
-      setGateFeedback(
-        "Sending verification email...",
-        "loading"
-      );
-
-      try {
-        await sendEmailVerification(
-          auth.currentUser
-        );
-
-        setGateFeedback(
-          "Verification sent. Click the link in your email, then press the unlock button here.",
-          "success"
-        );
-      } catch (error) {
-        setGateFeedback(
-          getAuthErrorMessage(error),
-          "error"
-        );
-      }
-    }
-  );
-
-  authRefresh.addEventListener(
-    "click",
-    checkVerificationStatus
-  );
-
-  authSignOut.addEventListener(
+  authSignOut?.addEventListener(
     "click",
     () => {
-      setGateFeedback(
-        "Signing out...",
-        "loading"
-      );
-
-      signOut(auth).catch((error) => {
-        setGateFeedback(
-          getAuthErrorMessage(error),
-          "error"
-        );
-      });
+      signOut();
     }
   );
 
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    updateChatAuthState(user);
-  });
+  // Check for existing account in localStorage
+  const savedName = localStorage.getItem("chatUserName");
+  const savedGrade = localStorage.getItem("chatUserGrade");
+  
+  if (savedName && savedGrade) {
+    loginUser(savedName, savedGrade);
+  } else {
+    showAuthForm();
+  }
 
   window.firebaseChatAuthReady = true;
 }
 
-function openAuthForm(mode) {
-  authMode = mode;
-
-  if (authGateTitle) {
-    authGateTitle.textContent =
-      mode === "create"
-        ? "Create account"
-        : "Sign in";
-  }
-
-  if (authGateCopy) {
-    authGateCopy.textContent =
-      mode === "create"
-        ? "Make an account, then verify your email before chatting."
-        : "Sign in with your verified Firebase email.";
-  }
-
-  if (authSubmit) {
-    authSubmit.textContent =
-      mode === "create"
-        ? "Create account"
-        : "Sign in";
-    authSubmit.disabled = false;
-  }
-
-  if (authPassword) {
-    authPassword.autocomplete =
-      mode === "create"
-        ? "new-password"
-        : "current-password";
-  }
-
-  setAuthFeedback(
-    mode === "create"
-      ? "Use at least 6 characters for your password."
-      : "Enter your email and password.",
-    ""
-  );
-
-  if (authGateActions) {
-    authGateActions.hidden = true;
-  }
-
+function showAuthForm() {
   if (authForm) {
     authForm.hidden = false;
-    authForm.dataset.mode = mode;
   }
-
-  setGateFeedback("");
-
-  setTimeout(() => authEmail?.focus(), 80);
-}
-
-function closeAuthForm() {
-  if (authForm) {
-    authForm.hidden = true;
+  if (chatAuthGate) {
+    chatAuthGate.classList.remove("hidden");
   }
-
-  if (!currentUser) {
-    setGateContent({
-      title: "Sign in to chat",
-      copy: "Use a verified Firebase email so everyone knows who is talking.",
-      showChoices: true,
-      showVerify: false,
-      showRefresh: false,
-      showForm: false,
-      feedback: ""
-    });
-  } else {
-    updateChatAuthState(currentUser);
-  }
-
-  if (authSubmit) {
-    authSubmit.disabled = false;
-  }
-}
-
-async function checkVerificationStatus() {
-  if (!auth.currentUser) {
-    updateChatAuthState(null);
-    return;
-  }
-
-  setGateFeedback(
-    "Checking your verification status...",
-    "loading"
-  );
-
-  try {
-    await auth.currentUser.reload();
-
-    currentUser = auth.currentUser;
-
-    updateChatAuthState(currentUser);
-
-    if (currentUser.emailVerified) {
-      setGateFeedback(
-        "Email verified. Chat unlocked.",
-        "success"
-      );
-    } else {
-      setGateFeedback(
-        "Still not verified. Open the email link, then try again.",
-        "error"
-      );
-    }
-  } catch (error) {
-    setGateFeedback(
-      getAuthErrorMessage(error),
-      "error"
-    );
+  if (authName) {
+    authName.focus();
   }
 }
 
 function submitAuthForm() {
-  authMode = authForm?.dataset.mode || authMode;
+  const name = authName.value.trim();
+  const gradeBtn = document.querySelector(".grade-option.selected");
 
-  const email = authEmail.value.trim();
-  const password = authPassword.value;
-
-  if (!email || !password) {
-    setAuthFeedback(
-      "Enter your email and password first.",
-      "error"
-    );
+  if (!name) {
+    setAuthFeedback("Enter your name.", "error");
     return;
   }
 
-  setAuthFeedback(
-    authMode === "create"
-      ? "Creating your account..."
-      : "Signing you in...",
-    "loading"
-  );
-
-  if (authSubmit) {
-    authSubmit.disabled = true;
+  if (name.length < 2) {
+    setAuthFeedback("Name must be at least 2 characters.", "error");
+    return;
   }
 
-  const authAction =
-    authMode === "create"
-      ? createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        ).then(({ user }) =>
-          sendEmailVerification(user).then(
-            () => user
-          )
-        )
-      : signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        ).then(({ user }) => user);
+  if (!gradeBtn) {
+    setAuthFeedback("Select your grade.", "error");
+    return;
+  }
 
-  authAction
-    .then((user) => {
-      currentUser = user;
+  const grade = gradeBtn.dataset.grade;
 
-      if (authMode === "create") {
-        setAuthFeedback(
-          "Account created. Check your email for the verification link.",
-          "success"
-        );
-        setGateFeedback(
-          "Account created. Verify your email, then press the unlock button.",
-          "success"
-        );
-        closeAuthForm();
-        updateChatAuthState(user);
-      } else if (user.emailVerified) {
-        setAuthFeedback(
-          "Signed in. Opening chat...",
-          "success"
-        );
-        updateChatAuthState(user);
-      } else {
-        setAuthFeedback(
-          "Signed in, but your email is not verified yet.",
-          "error"
-        );
-        setGateFeedback(
-          "Your email still needs verification before chat unlocks.",
-          "error"
-        );
-        closeAuthForm();
-        updateChatAuthState(user);
-      }
-    })
-    .catch((error) => {
-      setAuthFeedback(
-        getAuthErrorMessage(error),
-        "error"
-      );
-    })
-    .finally(() => {
-      if (authSubmit) {
-        authSubmit.disabled = false;
-      }
-    });
+  setAuthFeedback("Creating account...", "loading");
+  authSubmit.disabled = true;
+
+  try {
+    localStorage.setItem("chatUserName", name);
+    localStorage.setItem("chatUserGrade", grade);
+    
+    loginUser(name, grade);
+    
+    setAuthFeedback("Account created!", "success");
+  } catch (error) {
+    setAuthFeedback("Failed to create account.", "error");
+    authSubmit.disabled = false;
+  }
 }
 
-function updateChatAuthState(user) {
-  const canChat = Boolean(
-    user?.email && user.emailVerified
-  );
+function loginUser(name, grade) {
+  currentUserName = name;
+  currentUserGrade = grade;
+  currentUserGroup = getGradeGroup(grade);
+  
+  updateChatAuthState(name, grade);
+}
+
+function signOut() {
+  localStorage.removeItem("chatUserName");
+  localStorage.removeItem("chatUserGrade");
+  
+  currentUserName = null;
+  currentUserGrade = null;
+  currentUserGroup = null;
+  
+  updateChatAuthState(null, null);
+  showAuthForm();
+}
+
+function updateChatAuthState(name, grade) {
+  const canChat = Boolean(name && grade);
 
   window.chatAuthState = {
     canChat,
-    email: user?.email || ""
+    name: name || "",
+    grade: grade || ""
   };
 
   if (!CHAT_ENABLED) {
     return;
   }
 
-  if (!user) {
-    setGateContent({
-      title: "Sign in to chat",
-      copy: "Use a verified Firebase email so everyone knows who is talking.",
-      showChoices: true,
-      showVerify: false,
-      showRefresh: false,
-      showForm: false,
-      feedback: ""
-    });
-  } else if (!user.emailVerified) {
-    setGateContent({
-      title: "Verify your email",
-      copy: `${user.email} is signed in, but chat stays locked until the email is verified.`,
-      showChoices: false,
-      showVerify: true,
-      showRefresh: true,
-      showForm: false,
-      feedback: "Click the verification link in your email, then press the unlock button."
-    });
+  if (!canChat) {
+    if (chatAuthGate) {
+      chatAuthGate.classList.remove("hidden");
+    }
+    if (authForm) {
+      authForm.hidden = false;
+    }
   } else {
-    setGateContent({
-      title: "Chat unlocked",
-      copy: `Chatting as ${user.email}`,
-      showChoices: false,
-      showVerify: false,
-      showRefresh: false,
-      showForm: false,
-      feedback: ""
-    });
+    if (chatAuthGate) {
+      chatAuthGate.classList.add("hidden");
+    }
+    if (authForm) {
+      authForm.hidden = true;
+    }
   }
-
-  chatAuthGate?.classList.toggle(
-    "hidden",
-    canChat
-  );
 
   if (chatUserStatus) {
-    chatUserStatus.hidden = !user;
+    chatUserStatus.hidden = !canChat;
   }
 
-  if (chatUserEmail) {
-    chatUserEmail.textContent = user?.email
-      ? user.emailVerified
-        ? user.email
-        : `${user.email} (unverified)`
-      : "";
+  if (chatUserName && canChat) {
+    const gradeLabel = Object.values(GRADE_GROUPS).find(g => g.grades.includes(grade))?.label;
+    chatUserName.textContent = `${name} (Grade ${grade})`;
+  }
+
+  if (chatGradeBadge && canChat) {
+    const gradeLabel = Object.values(GRADE_GROUPS).find(g => g.grades.includes(grade))?.label;
+    chatGradeBadge.textContent = `${gradeLabel}`;
   }
 
   if (authSignOut) {
-    authSignOut.hidden = !user;
+    authSignOut.hidden = !canChat;
   }
 
   if (chatInput) {
     chatInput.disabled = !canChat;
     chatInput.placeholder = canChat
       ? "Message everyone... "
-      : "Sign in with a verified email to chat";
+      : "Create an account to chat";
   }
 
   if (chatSend) {
@@ -909,40 +650,10 @@ function updateChatAuthState(user) {
   if (chatForm) {
     chatForm.hidden = !canChat;
   }
-}
 
-function setGateContent({
-  title,
-  copy,
-  showChoices,
-  showVerify,
-  showRefresh,
-  showForm,
-  feedback
-}) {
-  if (authGateTitle) authGateTitle.textContent = title;
-  if (authGateCopy) authGateCopy.textContent = copy;
-  if (authGateActions) {
-    authGateActions.hidden = !showChoices;
+  if (canChat) {
+    watchChatMessages();
   }
-  if (authVerify) {
-    authVerify.hidden = !showVerify;
-  }
-  if (authRefresh) {
-    authRefresh.hidden = !showRefresh;
-  }
-  if (authForm) {
-    authForm.hidden = !showForm;
-  }
-  setGateFeedback(feedback || "");
-}
-
-function setGateFeedback(message, state = "") {
-  if (!authGateFeedback) return;
-
-  authGateFeedback.textContent = message;
-  authGateFeedback.className =
-    `auth-gate-feedback ${state}`.trim();
 }
 
 function setAuthFeedback(message, state = "") {
@@ -951,26 +662,6 @@ function setAuthFeedback(message, state = "") {
   authFeedback.textContent = message;
   authFeedback.className =
     `auth-feedback ${state}`.trim();
-}
-
-function getAuthErrorMessage(error) {
-  switch (error?.code) {
-    case "auth/email-already-in-use":
-      return "That email already has an account. Try signing in.";
-    case "auth/invalid-email":
-      return "Enter a valid email address.";
-    case "auth/invalid-credential":
-    case "auth/wrong-password":
-    case "auth/user-not-found":
-      return "The email or password was not accepted.";
-    case "auth/weak-password":
-      return "Use a password with at least 6 characters.";
-    case "auth/too-many-requests":
-      return "Too many attempts. Wait a bit and try again.";
-    default:
-      return error?.message ||
-        "Firebase authentication failed.";
-  }
 }
 
 function setupChat() {
@@ -989,8 +680,6 @@ function setupChat() {
       sendChatMessage();
     }
   );
-
-  watchChatMessages();
 }
 
 function watchChatMessages() {
@@ -998,12 +687,13 @@ function watchChatMessages() {
 
   if (unsubscribeChat) return;
 
-  // Reset so cleanup always fires on first load
+  if (!currentUserGroup) return;
+
   lastChatCleanupAt = 0;
   cleanupOldChatMessages();
 
   const messagesRef = query(
-    ref(database, "siteChat/messages"),
+    ref(database, `siteChat/${currentUserGroup}/messages`),
     limitToLast(CHAT_MESSAGE_LIMIT)
   );
 
@@ -1045,6 +735,10 @@ function renderMessage(key, message) {
   item.className =
     "chat-message";
 
+  if (message.name === currentUserName) {
+    item.classList.add("own");
+  }
+
   const meta =
     document.createElement("div");
 
@@ -1057,7 +751,7 @@ function renderMessage(key, message) {
     "message-name";
 
   name.textContent =
-    cleanEmail(message.email || message.name) ||
+    cleanName(message.name) ||
     "Guest";
 
   const time =
@@ -1093,15 +787,16 @@ function sendChatMessage() {
   if (!rawText) return;
 
   if (
-    !currentUser?.email ||
-    !currentUser.emailVerified
+    !currentUserName ||
+    !currentUserGrade ||
+    !currentUserGroup
   ) {
-    updateChatAuthState(currentUser);
+    updateChatAuthState(null, null);
     return;
   }
 
-  const email =
-    cleanEmail(currentUser.email);
+  const name =
+    cleanName(currentUserName);
 
   const text =
     applyCensor(rawText);
@@ -1109,17 +804,16 @@ function sendChatMessage() {
   chatInput.value = "";
 
   push(
-    ref(database, "siteChat/messages"),
+    ref(database, `siteChat/${currentUserGroup}/messages`),
     {
-      email,
+      name,
       text,
-      uid: currentUser.uid,
+      grade: currentUserGrade,
       sid: SESSION_ID,
       createdAt: Date.now()
     }
   )
     .then(() => {
-      // Allow cleanup to run again 60s after each send
       lastChatCleanupAt = Date.now() - CHAT_CLEANUP_INTERVAL_MS + 60_000;
       cleanupOldChatMessages();
     })
@@ -1132,15 +826,16 @@ function sendChatMessage() {
 }
 
 async function cleanupOldChatMessages() {
+  if (!currentUserGroup) return;
+
   const now = Date.now();
 
   if (now - lastChatCleanupAt < CHAT_CLEANUP_INTERVAL_MS) return;
 
   lastChatCleanupAt = now;
 
-  const messagesRoot = ref(database, "siteChat/messages");
+  const messagesRoot = ref(database, `siteChat/${currentUserGroup}/messages`);
 
-  // Step 1: delete messages older than 6 hours
   const cutoff = now - CHAT_MESSAGE_TTL_MS;
 
   const oldQ = query(
@@ -1161,7 +856,6 @@ async function cleanupOldChatMessages() {
     await Promise.all(removals);
   }
 
-  // Step 2: delete everything beyond the newest CHAT_MESSAGE_LIMIT records
   const allSnap = await get(messagesRoot).catch(() => null);
 
   if (!allSnap?.exists()) return;
@@ -1170,7 +864,6 @@ async function cleanupOldChatMessages() {
 
   allSnap.forEach((s) => keys.push(s.key));
 
-  // Firebase returns push keys in insertion order (oldest first)
   const toDelete = keys.slice(
     0,
     Math.max(0, keys.length - CHAT_MESSAGE_LIMIT)
@@ -1178,7 +871,7 @@ async function cleanupOldChatMessages() {
 
   await Promise.all(
     toDelete.map((k) =>
-      remove(ref(database, `siteChat/messages/${k}`)).catch(console.error)
+      remove(ref(database, `siteChat/${currentUserGroup}/messages/${k}`)).catch(console.error)
     )
   );
 }
@@ -1221,11 +914,11 @@ function cleanMessageText(value) {
     .slice(0, MAX_MESSAGE_LENGTH);
 }
 
-function cleanEmail(value) {
+function cleanName(value) {
   return String(value || "")
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 80);
+    .slice(0, 30);
 }
 
 function escapeRegExp(value) {
