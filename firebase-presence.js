@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { initializeApp } from "https://gstatic.com";
 
 import {
   getDatabase,
@@ -15,13 +15,13 @@ import {
   set,
   update,
   remove
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+} from "https://gstatic.com";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAk9fMAWy6AS4o2s5n5zSJj0M0GlJoyIWE",
-  authDomain: "new-tab-2-d6042.firebaseapp.com",
+  authDomain: "://firebaseapp.com",
   databaseURL:
-    "https://new-tab-2-d6042-default-rtdb.firebaseio.com",
+    "https://firebaseio.com",
   projectId: "new-tab-2-d6042",
   storageBucket:
     "new-tab-2-d6042.firebasestorage.app",
@@ -54,30 +54,6 @@ const PRESENCE_CLEANUP_INTERVAL_MS =
 
 const CHAT_ENABLED =
   window.CHAT_ENABLED !== false;
-
-const CENSOR_WORDS = [
-  "nigger",
-  "nigga",
-  "faggot",
-  "fag",
-  "chink",
-  "retard",
-  "niggers",
-  "niggas",
-  "faggots",
-  "fags",
-  "chinks",
-  "retards",
-  "testcensor"
-];
-
-const CENSOR_REPLACEMENTS = [
-  "I hope you have a great day! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾",
-  "I wish your family the best! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾",
-  "You're a kind and loving person! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾",
-  "I hope all your pets go unharmed. ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾",
-  "Download the Dairy Queen app and use code Clinga2210! ⁽ᶜᵉⁿˢᵒʳᵉᵈ⁾"
-];
 
 const app = initializeApp(firebaseConfig);
 
