@@ -288,6 +288,28 @@ nav {
   pointer-events: none;
 }
 
+.chat-button {
+  padding: 8px 16px;
+  border: 1px solid rgba(56, 189, 248, 0.6);
+  border-radius: var(--radius);
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-button:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.8);
+  color: #fff;
+}
+
 #viewer {
   position: fixed;
   top: var(--nav-height);
@@ -296,36 +318,6 @@ nav {
   height: calc(100% - var(--nav-height));
   border: none;
   background: #000;
-}
-
-.chat-toggle {
-  position: fixed;
-  top: 50%;
-  right: 0;
-  width: 52px;
-  height: 86px;
-  border: 1px solid rgba(56, 189, 248, 0.65);
-  border-right: none;
-  border-radius: 16px 0 0 16px;
-  background: linear-gradient(135deg, #38bdf8, #22c55e);
-  color: #031018;
-  font-size: 34px;
-  font-weight: 900;
-  cursor: pointer;
-  transform: translateY(-50%);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 28px rgba(56, 189, 248, 0.36);
-  z-index: 1800;
-  pointer-events: auto;
-  transition: right 0.28s ease, transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.chat-toggle:hover {
-  transform: translateY(-50%) scale(1.04);
-  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.5), 0 0 34px rgba(34, 197, 94, 0.42);
-}
-
-.chat-toggle.open {
-  right: min(33vw, 460px);
 }
 
 .site-chat {
@@ -367,6 +359,29 @@ nav {
   font-size: 18px;
   font-weight: 850;
   letter-spacing: 0;
+}
+
+.chat-close-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chat-close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .active-users {
@@ -524,10 +539,6 @@ nav {
     width: min(92vw, 420px);
     min-width: 0;
   }
-
-  .chat-toggle.open {
-    right: min(92vw, 420px);
-  }
 }
 </style>
 </head>
@@ -556,17 +567,21 @@ nav {
       <div class="dropdown-trigger" onclick="toggleDropdown()">More Games ▾</div>
       <div class="dropdown-menu" id="tabsMore"></div>
     </div>
+    <button id="chatToggle" class="chat-button" type="button" aria-label="Open chat" title="Open chat">
+      <span>💬 Chat</span>
+    </button>
   </div>
 </nav>
 
 <iframe id="viewer"></iframe>
 
-<button id="chatToggle" class="chat-toggle" type="button" aria-label="Open chat" title="Open chat">‹</button>
-
 <aside id="siteChat" class="site-chat" aria-label="Site chat">
   <header class="chat-header">
     <div class="chat-title-row">
       <div class="chat-title">Live Chat</div>
+      <button id="chatCloseBtn" class="chat-close-btn" type="button" aria-label="Close chat" title="Close chat">✕</button>
+    </div>
+    <div class="chat-title-row">
       <div id="chatActiveUsers" class="active-users">0 active</div>
     </div>
     <div class="name-row">
@@ -598,6 +613,7 @@ const moreDropdown = document.getElementById("moreDropdown");
 const statusText = document.getElementById("status");
 const iframe = document.getElementById("viewer");
 const chatToggle = document.getElementById("chatToggle");
+const chatCloseBtn = document.getElementById("chatCloseBtn");
 const siteChat = document.getElementById("siteChat");
 const chatInput = document.getElementById("chatInput");
 const chatForm = document.getElementById("chatForm");
@@ -703,8 +719,6 @@ function toggleDropdown() {
 
 function setChatOpen(isOpen) {
   siteChat.classList.toggle("open", isOpen);
-  chatToggle.classList.toggle("open", isOpen);
-  chatToggle.textContent = isOpen ? "›" : "‹";
   chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
   chatToggle.title = isOpen ? "Close chat" : "Open chat";
 
@@ -713,6 +727,8 @@ function setChatOpen(isOpen) {
   }));
 
   if (isOpen) {
+    updateChatPanelState();
+    updateActiveUsersFromBadges();
     chatInput.focus();
   }
 }
@@ -721,29 +737,10 @@ chatToggle.addEventListener("click", () => {
   setChatOpen(!siteChat.classList.contains("open"));
 });
 
-setChatOpen = function(isOpen) {
-  siteChat.classList.toggle("open", isOpen);
-  chatToggle.classList.toggle("open", isOpen);
-  chatToggle.textContent = isOpen ? ">" : "<";
-  chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
-  chatToggle.title = isOpen ? "Close chat" : "Open chat";
+chatCloseBtn.addEventListener("click", () => {
+  setChatOpen(false);
+});
 
-  if (isOpen) {
-    updateChatPanelState();
-    updateActiveUsersFromBadges();
-  }
-
-  document.dispatchEvent(new CustomEvent("siteChatToggled", {
-    detail: { open: isOpen }
-  }));
-
-  if (isOpen && CHAT_ENABLED) {
-    chatInput.focus();
-  }
-};
-
-chatToggle.textContent = "<";
-chatSend.textContent = ">";
 chatName.value = localStorage.getItem(CHAT_NAME_KEY) || "";
 
 chatName.addEventListener("input", () => {
