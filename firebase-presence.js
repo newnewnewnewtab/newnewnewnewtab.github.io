@@ -20,14 +20,11 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyAk9fMAWy6AS4o2s5n5zSJj0M0GlJoyIWE",
   authDomain: "://firebaseapp.com",
-  databaseURL:
-    "https://firebaseio.com",
+  databaseURL: "https://firebaseio.com",
   projectId: "new-tab-2-d6042",
-  storageBucket:
-    "new-tab-2-d6042.firebasestorage.app",
+  storageBucket: "new-tab-2-d6042.firebasestorage.app",
   messagingSenderId: "347559506222",
-  appId:
-    "1:347559506222:web:e854997d9048686b988abf"
+  appId: "1:347559506222:web:e854997d9048686b988abf"
 };
 
 const SESSION_ID_KEY =
