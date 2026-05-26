@@ -289,25 +289,78 @@ nav {
 }
 
 .chat-button {
-  padding: 8px 16px;
-  border: 1px solid rgba(56, 189, 248, 0.6);
-  border-radius: var(--radius);
-  background: rgba(56, 189, 248, 0.1);
-  color: var(--accent);
-  font-weight: 600;
+  position: relative;
+  margin-left: auto;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(125, 211, 252, 0.48);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(14, 116, 144, 0.45), rgba(15, 23, 42, 0.86));
+  color: #e0f2fe;
+  font-weight: 800;
   cursor: pointer;
   font-size: 13px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 26px rgba(8, 47, 73, 0.28);
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
   white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
 }
 
 .chat-button:hover {
-  background: rgba(56, 189, 248, 0.2);
-  border-color: rgba(56, 189, 248, 0.8);
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.62), rgba(15, 23, 42, 0.92));
+  border-color: rgba(125, 211, 252, 0.82);
   color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 14px 32px rgba(8, 47, 73, 0.34);
+}
+
+.chat-button.open {
+  background: var(--accent);
+  color: #031018;
+  border-color: transparent;
+}
+
+.chat-button-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.chat-button.open .chat-button-icon {
+  background: rgba(3, 16, 24, 0.1);
+}
+
+.chat-unread-dot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #22c55e;
+  border: 2px solid rgba(15, 23, 42, 0.98);
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  opacity: 0;
+  transform: scale(0.72);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.chat-button.has-unread .chat-unread-dot {
+  opacity: 1;
+  transform: scale(1);
+  animation: unreadPulse 1.8s ease-out infinite;
+}
+
+@keyframes unreadPulse {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.34); }
+  100% { box-shadow: 0 0 0 9px rgba(34, 197, 94, 0); }
 }
 
 #viewer {
@@ -333,7 +386,7 @@ nav {
   display: grid;
   grid-template-rows: auto 1fr auto;
   transform: translateX(100%);
-  transition: transform 0.28s ease;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 1700;
 }
 
@@ -395,21 +448,58 @@ nav {
   white-space: nowrap;
 }
 
-.name-row {
+.chat-profile {
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 10px;
+  gap: 8px;
+  margin-top: 2px;
 }
 
-.name-row label {
+.identity-summary {
+  display: none;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.34);
+}
+
+.identity-summary.locked {
+  display: grid;
+}
+
+.identity-main {
+  min-width: 0;
+}
+
+.identity-label {
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 10px;
+  font-weight: 900;
   text-transform: uppercase;
 }
 
-.chat-name,
+.identity-name {
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 850;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identity-room {
+  border: 1px solid rgba(56, 189, 248, 0.38);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: #bae6fd;
+  background: rgba(8, 47, 73, 0.42);
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 .chat-input {
   width: 100%;
   min-width: 0;
@@ -421,12 +511,6 @@ nav {
   font: inherit;
 }
 
-.chat-name {
-  height: 38px;
-  padding: 0 12px;
-}
-
-.chat-name:focus,
 .chat-input:focus {
   border-color: rgba(56, 189, 248, 0.72);
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
@@ -467,6 +551,7 @@ nav {
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 12px;
   background: rgba(30, 41, 59, 0.68);
+  animation: messageIn 0.2s ease-out;
 }
 
 .chat-message.own {
@@ -483,6 +568,13 @@ nav {
   font-weight: 700;
 }
 
+.message-author {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 6px;
+}
+
 .message-name {
   color: #e0f2fe;
   overflow: hidden;
@@ -494,6 +586,211 @@ nav {
   color: #f8fafc;
   overflow-wrap: anywhere;
   line-height: 1.35;
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-setup {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 6, 23, 0.68);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.chat-setup.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.chat-setup-panel {
+  width: min(100%, 340px);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 16px;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+  animation: setupIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chat-setup-title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.chat-setup-copy {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.chat-setup-label {
+  display: block;
+  margin: 14px 0 7px;
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.chat-setup-input {
+  width: 100%;
+  height: 42px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.68);
+  color: var(--text);
+  outline: none;
+  padding: 0 12px;
+  font: inherit;
+}
+
+.chat-setup-input:focus {
+  border-color: rgba(56, 189, 248, 0.72);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+}
+
+.school-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.school-option {
+  height: 40px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.44);
+  color: #cbd5e1;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+
+.school-option:hover,
+.school-option.selected {
+  transform: translateY(-1px);
+  border-color: rgba(56, 189, 248, 0.76);
+  background: rgba(8, 145, 178, 0.32);
+  color: #f8fafc;
+}
+
+.chat-setup-submit {
+  width: 100%;
+  height: 42px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #031018;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+.chat-setup-submit:hover {
+  transform: translateY(-1px);
+  background: #67e8f9;
+}
+
+.chat-setup-error {
+  min-height: 18px;
+  margin-top: 8px;
+  color: #fecaca;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@keyframes setupIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-toast-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1900;
+  display: grid;
+  gap: 10px;
+  width: min(330px, calc(100vw - 36px));
+  pointer-events: none;
+}
+
+.chat-toast {
+  border: 1px solid rgba(125, 211, 252, 0.34);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(15, 23, 42, 0.96);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(14px);
+  animation: toastIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chat-toast.hide {
+  animation: toastOut 0.2s ease forwards;
+}
+
+.toast-name {
+  color: #e0f2fe;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.toast-text {
+  margin-top: 3px;
+  color: #f8fafc;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translate(16px, 8px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translate(12px, 6px) scale(0.98);
+  }
 }
 
 .chat-form {
@@ -539,6 +836,18 @@ nav {
     width: min(92vw, 420px);
     min-width: 0;
   }
+
+  .chat-button {
+    padding: 0 12px;
+  }
+
+  .chat-button-text {
+    display: none;
+  }
+
+  .school-options {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
@@ -568,7 +877,9 @@ nav {
       <div class="dropdown-menu" id="tabsMore"></div>
     </div>
     <button id="chatToggle" class="chat-button" type="button" aria-label="Open chat" title="Open chat">
-      <span>💬 Chat</span>
+      <span class="chat-button-icon" aria-hidden="true">C</span>
+      <span class="chat-button-text">Chat</span>
+      <span class="chat-unread-dot" aria-hidden="true"></span>
     </button>
   </div>
 </nav>
@@ -584,9 +895,14 @@ nav {
     <div class="chat-title-row">
       <div id="chatActiveUsers" class="active-users">0 active</div>
     </div>
-    <div class="name-row">
-      <label for="chatName">Name</label>
-      <input id="chatName" class="chat-name" maxlength="24" autocomplete="nickname" placeholder="Enter name" />
+    <div class="chat-profile">
+      <div id="chatIdentitySummary" class="identity-summary">
+        <div class="identity-main">
+          <div class="identity-label">Locked in as</div>
+          <div id="chatLockedName" class="identity-name">Guest</div>
+        </div>
+      </div>
+      <div id="chatLockedRoom" class="identity-room">Chat room</div>
     </div>
   </header>
 
@@ -598,11 +914,33 @@ nav {
     <input id="chatInput" class="chat-input" maxlength="240" autocomplete="off" placeholder="Message everyone... " />
     <button id="chatSend" class="chat-send" type="submit" aria-label="Send message" title="Send">›</button>
   </form>
+
+  <div id="chatSetup" class="chat-setup" aria-hidden="true">
+    <form id="chatSetupForm" class="chat-setup-panel">
+      <h2 class="chat-setup-title">Set up chat</h2>
+      <p class="chat-setup-copy">Choose carefully. Your name and school are locked after this and cannot be changed on this device.</p>
+
+      <label class="chat-setup-label" for="chatSetupName">Your name</label>
+      <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Enter your name" />
+
+      <div class="chat-setup-label">Your school</div>
+      <div class="school-options" role="group" aria-label="School level">
+        <button class="school-option" type="button" data-school="High School">High</button>
+        <button class="school-option" type="button" data-school="Middle School">Middle</button>
+        <button class="school-option" type="button" data-school="Elementary School">Elementary</button>
+      </div>
+
+      <button class="chat-setup-submit" type="submit">Lock and start chatting</button>
+      <div id="chatSetupError" class="chat-setup-error" aria-live="polite"></div>
+    </form>
+  </div>
 </aside>
+
+<div id="chatToastStack" class="chat-toast-stack" aria-live="polite"></div>
 
 <script src="games.js"></script>
 <script>
-window.CHAT_ENABLED = false; // master chat switch
+window.CHAT_ENABLED = true; // master chat switch
 </script>
 <script type="module" src="firebase-presence.js"></script>
 
@@ -617,15 +955,23 @@ const chatCloseBtn = document.getElementById("chatCloseBtn");
 const siteChat = document.getElementById("siteChat");
 const chatInput = document.getElementById("chatInput");
 const chatForm = document.getElementById("chatForm");
-const chatName = document.getElementById("chatName");
 const chatMessages = document.getElementById("chatMessages");
 const chatSend = document.getElementById("chatSend");
 const chatActiveUsers = document.getElementById("chatActiveUsers");
+const chatSetup = document.getElementById("chatSetup");
+const chatSetupForm = document.getElementById("chatSetupForm");
+const chatSetupName = document.getElementById("chatSetupName");
+const chatSetupError = document.getElementById("chatSetupError");
+const chatIdentitySummary = document.getElementById("chatIdentitySummary");
+const chatLockedName = document.getElementById("chatLockedName");
+const chatLockedRoom = document.getElementById("chatLockedRoom");
 
 const MAX_VISIBLE = 8;
 const CHAT_NAME_KEY = "site_chat_name";
+const CHAT_SCHOOL_KEY = "site_chat_school";
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
 let latestFirebaseActiveUsers = null;
+let selectedSchool = "";
 
 function getGameData(data) {
   if (typeof data === "string") {
@@ -719,6 +1065,7 @@ function toggleDropdown() {
 
 function setChatOpen(isOpen) {
   siteChat.classList.toggle("open", isOpen);
+  chatToggle.classList.toggle("open", isOpen);
   chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
   chatToggle.title = isOpen ? "Close chat" : "Open chat";
 
@@ -727,9 +1074,14 @@ function setChatOpen(isOpen) {
   }));
 
   if (isOpen) {
+    chatToggle.classList.remove("has-unread");
     updateChatPanelState();
     updateActiveUsersFromBadges();
-    chatInput.focus();
+    if (hasChatIdentity()) {
+      chatInput.focus();
+    } else {
+      showChatSetup();
+    }
   }
 }
 
@@ -741,12 +1093,6 @@ chatCloseBtn.addEventListener("click", () => {
   setChatOpen(false);
 });
 
-chatName.value = localStorage.getItem(CHAT_NAME_KEY) || "";
-
-chatName.addEventListener("input", () => {
-  localStorage.setItem(CHAT_NAME_KEY, chatName.value.trim().slice(0, 24));
-});
-
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
@@ -755,7 +1101,25 @@ chatForm.addEventListener("submit", (event) => {
     return;
   }
 
+  if (!hasChatIdentity()) {
+    showChatSetup();
+    return;
+  }
+
   document.dispatchEvent(new CustomEvent("siteChatSubmit"));
+});
+
+document.addEventListener("siteChatNotify", (event) => {
+  if (!siteChat.classList.contains("open")) {
+    chatToggle.classList.add("has-unread");
+  }
+
+  showChatToast(event.detail?.name, event.detail?.text, event.detail?.room);
+});
+
+document.addEventListener("siteChatNeedsIdentity", () => {
+  setChatOpen(true);
+  showChatSetup();
 });
 
 document.addEventListener("siteActiveUsersChanged", (event) => {
@@ -764,8 +1128,10 @@ document.addEventListener("siteActiveUsersChanged", (event) => {
 });
 
 function updateChatPanelState() {
-  chatInput.disabled = !CHAT_ENABLED;
-  chatSend.disabled = !CHAT_ENABLED;
+  const canChat = CHAT_ENABLED && hasChatIdentity();
+
+  chatInput.disabled = !canChat;
+  chatSend.disabled = !canChat;
 
   if (!CHAT_ENABLED) {
     chatInput.placeholder = "Chat Disabled";
@@ -773,9 +1139,115 @@ function updateChatPanelState() {
     return;
   }
 
+  if (!hasChatIdentity()) {
+    chatInput.placeholder = "Set your name first";
+    return;
+  }
+
+  chatInput.placeholder = "Message everyone...";
+
   if (!chatMessages.querySelector(".chat-message")) {
     chatMessages.innerHTML = '<div class="chat-empty">Loading messages...</div>';
   }
+}
+
+function cleanChatName(value) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 24);
+}
+
+function hasChatIdentity() {
+  return Boolean(
+    cleanChatName(localStorage.getItem(CHAT_NAME_KEY)) &&
+    localStorage.getItem(CHAT_SCHOOL_KEY)
+  );
+}
+
+function syncChatIdentity() {
+  const name = cleanChatName(localStorage.getItem(CHAT_NAME_KEY));
+  const school = localStorage.getItem(CHAT_SCHOOL_KEY) || "";
+
+  chatLockedName.textContent = name || "Not set";
+  chatLockedRoom.textContent = school ? `${school} chat` : "Chat room";
+  chatIdentitySummary.classList.toggle("locked", Boolean(name && school));
+  chatSetup.classList.toggle("show", !name || !school);
+  chatSetup.setAttribute("aria-hidden", name && school ? "true" : "false");
+  updateChatPanelState();
+
+  document.dispatchEvent(new CustomEvent("siteChatIdentityChanged", {
+    detail: { name, school }
+  }));
+}
+
+function showChatSetup() {
+  chatSetup.classList.add("show");
+  chatSetup.setAttribute("aria-hidden", "false");
+  chatSetupName.value = cleanChatName(localStorage.getItem(CHAT_NAME_KEY));
+  chatSetupError.textContent = "";
+  requestAnimationFrame(() => chatSetupName.focus());
+}
+
+document.querySelectorAll(".school-option").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedSchool = button.dataset.school;
+    document.querySelectorAll(".school-option").forEach((option) => {
+      option.classList.toggle("selected", option === button);
+      option.setAttribute("aria-pressed", option === button ? "true" : "false");
+    });
+  });
+});
+
+chatSetupForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const name = cleanChatName(chatSetupName.value);
+
+  if (!name) {
+    chatSetupError.textContent = "Enter a name first.";
+    return;
+  }
+
+  if (!selectedSchool) {
+    chatSetupError.textContent = "Pick your school level.";
+    return;
+  }
+
+  localStorage.setItem(CHAT_NAME_KEY, name);
+  localStorage.setItem(CHAT_SCHOOL_KEY, selectedSchool);
+  chatSetup.classList.remove("show");
+  chatSetup.setAttribute("aria-hidden", "true");
+  syncChatIdentity();
+  chatInput.focus();
+});
+
+function showChatToast(name, text, room) {
+  const stack = document.getElementById("chatToastStack");
+  if (!stack || siteChat.classList.contains("open")) return;
+
+  const toast = document.createElement("div");
+  toast.className = "chat-toast";
+
+  const toastName = document.createElement("div");
+  toastName.className = "toast-name";
+  toastName.textContent = `${cleanChatName(name) || "Someone"} - ${room || "Chat"}`;
+
+  const toastText = document.createElement("div");
+  toastText.className = "toast-text";
+  toastText.textContent = String(text || "").slice(0, 120);
+
+  toast.append(toastName, toastText);
+  stack.appendChild(toast);
+
+  while (stack.children.length > 3) {
+    stack.firstElementChild.remove();
+  }
+
+  setTimeout(() => {
+    toast.classList.add("hide");
+    setTimeout(() => toast.remove(), 220);
+  }, 4200);
 }
 
 function updateActiveUsersFromBadges() {
@@ -847,6 +1319,7 @@ yesBtn.onclick = () => {
 
 noBtn.onclick = dismiss;
 
+syncChatIdentity();
 build();
 </script>
 
