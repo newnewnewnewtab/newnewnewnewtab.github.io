@@ -898,11 +898,11 @@ nav {
     <div class="chat-profile">
       <div id="chatIdentitySummary" class="identity-summary">
         <div class="identity-main">
-          <div class="identity-label">Locked in as</div>
+          <div class="identity-label">Logged in as</div>
           <div id="chatLockedName" class="identity-name">Guest</div>
         </div>
       </div>
-      <div id="chatLockedRoom" class="identity-room">Chat room</div>
+      <div id="chatLockedRoom" class="identity-room">Chat</div>
     </div>
   </header>
 
@@ -918,10 +918,10 @@ nav {
   <div id="chatSetup" class="chat-setup" aria-hidden="true">
     <form id="chatSetupForm" class="chat-setup-panel">
       <h2 class="chat-setup-title">Set up chat</h2>
-      <p class="chat-setup-copy">Choose carefully. Your name and school are locked after this and cannot be changed on this device.</p>
+      <p class="chat-setup-copy">Name and school are locked after this and cannot be changed on this device.</p>
 
       <label class="chat-setup-label" for="chatSetupName">Your name</label>
-      <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Enter your name" />
+      <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Name" />
 
       <div class="chat-setup-label">Your school</div>
       <div class="school-options" role="group" aria-label="School level">
@@ -930,7 +930,7 @@ nav {
         <button class="school-option" type="button" data-school="Elementary School">Elementary</button>
       </div>
 
-      <button class="chat-setup-submit" type="submit">Lock and start chatting</button>
+      <button class="chat-setup-submit" type="submit">Start chatting</button>
       <div id="chatSetupError" class="chat-setup-error" aria-live="polite"></div>
     </form>
   </div>
@@ -1135,7 +1135,7 @@ function updateChatPanelState() {
 
   if (!CHAT_ENABLED) {
     chatInput.placeholder = "Chat Disabled";
-    chatMessages.innerHTML = '<div class="chat-disabled-notice">Chat Coming May 26th</div>';
+    chatMessages.innerHTML = '<div class="chat-disabled-notice">Chat coming somepoint today</div>';
     return;
   }
 
@@ -1210,7 +1210,7 @@ chatSetupForm.addEventListener("submit", (event) => {
   }
 
   if (!selectedSchool) {
-    chatSetupError.textContent = "Pick your school level.";
+    chatSetupError.textContent = "Pick your school.";
     return;
   }
 
