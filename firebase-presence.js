@@ -581,6 +581,8 @@ function watchChatMessages() {
 
       chatMessages.scrollTop =
         chatMessages.scrollHeight;
+
+      cleanupOldChatMessages(roomId);
     }
   );
 }
