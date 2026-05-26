@@ -37,11 +37,13 @@ const SESSION_ID = getSessionId();
 
 const CHAT_NAME_KEY = "site_chat_name";
 
+const CHAT_SCHOOL_KEY = "site_chat_school";
+
 const CHAT_MESSAGE_LIMIT = 10;
 
 const MAX_MESSAGE_LENGTH = 180;
 
-const MAX_NAME_LENGTH = 12;
+const MAX_NAME_LENGTH = 24;
 
 const PRESENCE_HEARTBEAT_MS =
   30 * 1000;
@@ -73,6 +75,14 @@ let unsubscribeChat = null;
 
 let isOnline = false;
 
+let isChatOpen = false;
+
+let hasLoadedChat = false;
+
+let activeChatRoomId = null;
+
+const seenChatMessages = new Set();
+
 let presenceHeartbeatTimer = null;
 
 let lastPresenceCleanupAt = 0;
@@ -92,14 +102,19 @@ const chatMessages =
 const chatForm =
   document.getElementById("chatForm");
 
-const chatName =
-  document.getElementById("chatName");
-
 const chatInput =
   document.getElementById("chatInput");
 
 const chatSend =
   document.getElementById("chatSend");
+
+const CENSOR_WORDS =
+  window.CENSOR_WORDS || [];
+
+const CENSOR_REPLACEMENTS =
+  window.CENSOR_REPLACEMENTS || [
+    "Keep it friendly."
+  ];
 
 function getSessionId() {
   let id = sessionStorage.getItem(
@@ -418,36 +433,64 @@ function updateActiveUsers(
     `${totalPlayers} active user${
       totalPlayers === 1 ? "" : "s"
     } across games`;
+
+  document.dispatchEvent(
+    new CustomEvent(
+      "siteActiveUsersChanged",
+      {
+        detail: {
+          total: totalPlayers
+        }
+      }
+    )
+  );
 }
 
 function setupChat() {
   if (
     !chatForm ||
-    !chatInput ||
-    !chatName
+    !chatInput
   ) {
     return;
   }
 
-  chatName.value = cleanName(
-    localStorage.getItem(
-      CHAT_NAME_KEY
-    ) || ""
+  syncChatRoom();
+
+  document.addEventListener(
+    "siteChatIdentityChanged",
+    () => {
+      syncChatRoom();
+    }
   );
 
-  chatName.addEventListener(
-    "input",
+  document.addEventListener(
+    "siteChatToggled",
+    (event) => {
+      isChatOpen =
+        Boolean(event.detail?.open);
+
+      if (isChatOpen) {
+        chatToggle?.classList.remove(
+          "has-unread"
+        );
+      }
+    }
+  );
+
+  document.addEventListener(
+    "siteChatSubmit",
     () => {
-      localStorage.setItem(
-        CHAT_NAME_KEY,
-        cleanName(chatName.value)
-      );
+      sendChatMessage();
     }
   );
 
   chatForm.addEventListener(
     "submit",
     (event) => {
+      if (event.defaultPrevented) {
+        return;
+      }
+
       event.preventDefault();
 
       sendChatMessage();
@@ -460,12 +503,39 @@ function setupChat() {
 function watchChatMessages() {
   if (!CHAT_ENABLED) return;
 
+  const identity =
+    getChatIdentity();
+
+  const roomId =
+    chatRoomIdFromSchool(
+      identity.school
+    );
+
+  if (!roomId) return;
+
+  if (
+    unsubscribeChat &&
+    activeChatRoomId !== roomId
+  ) {
+    unsubscribeChat();
+    unsubscribeChat = null;
+  }
+
   if (unsubscribeChat) return;
 
-  cleanupOldChatMessages();
+  activeChatRoomId = roomId;
+  hasLoadedChat = false;
+  seenChatMessages.clear();
+  chatMessages.innerHTML =
+    '<div class="chat-empty">Loading room messages...</div>';
+
+  cleanupOldChatMessages(roomId);
 
   const messagesRef = query(
-    ref(database, "siteChat/messages"),
+    ref(
+      database,
+      `siteChat/rooms/${roomId}/messages`
+    ),
     orderByChild("createdAt"),
     limitToLast(CHAT_MESSAGE_LIMIT)
   );
@@ -479,19 +549,35 @@ function watchChatMessages() {
 
       if (!snapshot.exists()) {
         chatMessages.innerHTML =
-          '<div class="chat-empty">No messages yet.</div>';
+          '<div class="chat-empty">No messages in this room yet.</div>';
+
+        hasLoadedChat = true;
 
         return;
       }
 
       snapshot.forEach(
         (messageSnapshot) => {
+          const key =
+            messageSnapshot.key;
+
+          const message =
+            messageSnapshot.val();
+
           renderMessage(
-            messageSnapshot.key,
-            messageSnapshot.val()
+            key,
+            message
+          );
+
+          maybeNotifyChatMessage(
+            key,
+            message,
+            roomId
           );
         }
       );
+
+      hasLoadedChat = true;
 
       chatMessages.scrollTop =
         chatMessages.scrollHeight;
@@ -508,10 +594,20 @@ function renderMessage(key, message) {
   item.className =
     "chat-message";
 
+  if (message.sid === SESSION_ID) {
+    item.classList.add("own");
+  }
+
   const meta =
     document.createElement("div");
 
   meta.className = "message-meta";
+
+  const author =
+    document.createElement("span");
+
+  author.className =
+    "message-author";
 
   const name =
     document.createElement("span");
@@ -522,6 +618,8 @@ function renderMessage(key, message) {
   name.textContent =
     cleanName(message.name) ||
     "Guest";
+
+  author.append(name);
 
   const time =
     document.createElement("span");
@@ -542,7 +640,7 @@ function renderMessage(key, message) {
       message.text
     );
 
-  meta.append(name, time);
+  meta.append(author, time);
 
   item.append(meta, text);
 
@@ -555,12 +653,18 @@ function sendChatMessage() {
 
   if (!rawText) return;
 
-  const name =
-    cleanName(chatName.value) ||
-    `Guest-${SESSION_ID.slice(
-      0,
-      4
-    )}`;
+  const identity =
+    getChatIdentity();
+
+  if (!identity.name || !identity.school) {
+    document.dispatchEvent(
+      new CustomEvent(
+        "siteChatNeedsIdentity"
+      )
+    );
+
+    return;
+  }
 
   const text =
     applyCensor(rawText);
@@ -568,22 +672,38 @@ function sendChatMessage() {
   chatInput.value = "";
 
   push(
-    ref(database, "siteChat/messages"),
+    ref(
+      database,
+      `siteChat/rooms/${chatRoomIdFromSchool(
+        identity.school
+      )}/messages`
+    ),
     {
-      name,
+      name: identity.name,
       text,
       sid: SESSION_ID,
       createdAt: Date.now()
     }
   )
     .then(() => {
-      cleanupOldChatMessages();
+      cleanupOldChatMessages(
+        chatRoomIdFromSchool(
+          identity.school
+        )
+      );
     })
     .catch(console.error);
 }
 
-function cleanupOldChatMessages() {
-  get(ref(database, "siteChat/messages"))
+function cleanupOldChatMessages(roomId = activeChatRoomId) {
+  if (!roomId) return;
+
+  get(
+    ref(
+      database,
+      `siteChat/rooms/${roomId}/messages`
+    )
+  )
     .then((snapshot) => {
       if (!snapshot.exists()) return;
 
@@ -624,7 +744,7 @@ function cleanupOldChatMessages() {
           remove(
             ref(
               database,
-              `siteChat/messages/${msg.key}`
+              `siteChat/rooms/${roomId}/messages/${msg.key}`
             )
           )
         );
@@ -668,6 +788,127 @@ function applyCensor(text) {
       randomIndex
     ]
   );
+}
+
+function syncChatRoom() {
+  const identity =
+    getChatIdentity();
+
+  const nextRoomId =
+    chatRoomIdFromSchool(
+      identity.school
+    );
+
+  if (!nextRoomId) return;
+
+  if (activeChatRoomId !== nextRoomId) {
+    if (unsubscribeChat) {
+      unsubscribeChat();
+      unsubscribeChat = null;
+    }
+
+    activeChatRoomId = null;
+    watchChatMessages();
+  }
+}
+
+function getChatIdentity() {
+  return {
+    name: cleanName(
+      localStorage.getItem(
+        CHAT_NAME_KEY
+      ) || ""
+    ),
+    school: cleanSchool(
+      localStorage.getItem(
+        CHAT_SCHOOL_KEY
+      ) || ""
+    )
+  };
+}
+
+function cleanSchool(value) {
+  const school =
+    String(value || "").trim();
+
+  const allowed = [
+    "High School",
+    "Middle School",
+    "Elementary School"
+  ];
+
+  return allowed.includes(school)
+    ? school
+    : "";
+}
+
+function chatRoomIdFromSchool(value) {
+  const school =
+    cleanSchool(value);
+
+  if (school === "High School") {
+    return "high";
+  }
+
+  if (school === "Middle School") {
+    return "middle";
+  }
+
+  if (school === "Elementary School") {
+    return "elementary";
+  }
+
+  return "";
+}
+
+function maybeNotifyChatMessage(
+  key,
+  message,
+  roomId
+) {
+  if (!key || seenChatMessages.has(key)) {
+    return;
+  }
+
+  seenChatMessages.add(key);
+
+  if (
+    !hasLoadedChat ||
+    isChatOpen ||
+    message.sid === SESSION_ID
+  ) {
+    return;
+  }
+
+  document.dispatchEvent(
+    new CustomEvent("siteChatNotify", {
+      detail: {
+        name:
+          cleanName(message.name) ||
+          "Guest",
+        text: cleanMessageText(
+          message.text
+        ),
+        room: roomLabelFromId(roomId)
+      }
+    })
+  );
+}
+
+function roomLabelFromId(roomId) {
+  if (roomId === "high") {
+    return "High School";
+  }
+
+  if (roomId === "middle") {
+    return "Middle School";
+  }
+
+  if (roomId === "elementary") {
+    return "Elementary School";
+  }
+
+  return "Chat";
 }
 
 function cleanMessageText(value) {
