@@ -44,6 +44,12 @@ window.PAGES = {
     "url": "https://newnewnewtab.github.io/RL3D/" 
   },
 
+  "BTD5": { 
+    "url": "https://script.google.com/macros/s/AKfycbzSjvvBl4oIbQbsdQ6wORkEPqBumZKhlNUW3FirGHuAIe6EPZ_QGuF4N0TqjL0ECFoo/exec",
+    "ribbon": "Testing",
+    "ribbonColor": "#FF69B4"
+  },
+  
   "Slots": { 
     "url": "https://newnewnewtab.github.io/Slot-Machine/"
   },
