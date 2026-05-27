@@ -5,7 +5,7 @@ window.PAGES = {
   },
 
   "Polytrack": { 
-    "url": "https://t3m1n4l.github.io/polytrack/"
+    "url": "https://newnewnewtab.github.io/Polytrack/"
   },
   
   "Snow Rider": { 
