@@ -16,7 +16,7 @@ window.PAGES = {
     "url": "https://vexacloud-assets.github.io/basket-bros/"
   },
 
-   "Slither.io": { 
+   "Paper.io": { 
     "url": "https://script.google.com/macros/s/AKfycbwNxCzUuQVmLRWTwYK2D4yTqpWg2O-qge8BwCkxhLmqWd1DtXynwJXPEDClPt7ERZr-/exec",
     "ribbon": "New",
     "ribbonColor": "#0096FF"
@@ -26,8 +26,20 @@ window.PAGES = {
     "url": "https://arcadeclash.github.io/subway-surfers-unblocked/" 
   },
 
-  "Among Us": { 
-    "url": "https://script.google.com/macros/s/AKfycbyix6sPjvsn_izDvhJLVuif1buj9ZtARvj9D_FEQ0rscRXgl-RgArs0t4oJw_OHm5Dr5A/exec",
+  "Slow Roads": { 
+    "url": "https://script.google.com/macros/s/AKfycbzqDA2SnuVZ3DRelxxbUxSV9Z1RJz_gQfDRx06WUpgppWgrdDEErtZ1Lev9O6j2w9ioBQ/exec",
+    "ribbon": "New",
+    "ribbonColor": "#0096FF"
+  },
+
+  "Fishing.io": { 
+    "url": "https://script.google.com/macros/s/AKfycbzZJhJIeHFv_-I9PXF5xA-MA115srBLxJu4hxtMP4z0hGHSBcMzBNydUT5UxfmhSNQq/exec",
+    "ribbon": "New",
+    "ribbonColor": "#0096FF"
+  },
+
+  "Drive Quest": { 
+    "url": "https://script.google.com/macros/s/AKfycbx8lr6YYxFR_2MxHgZ9HVHEUWz_SWY0LL_i2T6tsht71XJPLh_vISwNmmTgNPFZWiBk4g/exec",
     "ribbon": "New",
     "ribbonColor": "#0096FF"
   },
