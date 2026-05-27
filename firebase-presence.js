@@ -1,6 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 
 import {
+  getAuth,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+import {
   getDatabase,
   ref,
   get,
@@ -29,6 +37,12 @@ const firebaseConfig = {
     "1:347559506222:web:e854997d9048686b988abf"
 };
 
+const ADMIN_EMAILS = [
+  "sagaasg29@rsu71.org"
+];
+
+window.SITE_CHAT_ADMIN_EMAILS = ADMIN_EMAILS;
+
 const SESSION_ID_KEY =
   "game_hoster_session_id";
 
@@ -38,7 +52,7 @@ const CHAT_NAME_KEY = "site_chat_name";
 
 const CHAT_SCHOOL_KEY = "site_chat_school";
 
-const CHAT_MESSAGE_LIMIT = 10;
+const CHAT_MESSAGE_LIMIT = 25;
 
 const MAX_MESSAGE_LENGTH = 180;
 
@@ -59,6 +73,12 @@ const CHAT_ROOMS = {
   }
 };
 
+const ROOM_ORDER = [
+  CHAT_ROOMS["High School"],
+  CHAT_ROOMS["Middle School"],
+  CHAT_ROOMS["Elementary School"]
+];
+
 const PRESENCE_HEARTBEAT_MS =
   30 * 1000;
 
@@ -70,6 +90,8 @@ const PRESENCE_CLEANUP_INTERVAL_MS =
 
 const app = initializeApp(firebaseConfig);
 
+const auth = getAuth(app);
+
 const database = getDatabase(app);
 
 let activeGameId = null;
@@ -80,7 +102,9 @@ let activeDisconnectRef = null;
 
 let unsubscribeCounts = null;
 
-let unsubscribeChat = null;
+let chatUnsubscribes = [];
+
+let unsubscribeUserProfile = null;
 
 let isOnline = false;
 
@@ -89,6 +113,12 @@ let isChatOpen = false;
 let hasLoadedChat = false;
 
 let activeChatRoomId = null;
+
+let currentUser = null;
+
+let currentProfile = null;
+
+let currentIsAdmin = false;
 
 const seenChatMessages = new Set();
 
@@ -110,6 +140,9 @@ const chatForm =
 
 const chatInput =
   document.getElementById("chatInput");
+
+const adminRoomSelect =
+  document.getElementById("chatRoomSelect");
 
 function getSessionId() {
   let id = sessionStorage.getItem(
@@ -439,6 +472,284 @@ function updateActiveUsers(
   );
 }
 
+function setupAuth() {
+  document.addEventListener(
+    "siteChatAuthAction",
+    (event) => {
+      handleAuthAction(event.detail)
+        .catch((error) => {
+          console.warn(
+            "Firebase auth failed:",
+            error
+          );
+
+          dispatchAuthStatus(
+            friendlyAuthError(error),
+            true
+          );
+        });
+    }
+  );
+
+  onAuthStateChanged(
+    auth,
+    (user) => {
+      currentUser = user;
+      currentIsAdmin =
+        isAdminEmail(user?.email);
+      currentProfile = null;
+
+      stopUserProfileWatch();
+      clearChatSubscriptions();
+
+      if (!user) {
+        dispatchAuthChanged();
+        showChatStatus(
+          "Sign in or make an account to use chat."
+        );
+        return;
+      }
+
+      connectDatabase();
+      watchUserProfile(user);
+    }
+  );
+}
+
+async function handleAuthAction(detail = {}) {
+  const action = detail.action;
+
+  if (action === "signout") {
+    await signOut(auth);
+    dispatchAuthStatus("Signed out.", false);
+    return;
+  }
+
+  const email = cleanEmail(detail.email);
+  const password = String(
+    detail.password || ""
+  );
+  const name = cleanName(detail.name);
+  const school = cleanSchool(detail.school);
+
+  if (!email || !password) {
+    throw new Error(
+      "Enter your email and password."
+    );
+  }
+
+  if (!name || !school) {
+    throw new Error(
+      "Choose a name and school."
+    );
+  }
+
+  dispatchAuthStatus(
+    action === "signup"
+      ? "Creating account..."
+      : "Signing in...",
+    false
+  );
+
+  const credential =
+    action === "signup"
+      ? await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        )
+      : await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+  localStorage.setItem(
+    CHAT_NAME_KEY,
+    name
+  );
+  localStorage.setItem(
+    CHAT_SCHOOL_KEY,
+    school
+  );
+
+  await saveUserProfile(
+    credential.user,
+    name,
+    school
+  );
+
+  dispatchAuthStatus(
+    action === "signup"
+      ? "Account created."
+      : "Signed in.",
+    false
+  );
+}
+
+function watchUserProfile(user) {
+  const userRef = ref(
+    database,
+    `siteChat/users/${user.uid}`
+  );
+
+  unsubscribeUserProfile = onValue(
+    userRef,
+    async (snapshot) => {
+      if (!currentUser) return;
+
+      const value = snapshot.val();
+
+      if (!value) {
+        const name = cleanName(
+          localStorage.getItem(
+            CHAT_NAME_KEY
+          )
+        );
+        const school = cleanSchool(
+          localStorage.getItem(
+            CHAT_SCHOOL_KEY
+          )
+        );
+
+        if (name && school) {
+          await saveUserProfile(
+            user,
+            name,
+            school
+          );
+        }
+
+        currentProfile = null;
+        dispatchAuthChanged();
+        return;
+      }
+
+      currentProfile =
+        normalizeProfile(user, value);
+
+      currentIsAdmin =
+        isAdminEmail(user.email);
+
+      localStorage.setItem(
+        CHAT_NAME_KEY,
+        currentProfile.name
+      );
+      localStorage.setItem(
+        CHAT_SCHOOL_KEY,
+        currentProfile.school
+      );
+
+      dispatchAuthChanged();
+      watchChatMessages();
+    },
+    (error) => {
+      console.warn(
+        "Firebase profile read failed:",
+        error
+      );
+
+      dispatchAuthStatus(
+        "Your profile could not load. Check the Firebase database rules.",
+        true
+      );
+    }
+  );
+}
+
+function stopUserProfileWatch() {
+  if (!unsubscribeUserProfile) return;
+
+  unsubscribeUserProfile();
+  unsubscribeUserProfile = null;
+}
+
+async function saveUserProfile(
+  user,
+  name,
+  school
+) {
+  if (!user) return;
+
+  const userRef = ref(
+    database,
+    `siteChat/users/${user.uid}`
+  );
+  const snapshot = await get(userRef);
+  const now = Date.now();
+
+  const profile = {
+    uid: user.uid,
+    email: cleanEmail(user.email),
+    name,
+    school,
+    updatedAt: now
+  };
+
+  if (!snapshot.exists()) {
+    profile.createdAt = now;
+  }
+
+  await update(userRef, profile);
+}
+
+function normalizeProfile(user, value) {
+  return {
+    uid: user.uid,
+    email: cleanEmail(
+      value.email || user.email
+    ),
+    name:
+      cleanName(value.name) ||
+      "Guest",
+    school:
+      cleanSchool(value.school) ||
+      "High School",
+    banned: value.banned === true,
+    timeoutUntil:
+      Number(value.timeoutUntil) || 0
+  };
+}
+
+function dispatchAuthChanged() {
+  document.dispatchEvent(
+    new CustomEvent(
+      "siteChatAuthChanged",
+      {
+        detail: {
+          user: currentUser
+            ? {
+                uid: currentUser.uid,
+                email: cleanEmail(
+                  currentUser.email
+                )
+              }
+            : null,
+          profile: currentProfile,
+          isAdmin: currentIsAdmin
+        }
+      }
+    )
+  );
+}
+
+function dispatchAuthStatus(
+  message,
+  isError
+) {
+  document.dispatchEvent(
+    new CustomEvent(
+      "siteChatAuthStatus",
+      {
+        detail: {
+          message,
+          isError
+        }
+      }
+    )
+  );
+}
+
 function setupChat() {
   if (
     !chatForm ||
@@ -447,12 +758,10 @@ function setupChat() {
     return;
   }
 
-  syncChatRoom();
-
   document.addEventListener(
     "siteChatIdentityChanged",
     () => {
-      syncChatRoom();
+      watchChatMessages();
     }
   );
 
@@ -490,37 +799,110 @@ function setupChat() {
     }
   );
 
-  watchChatMessages();
+  showChatStatus(
+    "Sign in or make an account to use chat."
+  );
+}
+
+function clearChatSubscriptions() {
+  chatUnsubscribes.forEach(
+    (unsubscribe) => unsubscribe()
+  );
+  chatUnsubscribes = [];
+  activeChatRoomId = null;
+  hasLoadedChat = false;
+  seenChatMessages.clear();
 }
 
 function watchChatMessages() {
-  const identity =
-    getChatIdentity();
+  if (!currentUser || !currentProfile) {
+    clearChatSubscriptions();
+    showChatStatus(
+      "Sign in or make an account to use chat."
+    );
+    return;
+  }
+
+  if (currentIsAdmin) {
+    watchAdminRooms();
+    return;
+  }
 
   const roomId =
     chatRoomIdFromSchool(
-      identity.school
+      currentProfile.school
     );
 
   if (!roomId) return;
 
   if (
-    unsubscribeChat &&
-    activeChatRoomId !== roomId
+    chatUnsubscribes.length &&
+    activeChatRoomId === roomId
   ) {
-    unsubscribeChat();
-    unsubscribeChat = null;
+    return;
   }
 
-  if (unsubscribeChat) return;
-
+  clearChatSubscriptions();
   activeChatRoomId = roomId;
-  hasLoadedChat = false;
-  seenChatMessages.clear();
-  chatMessages.innerHTML =
-    '<div class="chat-empty">Loading room messages...</div>';
 
-  cleanupOldChatMessages(roomId);
+  if (chatMessages) {
+    chatMessages.classList.remove(
+      "admin-grid"
+    );
+    chatMessages.innerHTML =
+      '<div class="chat-empty">Loading room messages...</div>';
+  }
+
+  subscribeRoom(roomId, chatMessages);
+}
+
+function watchAdminRooms() {
+  if (
+    chatUnsubscribes.length &&
+    activeChatRoomId === "admin"
+  ) {
+    return;
+  }
+
+  clearChatSubscriptions();
+  activeChatRoomId = "admin";
+
+  if (!chatMessages) return;
+
+  chatMessages.classList.add(
+    "admin-grid"
+  );
+  chatMessages.innerHTML = "";
+
+  ROOM_ORDER.forEach((room) => {
+    const panel =
+      document.createElement("section");
+    panel.className =
+      "admin-room-panel";
+
+    const title =
+      document.createElement("div");
+    title.className =
+      "admin-room-title";
+    title.textContent =
+      `${room.label} Chat`;
+
+    const body =
+      document.createElement("div");
+    body.className =
+      "admin-room-messages";
+    body.innerHTML =
+      '<div class="chat-empty">Loading messages...</div>';
+
+    panel.append(title, body);
+    chatMessages.appendChild(panel);
+
+    subscribeRoom(room.id, body);
+  });
+}
+
+function subscribeRoom(roomId, container) {
+  if (!container) return;
 
   const messagesRef = query(
     ref(
@@ -531,19 +913,16 @@ function watchChatMessages() {
     limitToLast(CHAT_MESSAGE_LIMIT)
   );
 
-  unsubscribeChat = onValue(
+  const unsubscribe = onValue(
     messagesRef,
     (snapshot) => {
-      if (!chatMessages) return;
-
-      chatMessages.innerHTML = "";
+      container.innerHTML = "";
 
       if (!snapshot.exists()) {
-        chatMessages.innerHTML =
+        container.innerHTML =
           '<div class="chat-empty">No messages in this room yet.</div>';
 
         hasLoadedChat = true;
-
         return;
       }
 
@@ -551,13 +930,14 @@ function watchChatMessages() {
         (messageSnapshot) => {
           const key =
             messageSnapshot.key;
-
           const message =
             messageSnapshot.val();
 
           renderMessage(
             key,
-            message
+            message,
+            roomId,
+            container
           );
 
           maybeNotifyChatMessage(
@@ -569,11 +949,8 @@ function watchChatMessages() {
       );
 
       hasLoadedChat = true;
-
-      chatMessages.scrollTop =
-        chatMessages.scrollHeight;
-
-      cleanupOldChatMessages(roomId);
+      container.scrollTop =
+        container.scrollHeight;
     },
     (error) => {
       console.warn(
@@ -586,10 +963,17 @@ function watchChatMessages() {
       );
     }
   );
+
+  chatUnsubscribes.push(unsubscribe);
 }
 
-function renderMessage(key, message) {
-  if (!chatMessages) return;
+function renderMessage(
+  key,
+  message,
+  roomId,
+  container = chatMessages
+) {
+  if (!container) return;
 
   const item =
     document.createElement("div");
@@ -597,7 +981,10 @@ function renderMessage(key, message) {
   item.className =
     "chat-message";
 
-  if (message.sid === SESSION_ID) {
+  if (
+    message.uid === currentUser?.uid ||
+    message.sid === SESSION_ID
+  ) {
     item.classList.add("own");
   }
 
@@ -624,6 +1011,19 @@ function renderMessage(key, message) {
 
   author.append(name);
 
+  if (
+    currentIsAdmin &&
+    message.email
+  ) {
+    const email =
+      document.createElement("span");
+    email.className =
+      "message-email";
+    email.textContent =
+      cleanEmail(message.email);
+    author.append(email);
+  }
+
   const time =
     document.createElement("span");
 
@@ -644,10 +1044,68 @@ function renderMessage(key, message) {
     );
 
   meta.append(author, time);
-
   item.append(meta, text);
 
-  chatMessages.appendChild(item);
+  if (message.editedAt) {
+    const edited =
+      document.createElement("div");
+    edited.className =
+      "message-edited";
+    edited.textContent = "edited";
+    item.appendChild(edited);
+  }
+
+  if (currentIsAdmin) {
+    item.appendChild(
+      createAdminControls(
+        key,
+        message,
+        roomId
+      )
+    );
+  }
+
+  container.appendChild(item);
+}
+
+function createAdminControls(
+  key,
+  message,
+  roomId
+) {
+  const controls =
+    document.createElement("div");
+  controls.className =
+    "message-admin-controls";
+
+  const actions = [
+    ["Timeout", () =>
+      timeoutUser(message)],
+    ["Ban", () =>
+      banUser(message)],
+    ["Delete", () =>
+      deleteMessage(key, roomId)],
+    ["Edit", () =>
+      editMessage(key, message, roomId)],
+    ["Name", () =>
+      renameUser(message)]
+  ];
+
+  actions.forEach(
+    ([label, handler]) => {
+      const button =
+        document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      button.addEventListener(
+        "click",
+        handler
+      );
+      controls.appendChild(button);
+    }
+  );
+
+  return controls;
 }
 
 function sendChatMessage() {
@@ -656,19 +1114,41 @@ function sendChatMessage() {
 
   if (!rawText) return;
 
-  const identity =
-    getChatIdentity();
-
-  const roomId =
-    chatRoomIdFromSchool(
-      identity.school
+  if (!currentUser || !currentProfile) {
+    document.dispatchEvent(
+      new CustomEvent(
+        "siteChatNeedsIdentity"
+      )
     );
+    return;
+  }
+
+  if (currentProfile.banned) {
+    showChatStatus(
+      "This account is banned from chat."
+    );
+    return;
+  }
 
   if (
-    !identity.name ||
-    !identity.school ||
-    !roomId
+    currentProfile.timeoutUntil &&
+    currentProfile.timeoutUntil > Date.now()
   ) {
+    showChatStatus(
+      `Timed out until ${formatMessageTime(currentProfile.timeoutUntil)}.`
+    );
+    return;
+  }
+
+  const roomId =
+    currentIsAdmin &&
+    adminRoomSelect?.value
+      ? adminRoomSelect.value
+      : chatRoomIdFromSchool(
+          currentProfile.school
+        );
+
+  if (!roomId) {
     document.dispatchEvent(
       new CustomEvent(
         "siteChatNeedsIdentity"
@@ -689,18 +1169,24 @@ function sendChatMessage() {
       `siteChat/rooms/${roomId}/messages`
     ),
     {
-      name: identity.name,
+      uid: currentUser.uid,
+      email: cleanEmail(
+        currentUser.email
+      ),
+      name: currentProfile.name,
       text,
       sid: SESSION_ID,
-      school: identity.school,
+      school: currentProfile.school,
       room: roomId,
       createdAt: Date.now()
     }
   )
     .then(() => {
-      cleanupOldChatMessages(
-        roomId
-      );
+      if (currentIsAdmin) {
+        cleanupOldChatMessages(
+          roomId
+        );
+      }
     })
     .catch((error) => {
       console.warn(
@@ -715,7 +1201,7 @@ function sendChatMessage() {
 }
 
 function cleanupOldChatMessages(roomId = activeChatRoomId) {
-  if (!roomId) return;
+  if (!roomId || !currentIsAdmin) return;
 
   get(
     ref(
@@ -739,14 +1225,12 @@ function cleanupOldChatMessages(roomId = activeChatRoomId) {
         });
       });
 
-      // oldest -> newest
       messages.sort(
         (a, b) =>
           a.createdAt -
           b.createdAt
       );
 
-      // delete old messages
       const deleteCount = Math.max(
         0,
         messages.length -
@@ -778,29 +1262,183 @@ function cleanupOldChatMessages(roomId = activeChatRoomId) {
     });
 }
 
-function syncChatRoom() {
-  const identity =
-    getChatIdentity();
+function timeoutUser(message) {
+  if (!message.uid) return;
 
-  const nextRoomId =
-    chatRoomIdFromSchool(
-      identity.school
+  const minutes = Number.parseInt(
+    prompt(
+      `Timeout ${message.email || message.name} for how many minutes?`,
+      "10"
+    ),
+    10
+  );
+
+  if (
+    !Number.isFinite(minutes) ||
+    minutes <= 0
+  ) {
+    return;
+  }
+
+  update(
+    ref(
+      database,
+      `siteChat/users/${message.uid}`
+    ),
+    {
+      timeoutUntil:
+        Date.now() +
+        minutes * 60 * 1000,
+      updatedAt: Date.now()
+    }
+  ).catch(console.error);
+}
+
+function banUser(message) {
+  if (!message.uid) return;
+
+  if (
+    !confirm(
+      `Ban ${message.email || message.name} from chat?`
+    )
+  ) {
+    return;
+  }
+
+  update(
+    ref(
+      database,
+      `siteChat/users/${message.uid}`
+    ),
+    {
+      banned: true,
+      timeoutUntil: 0,
+      updatedAt: Date.now()
+    }
+  ).catch(console.error);
+}
+
+function deleteMessage(key, roomId) {
+  if (
+    !confirm(
+      "Delete this message?"
+    )
+  ) {
+    return;
+  }
+
+  remove(
+    ref(
+      database,
+      `siteChat/rooms/${roomId}/messages/${key}`
+    )
+  ).catch(console.error);
+}
+
+function editMessage(
+  key,
+  message,
+  roomId
+) {
+  const nextText =
+    cleanMessageText(
+      prompt(
+        "Edit message",
+        cleanMessageText(message.text)
+      )
     );
 
-  if (!nextRoomId) return;
+  if (!nextText) return;
 
-  if (activeChatRoomId !== nextRoomId) {
-    if (unsubscribeChat) {
-      unsubscribeChat();
-      unsubscribeChat = null;
+  update(
+    ref(
+      database,
+      `siteChat/rooms/${roomId}/messages/${key}`
+    ),
+    {
+      text: nextText,
+      editedAt: Date.now(),
+      editedBy: currentUser.uid
     }
+  ).catch(console.error);
+}
 
-    activeChatRoomId = null;
-    watchChatMessages();
+async function renameUser(message) {
+  if (!message.uid) return;
+
+  const nextName =
+    cleanName(
+      prompt(
+        "Change display name",
+        cleanName(message.name)
+      )
+    );
+
+  if (!nextName) return;
+
+  await update(
+    ref(
+      database,
+      `siteChat/users/${message.uid}`
+    ),
+    {
+      name: nextName,
+      updatedAt: Date.now()
+    }
+  );
+
+  await updateExistingMessageNames(
+    message.uid,
+    nextName
+  );
+}
+
+async function updateExistingMessageNames(
+  uid,
+  name
+) {
+  const updates = [];
+
+  for (const room of ROOM_ORDER) {
+    const snapshot = await get(
+      ref(
+        database,
+        `siteChat/rooms/${room.id}/messages`
+      )
+    );
+
+    snapshot.forEach(
+      (messageSnapshot) => {
+        const value =
+          messageSnapshot.val();
+
+        if (value?.uid === uid) {
+          updates.push(
+            update(
+              messageSnapshot.ref,
+              {
+                name,
+                editedAt: Date.now(),
+                editedBy: currentUser.uid
+              }
+            )
+          );
+        }
+      }
+    );
   }
+
+  await Promise.all(updates);
 }
 
 function getChatIdentity() {
+  if (currentProfile) {
+    return {
+      name: currentProfile.name,
+      school: currentProfile.school
+    };
+  }
+
   return {
     name: cleanName(
       localStorage.getItem(
@@ -845,8 +1483,8 @@ function maybeNotifyChatMessage(
   if (
     !hasLoadedChat ||
     isChatOpen ||
-    message.sid === SESSION_ID ||
-    roomId !== activeChatRoomId
+    message.uid === currentUser?.uid ||
+    (!currentIsAdmin && roomId !== activeChatRoomId)
   ) {
     return;
   }
@@ -869,7 +1507,7 @@ function maybeNotifyChatMessage(
 
 function roomLabelFromId(roomId) {
   const room =
-    Object.values(CHAT_ROOMS).find(
+    ROOM_ORDER.find(
       (entry) => entry.id === roomId
     );
 
@@ -879,6 +1517,9 @@ function roomLabelFromId(roomId) {
 function showChatStatus(message) {
   if (!chatMessages) return;
 
+  chatMessages.classList.remove(
+    "admin-grid"
+  );
   chatMessages.innerHTML = "";
 
   const empty =
@@ -902,6 +1543,41 @@ function cleanName(value) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, MAX_NAME_LENGTH);
+}
+
+function cleanEmail(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+function isAdminEmail(email) {
+  return ADMIN_EMAILS.includes(
+    cleanEmail(email)
+  );
+}
+
+function friendlyAuthError(error) {
+  if (!error?.code) {
+    return error?.message ||
+      "Something went wrong.";
+  }
+
+  const messages = {
+    "auth/email-already-in-use":
+      "That email already has an account. Sign in instead.",
+    "auth/invalid-email":
+      "Enter a valid email address.",
+    "auth/invalid-credential":
+      "Email or password is incorrect.",
+    "auth/weak-password":
+      "Use a password with at least 6 characters.",
+    "auth/network-request-failed":
+      "Could not reach Firebase. Try again in a moment."
+  };
+
+  return messages[error.code] ||
+    "Firebase rejected that request. Check the email and password.";
 }
 
 function formatMessageTime(
@@ -931,5 +1607,7 @@ window.gamePresence = {
 };
 
 watchGameCounts();
+
+setupAuth();
 
 setupChat();
