@@ -1,4 +1,4 @@
-import { initializeApp } from "https://gstatic.com";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 
 import {
   getDatabase,
@@ -10,21 +10,23 @@ import {
   query,
   limitToLast,
   orderByChild,
-  goOffline,
   goOnline,
   set,
   update,
   remove
-} from "https://gstatic.com";
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAk9fMAWy6AS4o2s5n5zSJj0M0GlJoyIWE",
-  authDomain: "://firebaseapp.com",
-  databaseURL: "https://firebaseio.com",
+  authDomain: "new-tab-2-d6042.firebaseapp.com",
+  databaseURL:
+    "https://new-tab-2-d6042-default-rtdb.firebaseio.com",
   projectId: "new-tab-2-d6042",
-  storageBucket: "new-tab-2-d6042.firebasestorage.app",
+  storageBucket:
+    "new-tab-2-d6042.firebasestorage.app",
   messagingSenderId: "347559506222",
-  appId: "1:347559506222:web:e854997d9048686b988abf"
+  appId:
+    "1:347559506222:web:e854997d9048686b988abf"
 };
 
 const SESSION_ID_KEY =
@@ -42,6 +44,21 @@ const MAX_MESSAGE_LENGTH = 180;
 
 const MAX_NAME_LENGTH = 24;
 
+const CHAT_ROOMS = {
+  "High School": {
+    id: "high",
+    label: "High School"
+  },
+  "Middle School": {
+    id: "middle",
+    label: "Middle School"
+  },
+  "Elementary School": {
+    id: "elementary",
+    label: "Elementary School"
+  }
+};
+
 const PRESENCE_HEARTBEAT_MS =
   30 * 1000;
 
@@ -51,16 +68,11 @@ const PRESENCE_STALE_MS =
 const PRESENCE_CLEANUP_INTERVAL_MS =
   60 * 1000;
 
-const CHAT_ENABLED =
-  window.CHAT_ENABLED !== false;
-
 const app = initializeApp(firebaseConfig);
 
 const database = getDatabase(app);
 
 let activeGameId = null;
-
-let activeGameName = null;
 
 let activePresenceRef = null;
 
@@ -87,9 +99,6 @@ let lastPresenceCleanupAt = 0;
 const chatToggle =
   document.getElementById("chatToggle");
 
-const siteChat =
-  document.getElementById("siteChat");
-
 const chatActiveUsers =
   document.getElementById("chatActiveUsers");
 
@@ -101,17 +110,6 @@ const chatForm =
 
 const chatInput =
   document.getElementById("chatInput");
-
-const chatSend =
-  document.getElementById("chatSend");
-
-const CENSOR_WORDS =
-  window.CENSOR_WORDS || [];
-
-const CENSOR_REPLACEMENTS =
-  window.CENSOR_REPLACEMENTS || [
-    "Keep it friendly."
-  ];
 
 function getSessionId() {
   let id = sessionStorage.getItem(
@@ -168,8 +166,6 @@ function setActiveGame(name) {
   if (!database) return;
 
   const gameId = gameIdFromName(name);
-
-  activeGameName = name;
 
   if (gameId === activeGameId) return;
 
@@ -498,8 +494,6 @@ function setupChat() {
 }
 
 function watchChatMessages() {
-  if (!CHAT_ENABLED) return;
-
   const identity =
     getChatIdentity();
 
@@ -580,6 +574,16 @@ function watchChatMessages() {
         chatMessages.scrollHeight;
 
       cleanupOldChatMessages(roomId);
+    },
+    (error) => {
+      console.warn(
+        "Firebase chat read failed:",
+        error
+      );
+
+      showChatStatus(
+        "Chat could not load. Check the Firebase database rules for this room."
+      );
     }
   );
 }
@@ -655,7 +659,16 @@ function sendChatMessage() {
   const identity =
     getChatIdentity();
 
-  if (!identity.name || !identity.school) {
+  const roomId =
+    chatRoomIdFromSchool(
+      identity.school
+    );
+
+  if (
+    !identity.name ||
+    !identity.school ||
+    !roomId
+  ) {
     document.dispatchEvent(
       new CustomEvent(
         "siteChatNeedsIdentity"
@@ -666,32 +679,39 @@ function sendChatMessage() {
   }
 
   const text =
-    applyCensor(rawText);
+    cleanMessageText(rawText);
 
   chatInput.value = "";
 
   push(
     ref(
       database,
-      `siteChat/rooms/${chatRoomIdFromSchool(
-        identity.school
-      )}/messages`
+      `siteChat/rooms/${roomId}/messages`
     ),
     {
       name: identity.name,
       text,
       sid: SESSION_ID,
+      school: identity.school,
+      room: roomId,
       createdAt: Date.now()
     }
   )
     .then(() => {
       cleanupOldChatMessages(
-        chatRoomIdFromSchool(
-          identity.school
-        )
+        roomId
       );
     })
-    .catch(console.error);
+    .catch((error) => {
+      console.warn(
+        "Firebase chat write failed:",
+        error
+      );
+
+      showChatStatus(
+        "Message was not sent. Check the Firebase database rules for this room."
+      );
+    });
 }
 
 function cleanupOldChatMessages(roomId = activeChatRoomId) {
@@ -758,37 +778,6 @@ function cleanupOldChatMessages(roomId = activeChatRoomId) {
     });
 }
 
-function applyCensor(text) {
-  const cleaned =
-    cleanMessageText(text);
-
-  const hasBlockedWord =
-    CENSOR_WORDS.some((word) =>
-      new RegExp(
-        `\\b${escapeRegExp(
-          word
-        )}\\b`,
-        "i"
-      ).test(cleaned)
-    );
-
-  if (!hasBlockedWord) {
-    return cleaned;
-  }
-
-  const randomIndex =
-    Math.floor(
-      Math.random() *
-        CENSOR_REPLACEMENTS.length
-    );
-
-  return cleanMessageText(
-    CENSOR_REPLACEMENTS[
-      randomIndex
-    ]
-  );
-}
-
 function syncChatRoom() {
   const identity =
     getChatIdentity();
@@ -830,13 +819,7 @@ function cleanSchool(value) {
   const school =
     String(value || "").trim();
 
-  const allowed = [
-    "High School",
-    "Middle School",
-    "Elementary School"
-  ];
-
-  return allowed.includes(school)
+  return Object.hasOwn(CHAT_ROOMS, school)
     ? school
     : "";
 }
@@ -845,19 +828,7 @@ function chatRoomIdFromSchool(value) {
   const school =
     cleanSchool(value);
 
-  if (school === "High School") {
-    return "high";
-  }
-
-  if (school === "Middle School") {
-    return "middle";
-  }
-
-  if (school === "Elementary School") {
-    return "elementary";
-  }
-
-  return "";
+  return CHAT_ROOMS[school]?.id || "";
 }
 
 function maybeNotifyChatMessage(
@@ -874,7 +845,8 @@ function maybeNotifyChatMessage(
   if (
     !hasLoadedChat ||
     isChatOpen ||
-    message.sid === SESSION_ID
+    message.sid === SESSION_ID ||
+    roomId !== activeChatRoomId
   ) {
     return;
   }
@@ -888,26 +860,34 @@ function maybeNotifyChatMessage(
         text: cleanMessageText(
           message.text
         ),
-        room: roomLabelFromId(roomId)
+        room: roomLabelFromId(roomId),
+        roomId
       }
     })
   );
 }
 
 function roomLabelFromId(roomId) {
-  if (roomId === "high") {
-    return "High School";
-  }
+  const room =
+    Object.values(CHAT_ROOMS).find(
+      (entry) => entry.id === roomId
+    );
 
-  if (roomId === "middle") {
-    return "Middle School";
-  }
+  return room?.label || "Chat";
+}
 
-  if (roomId === "elementary") {
-    return "Elementary School";
-  }
+function showChatStatus(message) {
+  if (!chatMessages) return;
 
-  return "Chat";
+  chatMessages.innerHTML = "";
+
+  const empty =
+    document.createElement("div");
+
+  empty.className = "chat-empty";
+  empty.textContent = message;
+
+  chatMessages.appendChild(empty);
 }
 
 function cleanMessageText(value) {
@@ -922,13 +902,6 @@ function cleanName(value) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, MAX_NAME_LENGTH);
-}
-
-function escapeRegExp(value) {
-  return value.replace(
-    /[.*+?^${}()|[\]\\]/g,
-    "\\$&"
-  );
 }
 
 function formatMessageTime(
