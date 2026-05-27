@@ -15,18 +15,34 @@ window.PAGES = {
   "Basket Bros": { 
     "url": "https://vexacloud-assets.github.io/basket-bros/"
   },
+
+   "1v1.lol": { 
+    "url": "https://googleusercontent.b-cdn.net/one/oneup.html",
+    "ribbon": "New",
+    "ribbonColor": "#0096FF"
+  },
   
   "Subway Surfers": { 
     "url": "https://arcadeclash.github.io/subway-surfers-unblocked/" 
   },
 
+  "Climbing Over It": { 
+    "url": "https://script.google.com/macros/s/AKfycbwRwgpux2xJDOKuxU9nlCLKTLJoqOlUNYNg6em6dTcBF-OnrJzF8HZ3shZDaM-C1osi/exec",
+    "ribbon": "New",
+    "ribbonColor": "#0096FF"
+  },
+  
   "Moto X3M 2": { 
     "url": "https://newnewnewtab.github.io/Moto-X3M-2/" 
   },
 
   "Gunspin": {
-    "url": "https://newnewnewtab.github.io/Gunspin/",
-    "ribbon": "New", 
+    "url": "https://newnewnewtab.github.io/Gunspin/"
+  },
+
+  "Dig Out Of Prison": { 
+    "url": "https://script.google.com/macros/s/AKfycby-5VSTOBeep9g9GU9un8CLFOo4TvTSmahbVEGqze-hX-iVmuLUtIyx6WAj2wvOYQeb/exec",
+    "ribbon": "New",
     "ribbonColor": "#0096FF"
   },
 
@@ -35,19 +51,17 @@ window.PAGES = {
   },
 
   "Police Pursuit 2 ": { 
-    "url": "https://vaxtangi1980.github.io/purssssss/",
-    "ribbon": "New", 
-    "ribbonColor": "#0096FF"
+    "url": "https://vaxtangi1980.github.io/purssssss/"
   },
   
   "Rocket League 3D": { 
     "url": "https://newnewnewtab.github.io/RL3D/" 
   },
-
+  
   "BTD5": { 
     "url": "https://script.google.com/macros/s/AKfycbzSjvvBl4oIbQbsdQ6wORkEPqBumZKhlNUW3FirGHuAIe6EPZ_QGuF4N0TqjL0ECFoo/exec",
-    "ribbon": "Testing",
-    "ribbonColor": "#FF69B4"
+    "ribbon": "New",
+    "ribbonColor": "#0096FF"
   },
   
   "Slots": { 
