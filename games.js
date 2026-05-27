@@ -16,8 +16,8 @@ window.PAGES = {
     "url": "https://vexacloud-assets.github.io/basket-bros/"
   },
 
-   "1v1.lol": { 
-    "url": "https://googleusercontent.b-cdn.net/one/oneup.html",
+   "Slither.io": { 
+    "url": "https://script.google.com/macros/s/AKfycbwNxCzUuQVmLRWTwYK2D4yTqpWg2O-qge8BwCkxhLmqWd1DtXynwJXPEDClPt7ERZr-/exec",
     "ribbon": "New",
     "ribbonColor": "#0096FF"
   },
@@ -26,8 +26,8 @@ window.PAGES = {
     "url": "https://arcadeclash.github.io/subway-surfers-unblocked/" 
   },
 
-  "Climbing Over It": { 
-    "url": "https://script.google.com/macros/s/AKfycbwRwgpux2xJDOKuxU9nlCLKTLJoqOlUNYNg6em6dTcBF-OnrJzF8HZ3shZDaM-C1osi/exec",
+  "Among Us": { 
+    "url": "https://script.google.com/macros/s/AKfycbyix6sPjvsn_izDvhJLVuif1buj9ZtARvj9D_FEQ0rscRXgl-RgArs0t4oJw_OHm5Dr5A/exec",
     "ribbon": "New",
     "ribbonColor": "#0096FF"
   },
