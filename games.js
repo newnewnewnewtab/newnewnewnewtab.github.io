@@ -37,12 +37,6 @@ window.PAGES = {
     "ribbon": "New",
     "ribbonColor": "#0096FF"
   },
-
-  "Drive Quest": { 
-    "url": "https://script.google.com/macros/s/AKfycbx8lr6YYxFR_2MxHgZ9HVHEUWz_SWY0LL_i2T6tsht71XJPLh_vISwNmmTgNPFZWiBk4g/exec",
-    "ribbon": "New",
-    "ribbonColor": "#0096FF"
-  },
   
   "Moto X3M 2": { 
     "url": "https://newnewnewtab.github.io/Moto-X3M-2/" 
