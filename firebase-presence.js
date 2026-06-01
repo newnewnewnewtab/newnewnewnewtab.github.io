@@ -4,8 +4,10 @@ import {
   getAuth,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  reload
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 import {
@@ -51,6 +53,10 @@ const SESSION_ID = getSessionId();
 const CHAT_NAME_KEY = "site_chat_name";
 
 const CHAT_SCHOOL_KEY = "site_chat_school";
+
+const CHAT_PENDING_NAME_KEY = "site_chat_pending_name";
+
+const CHAT_PENDING_SCHOOL_KEY = "site_chat_pending_school";
 
 const CHAT_MESSAGE_LIMIT = 25;
 
@@ -123,6 +129,8 @@ let currentIsAdmin = false;
 const seenChatMessages = new Set();
 
 let presenceHeartbeatTimer = null;
+
+let presenceCleanupTimer = null;
 
 let lastPresenceCleanupAt = 0;
 
@@ -348,6 +356,7 @@ function watchGameCounts() {
   if (unsubscribeCounts) return;
 
   connectDatabase();
+  startPresenceCleanupTimer();
 
   const countsRef = ref(
     database,
@@ -447,6 +456,15 @@ function watchGameCounts() {
   );
 }
 
+function startPresenceCleanupTimer() {
+  if (presenceCleanupTimer) return;
+
+  presenceCleanupTimer = setInterval(
+    cleanupStalePresence,
+    PRESENCE_CLEANUP_INTERVAL_MS
+  );
+}
+
 function updateActiveUsers(
   totalPlayers
 ) {
@@ -493,7 +511,7 @@ function setupAuth() {
 
   onAuthStateChanged(
     auth,
-    (user) => {
+    async (user) => {
       currentUser = user;
       currentIsAdmin =
         isAdminEmail(user?.email);
@@ -505,13 +523,36 @@ function setupAuth() {
       if (!user) {
         dispatchAuthChanged();
         showChatStatus(
-          "Sign in or make an account to use chat."
+          "Choose Sign up or Log in to use chat."
         );
         return;
       }
 
+      if (!user.emailVerified) {
+        dispatchAuthChanged();
+        showChatStatus(
+          "Verify your email before using chat."
+        );
+        sendVerificationEmail(user, {
+          quiet: true
+        }).catch(console.warn);
+        return;
+      }
+
       connectDatabase();
-      watchUserProfile(user);
+      try {
+        await finishVerifiedSignup(user);
+        watchUserProfile(user);
+      } catch (error) {
+        console.warn(
+          "Verified profile setup failed:",
+          error
+        );
+        dispatchAuthStatus(
+          "Email verified, but your chat profile could not save. Check the Firebase database rules.",
+          true
+        );
+      }
     }
   );
 }
@@ -522,6 +563,39 @@ async function handleAuthAction(detail = {}) {
   if (action === "signout") {
     await signOut(auth);
     dispatchAuthStatus("Signed out.", false);
+    return;
+  }
+
+  if (action === "resend-verification") {
+    if (!auth.currentUser) {
+      throw new Error("Sign in first.");
+    }
+
+    await sendVerificationEmail(auth.currentUser);
+    return;
+  }
+
+  if (action === "verify-check") {
+    if (!auth.currentUser) {
+      throw new Error("Sign in first.");
+    }
+
+    await reload(auth.currentUser);
+    await auth.currentUser.getIdToken(true);
+
+    if (!auth.currentUser.emailVerified) {
+      throw new Error(
+        "Still waiting on verification. Open the email, then check again."
+      );
+    }
+
+    await finishVerifiedSignup(auth.currentUser);
+    currentUser = auth.currentUser;
+    watchUserProfile(auth.currentUser);
+    dispatchAuthStatus(
+      "Email verified. Welcome in.",
+      false
+    );
     return;
   }
 
@@ -538,7 +612,10 @@ async function handleAuthAction(detail = {}) {
     );
   }
 
-  if (!name || !school) {
+  if (
+    action === "signup" &&
+    (!name || !school)
+  ) {
     throw new Error(
       "Choose a name and school."
     );
@@ -551,40 +628,121 @@ async function handleAuthAction(detail = {}) {
     false
   );
 
-  const credential =
-    action === "signup"
-      ? await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        )
-      : await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+  if (action === "signup") {
+    const credential =
+      await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
+    savePendingSignup(name, school);
+
+    await sendVerificationEmail(
+      credential.user
+    );
+
+    dispatchAuthChanged();
+    dispatchAuthStatus(
+      "Verification email sent. Open it, then come back here.",
+      false
+    );
+    return;
+  }
+
+  const credential =
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+  if (!credential.user.emailVerified) {
+    await sendVerificationEmail(
+      credential.user
+    );
+    dispatchAuthChanged();
+    dispatchAuthStatus(
+      "Verification email sent. Open it, then check again.",
+      false
+    );
+    return;
+  }
+
+  await finishVerifiedSignup(
+    credential.user
+  );
+
+  dispatchAuthStatus("Signed in.", false);
+}
+
+async function sendVerificationEmail(
+  user,
+  { quiet = false } = {}
+) {
+  if (!user || user.emailVerified) return;
+
+  await sendEmailVerification(user);
+
+  if (!quiet) {
+    dispatchAuthStatus(
+      "Verification email sent. Check your inbox.",
+      false
+    );
+  }
+}
+
+function savePendingSignup(name, school) {
   localStorage.setItem(
-    CHAT_NAME_KEY,
+    CHAT_PENDING_NAME_KEY,
     name
   );
+  localStorage.setItem(
+    CHAT_PENDING_SCHOOL_KEY,
+    school
+  );
+}
+
+function clearPendingSignup() {
+  localStorage.removeItem(
+    CHAT_PENDING_NAME_KEY
+  );
+  localStorage.removeItem(
+    CHAT_PENDING_SCHOOL_KEY
+  );
+}
+
+async function finishVerifiedSignup(user) {
+  if (!user?.emailVerified) return;
+
+  const name = cleanName(
+    localStorage.getItem(
+      CHAT_PENDING_NAME_KEY
+    ) ||
+      localStorage.getItem(CHAT_NAME_KEY)
+  );
+  const school = cleanSchool(
+    localStorage.getItem(
+      CHAT_PENDING_SCHOOL_KEY
+    ) ||
+      localStorage.getItem(CHAT_SCHOOL_KEY)
+  );
+
+  if (!name || !school) return;
+
+  localStorage.setItem(CHAT_NAME_KEY, name);
   localStorage.setItem(
     CHAT_SCHOOL_KEY,
     school
   );
 
   await saveUserProfile(
-    credential.user,
+    user,
     name,
     school
   );
 
-  dispatchAuthStatus(
-    action === "signup"
-      ? "Account created."
-      : "Signed in.",
-    false
-  );
+  clearPendingSignup();
 }
 
 function watchUserProfile(user) {
@@ -722,7 +880,9 @@ function dispatchAuthChanged() {
                 uid: currentUser.uid,
                 email: cleanEmail(
                   currentUser.email
-                )
+                ),
+                emailVerified:
+                  currentUser.emailVerified === true
               }
             : null,
           profile: currentProfile,
@@ -800,7 +960,7 @@ function setupChat() {
   );
 
   showChatStatus(
-    "Sign in or make an account to use chat."
+    "Choose Sign up or Log in to use chat."
   );
 }
 
@@ -815,10 +975,16 @@ function clearChatSubscriptions() {
 }
 
 function watchChatMessages() {
-  if (!currentUser || !currentProfile) {
+  if (
+    !currentUser ||
+    !currentUser.emailVerified ||
+    !currentProfile
+  ) {
     clearChatSubscriptions();
     showChatStatus(
-      "Sign in or make an account to use chat."
+      currentUser
+        ? "Verify your email before using chat."
+        : "Choose Sign up or Log in to use chat."
     );
     return;
   }
@@ -1114,7 +1280,11 @@ function sendChatMessage() {
 
   if (!rawText) return;
 
-  if (!currentUser || !currentProfile) {
+  if (
+    !currentUser ||
+    !currentUser.emailVerified ||
+    !currentProfile
+  ) {
     document.dispatchEvent(
       new CustomEvent(
         "siteChatNeedsIdentity"
@@ -1573,7 +1743,9 @@ function friendlyAuthError(error) {
     "auth/weak-password":
       "Use a password with at least 6 characters.",
     "auth/network-request-failed":
-      "Could not reach Firebase. Try again in a moment."
+      "Could not reach Firebase. Try again in a moment.",
+    "auth/too-many-requests":
+      "Firebase is rate limiting verification emails. Wait a bit, then try again."
   };
 
   return messages[error.code] ||
