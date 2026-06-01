@@ -327,29 +327,16 @@ nav {
 }
 
 .chat-button-icon {
-  position: relative;
-  width: 19px;
-  height: 17px;
-  border: 2px solid currentColor;
-  border-radius: 8px;
-  opacity: 0.94;
-}
-
-.chat-button-icon::after {
-  content: "";
-  position: absolute;
-  right: 1px;
-  bottom: -6px;
-  width: 7px;
-  height: 7px;
-  border-left: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  border-bottom-left-radius: 2px;
-  transform: rotate(-24deg);
+  width: 20px;
+  height: 20px;
+  opacity: 0.96;
+  filter: drop-shadow(0 3px 8px rgba(14, 165, 233, 0.28));
+  transition: transform 0.18s ease;
 }
 
 .chat-button.open .chat-button-icon {
   opacity: 1;
+  transform: rotate(-4deg) scale(1.04);
 }
 
 .chat-unread-dot {
@@ -792,6 +779,54 @@ nav {
   gap: 10px;
 }
 
+.chat-auth-screen {
+  display: none;
+}
+
+.chat-auth-screen.active {
+  display: block;
+}
+
+.chat-mode-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.chat-back-btn {
+  height: 30px;
+  margin: 0 0 10px;
+  border: none;
+  background: transparent;
+  color: #bae6fd;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0;
+  text-align: left;
+}
+
+.chat-back-btn:hover {
+  color: #fff;
+}
+
+.chat-verify-card {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(125, 211, 252, 0.26);
+  border-radius: 12px;
+  background: rgba(8, 47, 73, 0.28);
+}
+
+.chat-verify-email {
+  color: #f8fafc;
+  font-weight: 950;
+  overflow-wrap: anywhere;
+}
+
 .chat-setup-title {
   margin: 0 0 6px;
   font-size: 20px;
@@ -883,6 +918,10 @@ nav {
   border: 1px solid rgba(125, 211, 252, 0.32);
   background: rgba(2, 6, 23, 0.7);
   color: #e0f2fe;
+}
+
+.chat-setup-submit.flush {
+  margin-top: 0;
 }
 
 .chat-setup-submit.secondary:hover {
@@ -1102,7 +1141,10 @@ nav {
       <div class="dropdown-menu" id="tabsMore"></div>
     </div>
     <button id="chatToggle" class="chat-button" type="button" aria-label="Open chat" title="Open chat">
-      <span class="chat-button-icon" aria-hidden="true"></span>
+      <svg class="chat-button-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+        <path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M8.25 9.25H15.75M8.25 12H13.25" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
       <span class="chat-button-text">Chat</span>
       <span class="chat-unread-dot" aria-hidden="true"></span>
     </button>
@@ -1151,34 +1193,69 @@ nav {
 
   <div id="chatSetup" class="chat-setup" aria-hidden="true">
     <form id="chatSetupForm" class="chat-setup-panel">
-      <h2 class="chat-setup-title">Join chat</h2>
-      <p class="chat-setup-copy">Sign in or make an account, then pick the name people will see.</p>
-
-      <div class="chat-auth-grid">
-        <div>
-          <label class="chat-setup-label" for="chatSetupEmail">Email</label>
-          <input id="chatSetupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@example.com" />
-        </div>
-
-        <div>
-          <label class="chat-setup-label" for="chatSetupPassword">Password</label>
-          <input id="chatSetupPassword" class="chat-setup-input" type="password" autocomplete="current-password" placeholder="Password" />
+      <div class="chat-auth-screen active" data-auth-screen="choice">
+        <h2 class="chat-setup-title">Join chat</h2>
+        <p class="chat-setup-copy">Use a verified email account before sending messages.</p>
+        <div class="chat-mode-actions">
+          <button class="chat-setup-submit flush" type="button" data-auth-mode="signup">Sign up</button>
+          <button class="chat-setup-submit secondary flush" type="button" data-auth-mode="signin">Log in</button>
         </div>
       </div>
 
-      <label class="chat-setup-label" for="chatSetupName">Your name</label>
-      <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Enter your name" />
-
-      <div class="chat-setup-label">Your school</div>
-      <div class="school-options" role="group" aria-label="School level">
-        <button class="school-option" type="button" data-school="High School">High</button>
-        <button class="school-option" type="button" data-school="Middle School">Middle</button>
-        <button class="school-option" type="button" data-school="Elementary School">Elementary</button>
+      <div class="chat-auth-screen" data-auth-screen="signin">
+        <button class="chat-back-btn" type="button" data-auth-mode="choice">Back</button>
+        <h2 class="chat-setup-title">Log in</h2>
+        <p class="chat-setup-copy">Enter the email and password for your chat account.</p>
+        <div class="chat-auth-grid">
+          <div>
+            <label class="chat-setup-label" for="chatSetupEmail">Email</label>
+            <input id="chatSetupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@example.com" />
+          </div>
+          <div>
+            <label class="chat-setup-label" for="chatSetupPassword">Password</label>
+            <input id="chatSetupPassword" class="chat-setup-input" type="password" autocomplete="current-password" placeholder="Password" />
+          </div>
+        </div>
+        <button class="chat-setup-submit" type="submit" data-auth-action="signin">Log in</button>
       </div>
 
-      <div class="chat-setup-actions">
-        <button class="chat-setup-submit" type="submit" data-auth-action="signup">Make account</button>
-        <button class="chat-setup-submit secondary" type="submit" data-auth-action="signin">Sign in</button>
+      <div class="chat-auth-screen" data-auth-screen="signup">
+        <button class="chat-back-btn" type="button" data-auth-mode="choice">Back</button>
+        <h2 class="chat-setup-title">Sign up</h2>
+        <p class="chat-setup-copy">Create your account, then verify your email before chat opens.</p>
+        <div class="chat-auth-grid">
+          <div>
+            <label class="chat-setup-label" for="chatSignupEmail">Email</label>
+            <input id="chatSignupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@example.com" />
+          </div>
+          <div>
+            <label class="chat-setup-label" for="chatSignupPassword">Password</label>
+            <input id="chatSignupPassword" class="chat-setup-input" type="password" autocomplete="new-password" placeholder="At least 6 characters" />
+          </div>
+        </div>
+
+        <label class="chat-setup-label" for="chatSetupName">Your name</label>
+        <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Enter your name" />
+
+        <div class="chat-setup-label">Your school</div>
+        <div class="school-options" role="group" aria-label="School level">
+          <button class="school-option" type="button" data-school="High School">High</button>
+          <button class="school-option" type="button" data-school="Middle School">Middle</button>
+          <button class="school-option" type="button" data-school="Elementary School">Elementary</button>
+        </div>
+
+        <button class="chat-setup-submit" type="submit" data-auth-action="signup">Create account</button>
+      </div>
+
+      <div class="chat-auth-screen" data-auth-screen="verify">
+        <h2 class="chat-setup-title">Verify your email</h2>
+        <p class="chat-setup-copy">A verification link has been sent. Open it, then come back here to continue.</p>
+        <div class="chat-verify-card">
+          <div class="chat-verify-email" id="chatVerifyEmail">you@example.com</div>
+          <button class="chat-setup-submit flush" type="button" data-auth-action="verify-check">I verified it</button>
+          <button class="chat-setup-submit secondary flush" type="button" data-auth-action="resend-verification">Resend email</button>
+          <button class="chat-back-btn" type="button" data-auth-action="signout">Use different email</button>
+        </div>
       </div>
       <div id="chatSetupError" class="chat-setup-error" aria-live="polite"></div>
     </form>
@@ -1211,8 +1288,11 @@ const chatSetup = document.getElementById("chatSetup");
 const chatSetupForm = document.getElementById("chatSetupForm");
 const chatSetupEmail = document.getElementById("chatSetupEmail");
 const chatSetupPassword = document.getElementById("chatSetupPassword");
+const chatSignupEmail = document.getElementById("chatSignupEmail");
+const chatSignupPassword = document.getElementById("chatSignupPassword");
 const chatSetupName = document.getElementById("chatSetupName");
 const chatSetupError = document.getElementById("chatSetupError");
+const chatVerifyEmail = document.getElementById("chatVerifyEmail");
 const chatIdentitySummary = document.getElementById("chatIdentitySummary");
 const chatLockedName = document.getElementById("chatLockedName");
 const chatLockedRoom = document.getElementById("chatLockedRoom");
@@ -1226,6 +1306,7 @@ const CHAT_SCHOOL_KEY = "site_chat_school";
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
 let latestFirebaseActiveUsers = null;
 let selectedSchool = "";
+let chatAuthScreen = "choice";
 let chatAuthState = {
   user: null,
   profile: null,
@@ -1399,6 +1480,9 @@ document.addEventListener("siteChatAuthChanged", (event) => {
 document.addEventListener("siteChatAuthStatus", (event) => {
   chatSetupError.textContent = event.detail?.message || "";
   chatSetupError.classList.toggle("ok", !event.detail?.isError);
+  if (!event.detail?.isError && /verification email sent/i.test(event.detail?.message || "")) {
+    setChatAuthScreen("verify");
+  }
 });
 
 chatSignOut.addEventListener("click", () => {
@@ -1433,6 +1517,11 @@ function updateChatPanelState() {
     return;
   }
 
+  if (chatAuthState.user && !chatAuthState.user.emailVerified) {
+    chatInput.placeholder = "Verify your email to chat";
+    return;
+  }
+
   if (!hasChatIdentity()) {
     chatInput.placeholder = "Sign in to chat";
     return;
@@ -1455,6 +1544,7 @@ function cleanChatName(value) {
 function hasChatIdentity() {
   return Boolean(
     chatAuthState.user &&
+    chatAuthState.user.emailVerified &&
     chatAuthState.profile &&
     cleanChatName(chatAuthState.profile.name) &&
     chatAuthState.profile.school
@@ -1465,7 +1555,12 @@ function syncChatIdentity() {
   const profile = chatAuthState.profile;
   const name = cleanChatName(profile?.name || localStorage.getItem(CHAT_NAME_KEY));
   const school = profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "";
-  const isReady = Boolean(chatAuthState.user && name && school);
+  const isVerified = chatAuthState.user?.emailVerified === true;
+  const isReady = Boolean(chatAuthState.user && isVerified && name && school);
+
+  if (!chatAuthState.user && chatAuthScreen === "verify") {
+    setChatAuthScreen("choice");
+  }
 
   chatLockedName.textContent = chatAuthState.user?.email
     ? `${name || "Not set"} - ${chatAuthState.user.email}`
@@ -1476,6 +1571,9 @@ function syncChatIdentity() {
   siteChat.classList.toggle("admin-mode", chatAuthState.isAdmin);
   chatSetup.classList.toggle("show", !isReady);
   chatSetup.setAttribute("aria-hidden", isReady ? "true" : "false");
+  if (!isReady && chatAuthState.user && !isVerified) {
+    setChatAuthScreen("verify");
+  }
   if (chatRoomSelect && chatAuthState.isAdmin && chatRoomSelect.value === "") {
     chatRoomSelect.value = "high";
   }
@@ -1498,11 +1596,48 @@ function showChatSetup() {
   chatSetup.setAttribute("aria-hidden", "false");
   chatSetupName.value = cleanChatName(chatAuthState.profile?.name || localStorage.getItem(CHAT_NAME_KEY));
   chatSetupEmail.value = chatAuthState.user?.email || chatSetupEmail.value;
+  chatSignupEmail.value = chatAuthState.user?.email || chatSignupEmail.value;
   chatSetupPassword.value = "";
+  chatSignupPassword.value = "";
   setSelectedSchool(chatAuthState.profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "");
   chatSetupError.textContent = "";
-  requestAnimationFrame(() => chatSetupEmail.focus());
+  setChatAuthScreen(chatAuthState.user && !chatAuthState.user.emailVerified ? "verify" : chatAuthScreen);
+  requestAnimationFrame(() => {
+    if (chatAuthScreen === "signin") chatSetupEmail.focus();
+    if (chatAuthScreen === "signup") chatSignupEmail.focus();
+  });
 }
+
+function setChatAuthScreen(screen) {
+  chatAuthScreen = screen || "choice";
+  document.querySelectorAll("[data-auth-screen]").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.authScreen === chatAuthScreen);
+  });
+  chatVerifyEmail.textContent = chatAuthState.user?.email || "your email";
+  chatSetupError.textContent = "";
+}
+
+document.querySelectorAll("[data-auth-mode]").forEach((button) => {
+  button.addEventListener("click", () => {
+    setChatAuthScreen(button.dataset.authMode);
+  });
+});
+
+document.querySelectorAll("button[type='button'][data-auth-action]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const statusByAction = {
+      "verify-check": "Checking verification...",
+      "resend-verification": "Sending verification email...",
+      signout: "Signing out..."
+    };
+
+    chatSetupError.textContent = statusByAction[button.dataset.authAction] || "";
+
+    document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
+      detail: { action: button.dataset.authAction }
+    }));
+  });
+});
 
 document.querySelectorAll(".school-option").forEach((button) => {
   button.addEventListener("click", () => {
@@ -1523,26 +1658,27 @@ chatSetupForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const action = event.submitter?.dataset.authAction || "signin";
-  const email = String(chatSetupEmail.value || "").trim().toLowerCase();
-  const password = String(chatSetupPassword.value || "");
-  const name = cleanChatName(chatSetupName.value);
+  const isSignup = action === "signup";
+  const email = String((isSignup ? chatSignupEmail.value : chatSetupEmail.value) || "").trim().toLowerCase();
+  const password = String((isSignup ? chatSignupPassword.value : chatSetupPassword.value) || "");
+  const name = isSignup ? cleanChatName(chatSetupName.value) : "";
 
   if (!email || !password) {
     chatSetupError.textContent = "Enter your email and password.";
     return;
   }
 
-  if (!name) {
+  if (isSignup && !name) {
     chatSetupError.textContent = "Enter a name first.";
     return;
   }
 
-  if (!selectedSchool) {
+  if (isSignup && !selectedSchool) {
     chatSetupError.textContent = "Pick your school level.";
     return;
   }
 
-  chatSetupError.textContent = action === "signup" ? "Creating account..." : "Signing in...";
+  chatSetupError.textContent = isSignup ? "Creating account..." : "Logging in...";
 
   document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
     detail: {
@@ -1550,7 +1686,7 @@ chatSetupForm.addEventListener("submit", (event) => {
       email,
       password,
       name,
-      school: selectedSchool
+      school: isSignup ? selectedSchool : ""
     }
   }));
 });
