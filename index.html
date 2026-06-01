@@ -160,6 +160,7 @@ nav {
   align-items: center;
   gap: 8px;
   flex: 1;
+  min-width: 0;
   overflow: visible;
 }
 
@@ -167,6 +168,8 @@ nav {
   display: flex;
   gap: 8px;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .tab {
@@ -229,35 +232,80 @@ nav {
 .dropdown {
   position: relative;
   display: none;
+  flex-shrink: 0;
 }
 
 .dropdown-trigger {
-  padding: 8px 16px;
-  background: var(--bg-card);
+  padding: 9px 14px;
+  background:
+    linear-gradient(135deg, rgba(30, 41, 59, 0.94), rgba(15, 23, 42, 0.94));
   border-radius: var(--radius);
-  font-weight: 600;
+  font-weight: 900;
   cursor: pointer;
   font-size: 13px;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  color: #dff6ff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.dropdown-trigger:hover {
+  transform: translateY(-1px);
+  border-color: rgba(125, 211, 252, 0.58);
+  background:
+    linear-gradient(135deg, rgba(8, 145, 178, 0.28), rgba(15, 23, 42, 0.96));
+}
+
+.dropdown-trigger::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 0.18s ease;
+}
+
+.dropdown.open .dropdown-trigger::after {
+  transform: rotate(225deg) translate(-2px, -1px);
 }
 
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
-  background: #1e293b;
-  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
+  border: 1px solid rgba(125, 211, 252, 0.24);
   border-radius: var(--radius);
   padding: 8px;
-  min-width: 180px;
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+  width: min(320px, calc(100vw - 28px));
+  max-height: min(560px, calc(100vh - var(--nav-height) - 26px));
+  overflow-y: auto;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.48);
   display: none;
-  flex-direction: column;
-  gap: 4px;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  backdrop-filter: blur(14px);
+}
+
+.dropdown-menu .tab {
+  width: 100%;
+  justify-content: space-between;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(2, 6, 23, 0.28);
+  padding: 10px 12px;
+}
+
+.dropdown-menu .tab:hover {
+  background: rgba(8, 145, 178, 0.22);
+  border-color: rgba(125, 211, 252, 0.28);
 }
 
 .dropdown.open .dropdown-menu {
-  display: flex;
+  display: grid;
   animation: slideIn 0.2s ease-out;
 }
 
@@ -586,7 +634,7 @@ nav {
 
 .chat-messages.admin-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   align-items: stretch;
   gap: 14px;
   padding: 16px;
@@ -622,6 +670,128 @@ nav {
 
 .admin-room-messages .chat-message {
   max-width: 100%;
+}
+
+.admin-request-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.admin-request-card {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(8, 47, 73, 0.34), rgba(15, 23, 42, 0.72));
+  animation: requestCardIn 0.24s ease-out;
+}
+
+.admin-request-card.denied {
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+.admin-request-heading,
+.admin-request-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.admin-request-name {
+  min-width: 0;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-request-status {
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #bae6fd;
+  background: rgba(2, 6, 23, 0.42);
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.admin-request-meta,
+.admin-request-decline {
+  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.admin-request-decline {
+  color: #fecaca;
+}
+
+.admin-request-note {
+  width: 100%;
+  min-height: 58px;
+  resize: vertical;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.5);
+  color: #f8fafc;
+  outline: none;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.admin-request-note:focus,
+.admin-request-note.needs-note {
+  border-color: rgba(248, 113, 113, 0.72);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.14);
+}
+
+.admin-request-actions button {
+  height: 30px;
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 999px;
+  background: rgba(8, 145, 178, 0.28);
+  color: #e0f2fe;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 950;
+  padding: 0 11px;
+}
+
+.admin-request-actions button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(125, 211, 252, 0.62);
+}
+
+.admin-request-actions button.danger {
+  border-color: rgba(248, 113, 113, 0.32);
+  background: rgba(127, 29, 29, 0.32);
+  color: #fecaca;
+}
+
+@keyframes requestCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .chat-empty {
@@ -825,6 +995,82 @@ nav {
   color: #f8fafc;
   font-weight: 950;
   overflow-wrap: anywhere;
+}
+
+.chat-request-hero {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin: 4px 0 16px;
+  text-align: center;
+}
+
+.chat-request-orbit {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle, rgba(125, 211, 252, 0.22), rgba(8, 47, 73, 0.14));
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  box-shadow: 0 18px 42px rgba(14, 165, 233, 0.18);
+}
+
+.chat-request-orbit::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  border: 1px solid rgba(34, 211, 238, 0.34);
+  border-left-color: transparent;
+  animation: requestSpin 2.1s linear infinite;
+}
+
+.chat-request-check {
+  width: 30px;
+  height: 30px;
+  color: #a7f3d0;
+  animation: requestFloat 1.8s ease-in-out infinite;
+}
+
+.chat-request-note {
+  margin: 10px 0 0;
+  padding: 11px 12px;
+  border: 1px solid rgba(125, 211, 252, 0.2);
+  border-radius: 12px;
+  background: rgba(8, 47, 73, 0.22);
+  color: #dff6ff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.chat-decline-note {
+  display: none;
+  margin-top: 10px;
+  padding: 11px 12px;
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  border-radius: 12px;
+  background: rgba(127, 29, 29, 0.24);
+  color: #fecaca;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.chat-decline-note.show {
+  display: block;
+}
+
+@keyframes requestSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes requestFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 .chat-setup-title {
@@ -1137,7 +1383,7 @@ nav {
   <div class="tabs-wrapper">
     <div class="tabs-main" id="tabsMain"></div>
     <div class="dropdown" id="moreDropdown">
-      <div class="dropdown-trigger" onclick="toggleDropdown()">More Games ▾</div>
+      <div class="dropdown-trigger" onclick="toggleDropdown()">More games</div>
       <div class="dropdown-menu" id="tabsMore"></div>
     </div>
     <button id="chatToggle" class="chat-button" type="button" aria-label="Open chat" title="Open chat">
@@ -1222,7 +1468,7 @@ nav {
       <div class="chat-auth-screen" data-auth-screen="signup">
         <button class="chat-back-btn" type="button" data-auth-mode="choice">Back</button>
         <h2 class="chat-setup-title">Sign up</h2>
-        <p class="chat-setup-copy">Create your account, then verify your email before chat opens.</p>
+        <p class="chat-setup-copy">Create your account, then send a request so New Tab can approve chat access.</p>
         <div class="chat-auth-grid">
           <div>
             <label class="chat-setup-label" for="chatSignupEmail">Email</label>
@@ -1247,13 +1493,31 @@ nav {
         <button class="chat-setup-submit" type="submit" data-auth-action="signup">Create account</button>
       </div>
 
-      <div class="chat-auth-screen" data-auth-screen="verify">
-        <h2 class="chat-setup-title">Verify your email</h2>
-        <p class="chat-setup-copy">A verification link has been sent. Open it, then come back here to continue.</p>
+      <div class="chat-auth-screen" data-auth-screen="approval">
+        <div class="chat-request-hero">
+          <div class="chat-request-orbit" aria-hidden="true">
+            <svg class="chat-request-check" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12.5L9.2 16.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 id="chatApprovalTitle" class="chat-setup-title">Request account verification</h2>
+          <p id="chatApprovalCopy" class="chat-setup-copy">Send your details to New Tab so an admin can approve chat access.</p>
+        </div>
         <div class="chat-verify-card">
-          <div class="chat-verify-email" id="chatVerifyEmail">you@example.com</div>
-          <button class="chat-setup-submit flush" type="button" data-auth-action="verify-check">I verified it</button>
-          <button class="chat-setup-submit secondary flush" type="button" data-auth-action="resend-verification">Resend email</button>
+          <div class="chat-verify-email" id="chatRequestEmail">you@example.com</div>
+          <label class="chat-setup-label" for="chatRequestName">Your name</label>
+          <input id="chatRequestName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Enter your name" />
+
+          <div class="chat-setup-label">Your school</div>
+          <div class="school-options" role="group" aria-label="School level for request">
+            <button class="school-option" type="button" data-school="High School">High</button>
+            <button class="school-option" type="button" data-school="Middle School">Middle</button>
+            <button class="school-option" type="button" data-school="Elementary School">Elementary</button>
+          </div>
+
+          <p class="chat-request-note">A request will be sent to New Tab and may take a few hours to get accepted. Make sure your email is valid so admins know who they are approving.</p>
+          <div id="chatDeclineNote" class="chat-decline-note"></div>
+          <button id="chatRequestApproval" class="chat-setup-submit flush" type="button" data-auth-action="request-approval">Request account verification</button>
           <button class="chat-back-btn" type="button" data-auth-action="signout">Use different email</button>
         </div>
       </div>
