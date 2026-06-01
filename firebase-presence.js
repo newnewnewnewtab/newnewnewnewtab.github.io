@@ -4,10 +4,8 @@ import {
   getAuth,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   signInWithEmailAndPassword,
-  signOut,
-  reload
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 import {
@@ -57,6 +55,12 @@ const CHAT_SCHOOL_KEY = "site_chat_school";
 const CHAT_PENDING_NAME_KEY = "site_chat_pending_name";
 
 const CHAT_PENDING_SCHOOL_KEY = "site_chat_pending_school";
+
+const ACCOUNT_REQUEST_STATUS = {
+  pending: "pending",
+  approved: "approved",
+  denied: "denied"
+};
 
 const CHAT_MESSAGE_LIMIT = 25;
 
@@ -112,6 +116,10 @@ let chatUnsubscribes = [];
 
 let unsubscribeUserProfile = null;
 
+let unsubscribeAccountRequest = null;
+
+let unsubscribeAdminRequests = null;
+
 let isOnline = false;
 
 let isChatOpen = false;
@@ -124,7 +132,13 @@ let currentUser = null;
 
 let currentProfile = null;
 
+let currentRequest = null;
+
 let currentIsAdmin = false;
+
+let adminRequestsContainer = null;
+
+let latestAdminRequests = [];
 
 const seenChatMessages = new Set();
 
@@ -516,8 +530,11 @@ function setupAuth() {
       currentIsAdmin =
         isAdminEmail(user?.email);
       currentProfile = null;
+      currentRequest = null;
 
       stopUserProfileWatch();
+      stopAccountRequestWatch();
+      stopAdminRequestsWatch();
       clearChatSubscriptions();
 
       if (!user) {
@@ -528,31 +545,15 @@ function setupAuth() {
         return;
       }
 
-      if (!user.emailVerified) {
-        dispatchAuthChanged();
-        showChatStatus(
-          "Verify your email before using chat."
-        );
-        sendVerificationEmail(user, {
-          quiet: true
-        }).catch(console.warn);
-        return;
+      connectDatabase();
+
+      if (currentIsAdmin) {
+        await ensureAdminProfile(user);
+        watchAdminAccountRequests();
       }
 
-      connectDatabase();
-      try {
-        await finishVerifiedSignup(user);
-        watchUserProfile(user);
-      } catch (error) {
-        console.warn(
-          "Verified profile setup failed:",
-          error
-        );
-        dispatchAuthStatus(
-          "Email verified, but your chat profile could not save. Check the Firebase database rules.",
-          true
-        );
-      }
+      watchAccountRequest(user);
+      watchUserProfile(user);
     }
   );
 }
@@ -566,35 +567,61 @@ async function handleAuthAction(detail = {}) {
     return;
   }
 
-  if (action === "resend-verification") {
+  if (action === "request-approval") {
     if (!auth.currentUser) {
       throw new Error("Sign in first.");
     }
 
-    await sendVerificationEmail(auth.currentUser);
-    return;
-  }
+    const requestName = cleanName(detail.name);
+    const requestSchool = cleanSchool(detail.school);
 
-  if (action === "verify-check") {
-    if (!auth.currentUser) {
-      throw new Error("Sign in first.");
-    }
-
-    await reload(auth.currentUser);
-    await auth.currentUser.getIdToken(true);
-
-    if (!auth.currentUser.emailVerified) {
+    if (!requestName || !requestSchool) {
       throw new Error(
-        "Still waiting on verification. Open the email, then check again."
+        "Enter your name and pick your school."
       );
     }
 
-    await finishVerifiedSignup(auth.currentUser);
-    currentUser = auth.currentUser;
-    watchUserProfile(auth.currentUser);
-    dispatchAuthStatus(
-      "Email verified. Welcome in.",
-      false
+    await submitAccountRequest(
+      auth.currentUser,
+      requestName,
+      requestSchool
+    );
+    return;
+  }
+
+  if (action === "approve-request") {
+    requireAdmin();
+    await approveAccountRequest(detail.uid);
+    return;
+  }
+
+  if (action === "deny-request") {
+    requireAdmin();
+    const note = String(
+      detail.note || ""
+    ).trim();
+
+    if (!note) {
+      throw new Error(
+        "Write a note before declining."
+      );
+    }
+
+    await denyAccountRequest(
+      detail.uid,
+      note
+    );
+    return;
+  }
+
+  if (action === "clear-denied-request") {
+    if (!auth.currentUser) return;
+
+    await remove(
+      ref(
+        database,
+        `siteChat/accountRequests/${auth.currentUser.uid}`
+      )
     );
     return;
   }
@@ -638,13 +665,9 @@ async function handleAuthAction(detail = {}) {
 
     savePendingSignup(name, school);
 
-    await sendVerificationEmail(
-      credential.user
-    );
-
     dispatchAuthChanged();
     dispatchAuthStatus(
-      "Verification email sent. Open it, then come back here.",
+      "Account created. Request account verification to unlock chat.",
       false
     );
     return;
@@ -657,39 +680,7 @@ async function handleAuthAction(detail = {}) {
       password
     );
 
-  if (!credential.user.emailVerified) {
-    await sendVerificationEmail(
-      credential.user
-    );
-    dispatchAuthChanged();
-    dispatchAuthStatus(
-      "Verification email sent. Open it, then check again.",
-      false
-    );
-    return;
-  }
-
-  await finishVerifiedSignup(
-    credential.user
-  );
-
   dispatchAuthStatus("Signed in.", false);
-}
-
-async function sendVerificationEmail(
-  user,
-  { quiet = false } = {}
-) {
-  if (!user || user.emailVerified) return;
-
-  await sendEmailVerification(user);
-
-  if (!quiet) {
-    dispatchAuthStatus(
-      "Verification email sent. Check your inbox.",
-      false
-    );
-  }
 }
 
 function savePendingSignup(name, school) {
@@ -712,37 +703,217 @@ function clearPendingSignup() {
   );
 }
 
-async function finishVerifiedSignup(user) {
-  if (!user?.emailVerified) return;
+async function submitAccountRequest(
+  user,
+  name,
+  school
+) {
+  if (!user) return;
 
-  const name = cleanName(
-    localStorage.getItem(
-      CHAT_PENDING_NAME_KEY
-    ) ||
-      localStorage.getItem(CHAT_NAME_KEY)
-  );
-  const school = cleanSchool(
-    localStorage.getItem(
-      CHAT_PENDING_SCHOOL_KEY
-    ) ||
-      localStorage.getItem(CHAT_SCHOOL_KEY)
+  const now = Date.now();
+  const requestRef = ref(
+    database,
+    `siteChat/accountRequests/${user.uid}`
   );
 
-  if (!name || !school) return;
+  await set(requestRef, {
+    uid: user.uid,
+    email: cleanEmail(user.email),
+    name,
+    school,
+    status: ACCOUNT_REQUEST_STATUS.pending,
+    requestedAt: now,
+    updatedAt: now
+  });
 
   localStorage.setItem(CHAT_NAME_KEY, name);
   localStorage.setItem(
     CHAT_SCHOOL_KEY,
     school
   );
+  clearPendingSignup();
 
-  await saveUserProfile(
-    user,
-    name,
-    school
+  dispatchAuthStatus(
+    "Request sent to New Tab. It may take a few hours to get accepted.",
+    false
+  );
+}
+
+function watchAccountRequest(user) {
+  if (!user) return;
+
+  const requestRef = ref(
+    database,
+    `siteChat/accountRequests/${user.uid}`
   );
 
-  clearPendingSignup();
+  unsubscribeAccountRequest = onValue(
+    requestRef,
+    (snapshot) => {
+      currentRequest =
+        snapshot.val() || null;
+      dispatchAuthChanged();
+    },
+    (error) => {
+      console.warn(
+        "Account request read failed:",
+        error
+      );
+    }
+  );
+}
+
+function stopAccountRequestWatch() {
+  if (!unsubscribeAccountRequest) return;
+
+  unsubscribeAccountRequest();
+  unsubscribeAccountRequest = null;
+}
+
+function watchAdminAccountRequests() {
+  if (unsubscribeAdminRequests) return;
+
+  const requestsRef = ref(
+    database,
+    "siteChat/accountRequests"
+  );
+
+  unsubscribeAdminRequests = onValue(
+    requestsRef,
+    (snapshot) => {
+      const requests = [];
+
+      snapshot.forEach((child) => {
+        const value = child.val();
+        if (!value) return;
+        requests.push({
+          ...value,
+          uid: value.uid || child.key
+        });
+      });
+
+      requests.sort((a, b) => {
+        const statusScore = {
+          pending: 0,
+          denied: 1,
+          approved: 2
+        };
+
+        return (
+          (statusScore[a.status] ?? 9) -
+            (statusScore[b.status] ?? 9) ||
+          Number(b.requestedAt || 0) -
+            Number(a.requestedAt || 0)
+        );
+      });
+
+      latestAdminRequests = requests;
+      renderAccountRequests();
+
+      document.dispatchEvent(
+        new CustomEvent(
+          "siteChatAccountRequestsChanged",
+          {
+            detail: { requests }
+          }
+        )
+      );
+    },
+    (error) => {
+      console.warn(
+        "Admin request queue failed:",
+        error
+      );
+    }
+  );
+}
+
+function stopAdminRequestsWatch() {
+  if (!unsubscribeAdminRequests) return;
+
+  unsubscribeAdminRequests();
+  unsubscribeAdminRequests = null;
+}
+
+function requireAdmin() {
+  if (!currentIsAdmin) {
+    throw new Error("Admin only.");
+  }
+}
+
+async function approveAccountRequest(uid) {
+  if (!uid) return;
+
+  const requestRef = ref(
+    database,
+    `siteChat/accountRequests/${uid}`
+  );
+  const snapshot = await get(requestRef);
+  const request = snapshot.val();
+
+  if (!request) {
+    throw new Error("That request no longer exists.");
+  }
+
+  const now = Date.now();
+
+  await saveApprovedUserProfile({
+    uid,
+    email: cleanEmail(request.email),
+    name: cleanName(request.name),
+    school: cleanSchool(request.school),
+    approvedAt: now,
+    approvedBy: currentUser.uid
+  });
+
+  await update(requestRef, {
+    status: ACCOUNT_REQUEST_STATUS.approved,
+    decidedAt: now,
+    decidedBy: currentUser.uid,
+    declineNote: null,
+    updatedAt: now
+  });
+}
+
+async function denyAccountRequest(uid, note) {
+  if (!uid) return;
+
+  const now = Date.now();
+
+  await update(
+    ref(
+      database,
+      `siteChat/accountRequests/${uid}`
+    ),
+    {
+      status: ACCOUNT_REQUEST_STATUS.denied,
+      declineNote: note,
+      decidedAt: now,
+      decidedBy: currentUser.uid,
+      updatedAt: now
+    }
+  );
+}
+
+async function ensureAdminProfile(user) {
+  if (!user) return;
+
+  const userRef = ref(
+    database,
+    `siteChat/users/${user.uid}`
+  );
+  const snapshot = await get(userRef);
+
+  if (snapshot.exists()) return;
+
+  await saveApprovedUserProfile({
+    uid: user.uid,
+    email: cleanEmail(user.email),
+    name: "Admin",
+    school: "High School",
+    approvedAt: Date.now(),
+    approvedBy: user.uid
+  });
 }
 
 function watchUserProfile(user) {
@@ -759,25 +930,6 @@ function watchUserProfile(user) {
       const value = snapshot.val();
 
       if (!value) {
-        const name = cleanName(
-          localStorage.getItem(
-            CHAT_NAME_KEY
-          )
-        );
-        const school = cleanSchool(
-          localStorage.getItem(
-            CHAT_SCHOOL_KEY
-          )
-        );
-
-        if (name && school) {
-          await saveUserProfile(
-            user,
-            name,
-            school
-          );
-        }
-
         currentProfile = null;
         dispatchAuthChanged();
         return;
@@ -785,6 +937,15 @@ function watchUserProfile(user) {
 
       currentProfile =
         normalizeProfile(user, value);
+
+      if (
+        !currentIsAdmin &&
+        currentProfile.approved !== true
+      ) {
+        currentProfile = null;
+        dispatchAuthChanged();
+        return;
+      }
 
       currentIsAdmin =
         isAdminEmail(user.email);
@@ -822,25 +983,31 @@ function stopUserProfileWatch() {
   unsubscribeUserProfile = null;
 }
 
-async function saveUserProfile(
-  user,
+async function saveApprovedUserProfile({
+  uid,
+  email,
   name,
-  school
-) {
-  if (!user) return;
+  school,
+  approvedAt = Date.now(),
+  approvedBy = ""
+}) {
+  if (!uid) return;
 
   const userRef = ref(
     database,
-    `siteChat/users/${user.uid}`
+    `siteChat/users/${uid}`
   );
   const snapshot = await get(userRef);
   const now = Date.now();
 
   const profile = {
-    uid: user.uid,
-    email: cleanEmail(user.email),
+    uid,
+    email: cleanEmail(email),
     name,
     school,
+    approved: true,
+    approvedAt,
+    approvedBy,
     updatedAt: now
   };
 
@@ -863,6 +1030,9 @@ function normalizeProfile(user, value) {
     school:
       cleanSchool(value.school) ||
       "High School",
+    approved:
+      value.approved === true ||
+      isAdminEmail(user.email),
     banned: value.banned === true,
     timeoutUntil:
       Number(value.timeoutUntil) || 0
@@ -880,12 +1050,11 @@ function dispatchAuthChanged() {
                 uid: currentUser.uid,
                 email: cleanEmail(
                   currentUser.email
-                ),
-                emailVerified:
-                  currentUser.emailVerified === true
+                )
               }
             : null,
           profile: currentProfile,
+          request: currentRequest,
           isAdmin: currentIsAdmin
         }
       }
@@ -977,13 +1146,12 @@ function clearChatSubscriptions() {
 function watchChatMessages() {
   if (
     !currentUser ||
-    !currentUser.emailVerified ||
-    !currentProfile
+    (!currentIsAdmin && !currentProfile)
   ) {
     clearChatSubscriptions();
     showChatStatus(
       currentUser
-        ? "Verify your email before using chat."
+        ? "Request account verification to unlock chat."
         : "Choose Sign up or Log in to use chat."
     );
     return;
@@ -1040,6 +1208,32 @@ function watchAdminRooms() {
   );
   chatMessages.innerHTML = "";
 
+  const requestPanel =
+    document.createElement("section");
+  requestPanel.className =
+    "admin-room-panel account-requests-panel";
+
+  const requestTitle =
+    document.createElement("div");
+  requestTitle.className =
+    "admin-room-title";
+  requestTitle.textContent =
+    "Account Requests";
+
+  adminRequestsContainer =
+    document.createElement("div");
+  adminRequestsContainer.className =
+    "admin-request-list";
+  adminRequestsContainer.innerHTML =
+    '<div class="chat-empty">Loading requests...</div>';
+
+  requestPanel.append(
+    requestTitle,
+    adminRequestsContainer
+  );
+  chatMessages.appendChild(requestPanel);
+  renderAccountRequests();
+
   ROOM_ORDER.forEach((room) => {
     const panel =
       document.createElement("section");
@@ -1064,6 +1258,144 @@ function watchAdminRooms() {
     chatMessages.appendChild(panel);
 
     subscribeRoom(room.id, body);
+  });
+}
+
+function renderAccountRequests() {
+  if (!adminRequestsContainer) return;
+
+  adminRequestsContainer.innerHTML = "";
+
+  const requests = latestAdminRequests.filter(
+    (request) =>
+      request.status !==
+      ACCOUNT_REQUEST_STATUS.approved
+  );
+
+  if (!requests.length) {
+    adminRequestsContainer.innerHTML =
+      '<div class="chat-empty">No account requests right now.</div>';
+    return;
+  }
+
+  requests.forEach((request) => {
+    const card =
+      document.createElement("article");
+    card.className =
+      `admin-request-card ${request.status || "pending"}`;
+
+    const heading =
+      document.createElement("div");
+    heading.className =
+      "admin-request-heading";
+
+    const name =
+      document.createElement("div");
+    name.className =
+      "admin-request-name";
+    name.textContent =
+      cleanName(request.name) ||
+      "Unnamed";
+
+    const status =
+      document.createElement("span");
+    status.className =
+      "admin-request-status";
+    status.textContent =
+      request.status || "pending";
+
+    heading.append(name, status);
+
+    const meta =
+      document.createElement("div");
+    meta.className =
+      "admin-request-meta";
+    meta.textContent =
+      `${cleanEmail(request.email)} - ${cleanSchool(request.school) || "No school"} - ${formatFullTime(request.requestedAt)}`;
+
+    const note =
+      document.createElement("textarea");
+    note.className =
+      "admin-request-note";
+    note.placeholder =
+      "Decline note required";
+    note.maxLength = 180;
+
+    const actions =
+      document.createElement("div");
+    actions.className =
+      "admin-request-actions";
+
+    const approve =
+      document.createElement("button");
+    approve.type = "button";
+    approve.textContent = "Approve";
+    approve.addEventListener("click", () => {
+      document.dispatchEvent(
+        new CustomEvent(
+          "siteChatAuthAction",
+          {
+            detail: {
+              action: "approve-request",
+              uid: request.uid
+            }
+          }
+        )
+      );
+    });
+
+    const deny =
+      document.createElement("button");
+    deny.type = "button";
+    deny.textContent = "Decline";
+    deny.className = "danger";
+    deny.addEventListener("click", () => {
+      const declineNote =
+        note.value.trim();
+
+      if (!declineNote) {
+        note.focus();
+        note.classList.add("needs-note");
+        return;
+      }
+
+      document.dispatchEvent(
+        new CustomEvent(
+          "siteChatAuthAction",
+          {
+            detail: {
+              action: "deny-request",
+              uid: request.uid,
+              note: declineNote
+            }
+          }
+        )
+      );
+    });
+
+    note.addEventListener("input", () => {
+      note.classList.remove("needs-note");
+    });
+
+    actions.append(approve, deny);
+    card.append(
+      heading,
+      meta,
+      note,
+      actions
+    );
+
+    if (request.declineNote) {
+      const decline =
+        document.createElement("div");
+      decline.className =
+        "admin-request-decline";
+      decline.textContent =
+        `Last note: ${String(request.declineNote).slice(0, 180)}`;
+      card.appendChild(decline);
+    }
+
+    adminRequestsContainer.appendChild(card);
   });
 }
 
@@ -1282,8 +1614,7 @@ function sendChatMessage() {
 
   if (
     !currentUser ||
-    !currentUser.emailVerified ||
-    !currentProfile
+    (!currentIsAdmin && !currentProfile)
   ) {
     document.dispatchEvent(
       new CustomEvent(
@@ -1340,13 +1671,13 @@ function sendChatMessage() {
     ),
     {
       uid: currentUser.uid,
-      email: cleanEmail(
-        currentUser.email
-      ),
-      name: currentProfile.name,
+    email: cleanEmail(
+      currentUser.email
+    ),
+      name: currentProfile?.name || "Admin",
       text,
       sid: SESSION_ID,
-      school: currentProfile.school,
+      school: currentProfile?.school || "High School",
       room: roomId,
       createdAt: Date.now()
     }
@@ -1743,13 +2074,25 @@ function friendlyAuthError(error) {
     "auth/weak-password":
       "Use a password with at least 6 characters.",
     "auth/network-request-failed":
-      "Could not reach Firebase. Try again in a moment.",
-    "auth/too-many-requests":
-      "Firebase is rate limiting verification emails. Wait a bit, then try again."
+      "Could not reach Firebase. Try again in a moment."
   };
 
   return messages[error.code] ||
     "Firebase rejected that request. Check the email and password.";
+}
+
+function formatFullTime(timestamp) {
+  if (!timestamp) return "unknown time";
+
+  return new Intl.DateTimeFormat(
+    [],
+    {
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    }
+  ).format(new Date(timestamp));
 }
 
 function formatMessageTime(
