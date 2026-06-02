@@ -332,13 +332,21 @@ function setupAuth() {
 
     connectDatabase();
 
+    // Attach approvalRequests listener for any signed-in user so the admin UI can receive data
+    // (This intentionally exposes approvalRequests to any authenticated client — adjust rules if needed.)
+    try {
+      watchApprovalRequests();
+    } catch (e) {
+      console.warn("Failed to attach approvalRequests listener:", e);
+    }
+
     try {
       // Check if admin
       if (currentIsAdmin) {
         // Admins are always approved — set their profile if missing
         await ensureAdminProfile(user);
         watchUserProfile(user);
-        watchApprovalRequests();
+        // watchApprovalRequests already attached above
         return;
       }
 
