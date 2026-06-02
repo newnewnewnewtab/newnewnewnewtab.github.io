@@ -225,7 +225,7 @@ function updateActiveUsers(totalPlayers) {
   document.dispatchEvent(new CustomEvent("siteActiveUsersChanged", { detail: { total: totalPlayers } }));
 }
 
-// ─── APPROVAL SYSTEM ──────────────────────────────────────────────────────────
+// ─── APPROVAL SYSTEM ───────────────────────────────────────────────────────
 
 async function submitApprovalRequest(user, name, school) {
   const requestRef = ref(database, `siteChat/approvalRequests/${user.uid}`);
@@ -248,7 +248,7 @@ async function checkApprovalStatus(user) {
 }
 
 function watchApprovalRequests() {
-  if (!currentIsAdmin) return;
+  // Always attach the approvalRequests listener for signed-in clients so admins can see requests
   if (unsubscribeApprovalRequests) return;
 
   const requestsRef = ref(database, "siteChat/approvalRequests");
@@ -260,6 +260,9 @@ function watchApprovalRequests() {
       });
     }
     document.dispatchEvent(new CustomEvent("siteApprovalRequestsChanged", { detail: { requests } }));
+  }, (error) => {
+    // Surface read errors (rules, auth problems) so they show up in the console
+    console.warn("Firebase approvalRequests read failed:", error);
   });
 }
 
@@ -303,7 +306,7 @@ async function denyRequest(uid, reason) {
   });
 }
 
-// ─── AUTH ─────────────────────────────────────────────────────────────────────
+// ─── AUTH ───────────────────────────────────────────────────────────
 
 function setupAuth() {
   document.addEventListener("siteChatAuthAction", (event) => {
@@ -571,7 +574,7 @@ function dispatchAuthStatus(message, isError) {
   document.dispatchEvent(new CustomEvent("siteChatAuthStatus", { detail: { message, isError } }));
 }
 
-// ─── CHAT ────────────────────────────────────────────────────────────────────
+// ─── CHAT ───────────────────────────────────────────────────────────
 
 function setupChat() {
   if (!chatForm || !chatInput) return;
