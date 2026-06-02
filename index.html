@@ -7,21 +7,21 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-1XQJN7ZWG6');
 </script>
 <meta charset="UTF-8" />
 <title>New Tab 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <script async src="https://googlesyndication.com" crossorigin="anonymous"></script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,900;1,9..40,400&family=Space+Mono:wght@400;700&display=swap');
+
 :root {
   --nav-height: 64px;
   --bg: #020617;
   --bg-card: #1e293b;
-  --border: rgba(255, 255, 255, 0.1);
+  --border: rgba(255,255,255,0.1);
   --text: #f8fafc;
   --muted: #94a3b8;
   --accent: #38bdf8;
@@ -32,17 +32,17 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
 }
 
-/* FULLSCREEN BLACKOUT POPUP */
+/* ─── OVERLAY ─────────────────────────────────────────────── */
 .overlay {
   position: fixed;
   inset: 0;
-  background: #000000;
+  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,76 +51,17 @@ body {
   visibility: hidden;
   transition: opacity 0.3s ease;
 }
+.overlay.active { opacity: 1; visibility: visible; }
+.overlay-content { text-align: center; max-width: 900px; padding: 40px; width: 100%; }
+.overlay-content h1 { color: #fff; font-size: clamp(2rem,8vw,4rem); font-weight: 800; margin-bottom: 50px; line-height: 1.1; letter-spacing: -2px; }
+.overlay-btns { display: flex; flex-direction: column; align-items: center; gap: 25px; }
+.btn-yes { background: #fff; color: #000; padding: 24px 80px; font-size: 1.5rem; font-weight: 900; border-radius: 100px; border: none; cursor: pointer; width: 100%; max-width: 400px; transition: transform 0.2s, background-color 0.2s; text-transform: uppercase; }
+.btn-yes:hover { transform: scale(1.05); background: #f0f0f0; }
+.btn-no { background: transparent; color: #666; padding: 10px 20px; font-size: 1.1rem; font-weight: 600; border: none; cursor: pointer; transition: color 0.2s; }
+.btn-no:hover:not(:disabled) { color: #999; }
+.btn-no:disabled { opacity: 0.3; cursor: not-allowed; }
 
-.overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.overlay-content {
-  text-align: center;
-  max-width: 900px;
-  padding: 40px;
-  width: 100%;
-}
-
-.overlay-content h1 {
-  color: #ffffff;
-  font-size: clamp(2rem, 8vw, 4rem);
-  font-weight: 800;
-  margin-bottom: 50px;
-  line-height: 1.1;
-  letter-spacing: -2px;
-}
-
-.overlay-btns {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 25px;
-}
-
-.btn-yes {
-  background: #ffffff;
-  color: #000000;
-  padding: 24px 80px;
-  font-size: 1.5rem;
-  font-weight: 900;
-  border-radius: 100px;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  max-width: 400px;
-  transition: transform 0.2s, background-color 0.2s;
-  text-transform: uppercase;
-}
-
-.btn-yes:hover {
-  transform: scale(1.05);
-  background: #f0f0f0;
-}
-
-.btn-no {
-  background: transparent;
-  color: #666666;
-  padding: 10px 20px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.btn-no:hover:not(:disabled) {
-  color: #999999;
-}
-
-.btn-no:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* NAVBAR */
+/* ─── NAVBAR ──────────────────────────────────────────────── */
 nav {
   position: fixed;
   inset: 0 0 auto 0;
@@ -129,72 +70,36 @@ nav {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15,23,42,0.9);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   z-index: 1000;
 }
+.brand { display: flex; flex-direction: column; min-width: fit-content; margin-right: 30px; }
+.title { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+.status { font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; }
 
-.brand {
-  display: flex;
-  flex-direction: column;
-  min-width: fit-content;
-  margin-right: 30px;
-}
-
-.title {
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.5px;
-}
-
-.status {
-  font-size: 11px;
-  color: var(--accent);
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.tabs-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  overflow: visible;
-}
-
-.tabs-main {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+.tabs-wrapper { display: flex; align-items: center; gap: 8px; flex: 1; overflow: visible; min-width: 0; }
+.tabs-main { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; overflow: hidden; min-width: 0; }
 
 .tab {
   position: relative;
-  padding: 8px 16px;
+  padding: 7px 14px;
   border-radius: var(--radius);
   cursor: pointer;
   background: transparent;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
   font-weight: 500;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--muted);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  flex-shrink: 0;
 }
-
-.tab:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-}
-
-.tab.active {
-  background: var(--accent);
-  color: #000;
-  font-weight: 700;
-}
+.tab:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.tab.active { background: var(--accent); color: #000; font-weight: 700; }
 
 .tab-player-count {
   position: absolute;
@@ -206,8 +111,8 @@ nav {
   border-radius: 999px;
   background: #22c55e;
   color: #052e16;
-  border: 2px solid rgba(15, 23, 42, 0.95);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35), 0 4px 10px rgba(0, 0, 0, 0.28);
+  border: 2px solid rgba(15,23,42,0.95);
+  box-shadow: 0 0 0 1px rgba(34,197,94,0.35), 0 4px 10px rgba(0,0,0,0.28);
   display: none;
   align-items: center;
   justify-content: center;
@@ -217,60 +122,95 @@ nav {
   text-align: center;
   pointer-events: none;
 }
+.tab-player-count.has-players { display: inline-flex; }
+.tab.active .tab-player-count { border-color: var(--accent); }
 
-.tab-player-count.has-players {
-  display: inline-flex;
-}
-
-.tab.active .tab-player-count {
-  border-color: var(--accent);
-}
-
-.dropdown {
-  position: relative;
-  display: none;
-}
+/* ─── MORE DROPDOWN (redesigned) ──────────────────────────── */
+.dropdown { position: relative; display: none; flex-shrink: 0; }
 
 .dropdown-trigger {
-  padding: 8px 16px;
-  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  background: rgba(30,41,59,0.8);
+  border: 1px solid rgba(125,211,252,0.2);
   border-radius: var(--radius);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   font-size: 13px;
-  border: 1px solid var(--border);
+  color: #e0f2fe;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+  font-family: inherit;
 }
+.dropdown-trigger:hover {
+  background: rgba(8,145,178,0.25);
+  border-color: rgba(125,211,252,0.45);
+  color: #fff;
+}
+.dropdown.open .dropdown-trigger {
+  background: rgba(8,145,178,0.32);
+  border-color: rgba(103,232,249,0.6);
+  color: #fff;
+}
+.dropdown-trigger-chevron {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.22s ease;
+  opacity: 0.8;
+}
+.dropdown.open .dropdown-trigger-chevron { transform: rotate(180deg); }
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
-  background: #1e293b;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  top: calc(100% + 10px);
+  left: 0;
+  background: rgba(10,20,40,0.98);
+  border: 1px solid rgba(125,211,252,0.22);
+  border-radius: 14px;
   padding: 8px;
-  min-width: 180px;
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+  min-width: 220px;
+  max-width: 300px;
+  box-shadow: 0 24px 60px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(125,211,252,0.08);
+  backdrop-filter: blur(20px);
   display: none;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
+  z-index: 1100;
 }
-
 .dropdown.open .dropdown-menu {
   display: flex;
-  animation: slideIn 0.2s ease-out;
+  animation: dropdownIn 0.22s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Tabs inside dropdown inherit .tab styles but full width */
+.dropdown-menu .tab {
+  width: 100%;
+  border-radius: 9px;
+  font-size: 13px;
+  padding: 9px 12px;
+  flex-shrink: 1;
+}
+.dropdown-menu .tab:hover { background: rgba(255,255,255,0.06); }
+.dropdown-menu .tab.active { background: var(--accent); }
+.dropdown-divider {
+  height: 1px;
+  background: rgba(148,163,184,0.12);
+  margin: 4px 0;
+  border: none;
+}
+.dropdown-section-label {
+  padding: 4px 10px 3px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 
 .ribbon {
@@ -288,57 +228,42 @@ nav {
   pointer-events: none;
 }
 
+/* ─── CHAT BUTTON ──────────────────────────────────────────── */
 .chat-button {
   position: relative;
   margin-left: auto;
   height: 42px;
   padding: 0 17px 0 14px;
-  border: 1px solid rgba(103, 232, 249, 0.42);
+  border: 1px solid rgba(103,232,249,0.42);
   border-radius: 999px;
-  background:
-    linear-gradient(135deg, rgba(6, 182, 212, 0.36), rgba(15, 23, 42, 0.9)),
-    rgba(15, 23, 42, 0.92);
+  background: linear-gradient(135deg, rgba(6,182,212,0.36), rgba(15,23,42,0.9)), rgba(15,23,42,0.92);
   color: #f0f9ff;
   font-weight: 900;
   cursor: pointer;
   font-size: 13px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 14px 34px rgba(6, 182, 212, 0.18);
+  font-family: inherit;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 14px 34px rgba(6,182,212,0.18);
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 9px;
+  flex-shrink: 0;
 }
-
 .chat-button:hover {
   transform: translateY(-1px);
-  background:
-    linear-gradient(135deg, rgba(34, 211, 238, 0.48), rgba(15, 23, 42, 0.92)),
-    rgba(15, 23, 42, 0.92);
-  border-color: rgba(165, 243, 252, 0.78);
+  background: linear-gradient(135deg, rgba(34,211,238,0.48), rgba(15,23,42,0.92)), rgba(15,23,42,0.92);
+  border-color: rgba(165,243,252,0.78);
   color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 18px 42px rgba(6, 182, 212, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 18px 42px rgba(6,182,212,0.26);
 }
-
 .chat-button.open {
   background: linear-gradient(135deg, #67e8f9, #38bdf8);
   color: #031018;
   border-color: transparent;
 }
-
-.chat-button-icon {
-  width: 20px;
-  height: 20px;
-  opacity: 0.96;
-  filter: drop-shadow(0 3px 8px rgba(14, 165, 233, 0.28));
-  transition: transform 0.18s ease;
-}
-
-.chat-button.open .chat-button-icon {
-  opacity: 1;
-  transform: rotate(-4deg) scale(1.04);
-}
-
+.chat-button-icon { width: 20px; height: 20px; opacity: 0.96; filter: drop-shadow(0 3px 8px rgba(14,165,233,0.28)); transition: transform 0.18s ease; }
+.chat-button.open .chat-button-icon { opacity: 1; transform: rotate(-4deg) scale(1.04); }
 .chat-unread-dot {
   position: absolute;
   top: -3px;
@@ -347,24 +272,23 @@ nav {
   height: 10px;
   border-radius: 999px;
   background: #22c55e;
-  border: 2px solid rgba(15, 23, 42, 0.98);
-  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  border: 2px solid rgba(15,23,42,0.98);
+  box-shadow: 0 0 0 6px rgba(34,197,94,0);
   opacity: 0;
   transform: scale(0.72);
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
-
 .chat-button.has-unread .chat-unread-dot {
   opacity: 1;
   transform: scale(1);
   animation: unreadPulse 1.8s ease-out infinite;
 }
-
 @keyframes unreadPulse {
-  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.34); }
-  100% { box-shadow: 0 0 0 9px rgba(34, 197, 94, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.34); }
+  100% { box-shadow: 0 0 0 9px rgba(34,197,94,0); }
 }
 
+/* ─── VIEWER ───────────────────────────────────────────────── */
 #viewer {
   position: fixed;
   top: var(--nav-height);
@@ -375,375 +299,249 @@ nav {
   background: #000;
 }
 
+/* ─── CHAT PANEL ──────────────────────────────────────────── */
 .site-chat {
   position: fixed;
   inset: 0 0 0 auto;
-  width: min(34vw, 470px);
+  width: min(34vw,470px);
   min-width: 340px;
   max-width: 100vw;
   background:
-    radial-gradient(circle at 20% 0%, rgba(20, 184, 166, 0.12), transparent 34%),
-    linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(2, 6, 23, 0.98));
-  border-left: 1px solid rgba(125, 211, 252, 0.24);
-  box-shadow: -28px 0 72px rgba(0, 0, 0, 0.5);
+    radial-gradient(circle at 20% 0%, rgba(20,184,166,0.12), transparent 34%),
+    linear-gradient(180deg, rgba(17,24,39,0.98), rgba(2,6,23,0.98));
+  border-left: 1px solid rgba(125,211,252,0.24);
+  box-shadow: -28px 0 72px rgba(0,0,0,0.5);
   backdrop-filter: blur(18px);
   display: grid;
   grid-template-rows: auto 1fr auto;
   transform: translateX(100%);
-  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.32s cubic-bezier(0.16,1,0.3,1);
   z-index: 1700;
 }
-
-.site-chat.open {
-  transform: translateX(0);
-}
-
-.site-chat.admin-mode.open {
-  inset: 0;
-  width: 100vw;
-  min-width: 0;
-  border-left: none;
-}
-
-.site-chat.admin-mode .chat-header {
-  padding: 16px 22px;
-}
+.site-chat.open { transform: translateX(0); }
+.site-chat.admin-mode.open { inset: 0; width: 100vw; min-width: 0; border-left: none; }
+.site-chat.admin-mode .chat-header { padding: 16px 22px; }
 
 .chat-header {
   padding: 20px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-  background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.64));
+  border-bottom: 1px solid rgba(148,163,184,0.16);
+  background: linear-gradient(180deg, rgba(15,23,42,0.92), rgba(15,23,42,0.64));
 }
-
-.chat-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.chat-title {
-  font-size: 20px;
-  font-weight: 950;
-  letter-spacing: 0;
-}
-
+.chat-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.chat-title { font-size: 20px; font-weight: 950; letter-spacing: 0; }
 .chat-close-btn {
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text);
-  font-size: 20px;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+  width: 32px; height: 32px; padding: 0; border: none;
+  background: rgba(255,255,255,0.1); color: var(--text);
+  font-size: 20px; font-weight: 600; border-radius: 8px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s ease; flex-shrink: 0;
 }
-
-.chat-close-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
+.chat-close-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
 .active-users {
-  border: 1px solid rgba(74, 222, 128, 0.4);
+  border: 1px solid rgba(74,222,128,0.4);
   border-radius: 999px;
   padding: 6px 11px;
   color: #dcfce7;
-  background: rgba(22, 101, 52, 0.22);
+  background: rgba(22,101,52,0.22);
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
 }
-
-.chat-profile {
-  display: grid;
-  gap: 8px;
-  margin-top: 2px;
-}
-
+.chat-profile { display: grid; gap: 8px; margin-top: 2px; }
 .identity-summary {
   display: none;
   grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border: 1px solid rgba(125, 211, 252, 0.2);
+  border: 1px solid rgba(125,211,252,0.2);
   border-radius: 14px;
-  background:
-    linear-gradient(135deg, rgba(8, 47, 73, 0.36), rgba(15, 23, 42, 0.78)),
-    rgba(2, 6, 23, 0.34);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: linear-gradient(135deg, rgba(8,47,73,0.36), rgba(15,23,42,0.78)), rgba(2,6,23,0.34);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
 }
+.identity-summary.locked { display: grid; }
+.identity-main { min-width: 0; }
+.identity-label { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.identity-name { color: #f8fafc; font-size: 15px; font-weight: 950; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.identity-room { border: 1px solid rgba(45,212,191,0.42); border-radius: 999px; padding: 6px 10px; color: #ccfbf1; background: rgba(13,148,136,0.2); font-size: 11px; font-weight: 950; white-space: nowrap; }
+.identity-actions { display: inline-flex; align-items: center; gap: 8px; }
+.admin-badge { display: none; border: 1px solid rgba(250,204,21,0.5); border-radius: 999px; padding: 6px 10px; color: #fef9c3; background: rgba(161,98,7,0.28); font-size: 11px; font-weight: 950; white-space: nowrap; }
+.admin-badge.show { display: inline-flex; }
+.identity-signout { height: 30px; border: 1px solid rgba(148,163,184,0.25); border-radius: 999px; background: rgba(15,23,42,0.78); color: #e2e8f0; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; padding: 0 11px; }
+.identity-signout:hover { border-color: rgba(125,211,252,0.55); color: #fff; }
 
-.identity-summary.locked {
-  display: grid;
+.chat-input { width: 100%; min-width: 0; border: 1px solid rgba(125,211,252,0.24); border-radius: 12px; background: rgba(2,6,23,0.68); color: var(--text); outline: none; font: inherit; }
+.chat-input:focus { border-color: rgba(56,189,248,0.72); box-shadow: 0 0 0 3px rgba(56,189,248,0.16); }
+
+.chat-messages { min-height: 0; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.chat-messages.admin-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; gap: 14px; padding: 16px; }
+
+.admin-room-panel { min-height: 0; display: grid; grid-template-rows: auto 1fr; border: 1px solid rgba(125,211,252,0.2); border-radius: 12px; overflow: hidden; background: rgba(15,23,42,0.52); }
+.admin-room-title { padding: 11px 12px; border-bottom: 1px solid rgba(148,163,184,0.16); color: #e0f2fe; font-size: 12px; font-weight: 950; text-transform: uppercase; }
+.admin-room-messages { min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.admin-room-messages .chat-message { max-width: 100%; }
+
+/* ─── ADMIN APPROVAL PANEL ─────────────────────────────────── */
+.admin-approval-panel {
+  border: 1px solid rgba(250,204,21,0.28);
+  border-radius: 14px;
+  background: rgba(10,8,0,0.6);
+  overflow: hidden;
+  margin-bottom: 14px;
 }
-
-.identity-main {
-  min-width: 0;
+.admin-approval-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(250,204,21,0.18);
+  background: rgba(161,98,7,0.12);
 }
-
-.identity-label {
-  color: var(--muted);
+.admin-approval-title {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #fef3c7;
+}
+.admin-approval-count {
+  background: #f59e0b;
+  color: #000;
   font-size: 10px;
   font-weight: 900;
-  text-transform: uppercase;
-}
-
-.identity-name {
-  color: #f8fafc;
-  font-size: 15px;
-  font-weight: 950;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.identity-room {
-  border: 1px solid rgba(45, 212, 191, 0.42);
   border-radius: 999px;
-  padding: 6px 10px;
-  color: #ccfbf1;
-  background: rgba(13, 148, 136, 0.2);
-  font-size: 11px;
-  font-weight: 950;
-  white-space: nowrap;
+  padding: 2px 8px;
+  min-width: 20px;
+  text-align: center;
 }
-
-.identity-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.admin-approval-list { padding: 8px; display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+.approval-request-card {
+  padding: 12px;
+  border: 1px solid rgba(148,163,184,0.15);
+  border-radius: 10px;
+  background: rgba(15,23,42,0.7);
+  animation: cardIn 0.25s cubic-bezier(0.16,1,0.3,1);
 }
-
-.admin-badge {
-  display: none;
-  border: 1px solid rgba(250, 204, 21, 0.5);
-  border-radius: 999px;
-  padding: 6px 10px;
-  color: #fef9c3;
-  background: rgba(161, 98, 7, 0.28);
-  font-size: 11px;
-  font-weight: 950;
-  white-space: nowrap;
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-.admin-badge.show {
-  display: inline-flex;
+.approval-request-info { display: grid; gap: 3px; margin-bottom: 10px; }
+.approval-req-email { color: #bae6fd; font-size: 13px; font-weight: 700; font-family: 'Space Mono', monospace; }
+.approval-req-meta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.approval-req-name { color: #f8fafc; font-size: 12px; font-weight: 600; }
+.approval-req-school {
+  font-size: 10px; font-weight: 900; text-transform: uppercase;
+  border-radius: 999px; padding: 2px 8px;
+  border: 1px solid rgba(45,212,191,0.4);
+  color: #ccfbf1; background: rgba(13,148,136,0.2);
 }
-
-.identity-signout {
-  height: 30px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.78);
-  color: #e2e8f0;
+.approval-req-time { color: var(--muted); font-size: 10px; }
+.approval-actions { display: flex; gap: 6px; }
+.approval-btn {
+  flex: 1;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
   cursor: pointer;
   font: inherit;
-  font-size: 11px;
-  font-weight: 900;
-  padding: 0 11px;
-}
-
-.identity-signout:hover {
-  border-color: rgba(125, 211, 252, 0.55);
-  color: #fff;
-}
-
-.chat-input {
-  width: 100%;
-  min-width: 0;
-  border: 1px solid rgba(125, 211, 252, 0.24);
-  border-radius: 12px;
-  background: rgba(2, 6, 23, 0.68);
-  color: var(--text);
-  outline: none;
-  font: inherit;
-}
-
-.chat-input:focus {
-  border-color: rgba(56, 189, 248, 0.72);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
-}
-
-.chat-messages {
-  min-height: 0;
-  overflow-y: auto;
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.chat-messages.admin-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
-  gap: 14px;
-  padding: 16px;
-}
-
-.admin-room-panel {
-  min-height: 0;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  border: 1px solid rgba(125, 211, 252, 0.2);
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(15, 23, 42, 0.52);
-}
-
-.admin-room-title {
-  padding: 11px 12px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-  color: #e0f2fe;
   font-size: 12px;
-  font-weight: 950;
-  text-transform: uppercase;
+  font-weight: 800;
+  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
 }
+.approval-btn:hover { transform: translateY(-1px); }
+.approval-btn:active { transform: translateY(0); }
+.approval-btn-approve { background: #22c55e; color: #052e16; }
+.approval-btn-approve:hover { background: #4ade80; }
+.approval-btn-deny { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+.approval-btn-deny:hover { background: rgba(239,68,68,0.32); }
+.approval-empty { padding: 16px; text-align: center; color: var(--muted); font-size: 13px; }
 
-.admin-room-messages {
-  min-height: 0;
-  overflow-y: auto;
-  padding: 12px;
+/* ─── DENY MODAL ─────────────────────────────────────────────── */
+.deny-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 2200;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
 }
+.deny-modal-backdrop.show { opacity: 1; visibility: visible; }
+.deny-modal {
+  width: min(90vw, 400px);
+  border: 1px solid rgba(239,68,68,0.4);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(30,20,20,0.99), rgba(15,5,5,0.99));
+  padding: 24px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.6);
+  animation: denyModalIn 0.26s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes denyModalIn {
+  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.deny-modal-title { font-size: 18px; font-weight: 900; margin: 0 0 6px; color: #fca5a5; }
+.deny-modal-sub { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
+.deny-modal-label { font-size: 11px; font-weight: 900; text-transform: uppercase; color: #cbd5e1; display: block; margin-bottom: 8px; }
+.deny-modal-textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 10px;
+  background: rgba(2,6,23,0.7);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 12px;
+  outline: none;
+  margin-bottom: 14px;
+}
+.deny-modal-textarea:focus { border-color: rgba(239,68,68,0.7); box-shadow: 0 0 0 3px rgba(239,68,68,0.14); }
+.deny-modal-actions { display: flex; gap: 10px; }
+.deny-modal-cancel { flex: 1; height: 40px; border: 1px solid rgba(148,163,184,0.25); border-radius: 10px; background: rgba(15,23,42,0.8); color: #e2e8f0; cursor: pointer; font: inherit; font-weight: 700; font-size: 13px; transition: background 0.15s; }
+.deny-modal-cancel:hover { background: rgba(30,41,59,0.9); }
+.deny-modal-confirm { flex: 1; height: 40px; border: none; border-radius: 10px; background: #ef4444; color: #fff; cursor: pointer; font: inherit; font-weight: 800; font-size: 13px; transition: background 0.15s, transform 0.15s; }
+.deny-modal-confirm:hover { background: #f87171; transform: translateY(-1px); }
 
-.admin-room-messages .chat-message {
-  max-width: 100%;
-}
-
-.chat-empty {
-  color: var(--muted);
-  margin: auto;
-  text-align: center;
-  line-height: 1.5;
-  max-width: 240px;
-}
-
-.chat-disabled-notice {
-  margin: auto;
-  max-width: 280px;
-  text-align: center;
-  color: #fecaca;
-  font-size: 30px;
-  font-weight: 900;
-  line-height: 1.12;
-  text-transform: uppercase;
-}
+/* ─── MESSAGES ───────────────────────────────────────────────── */
+.chat-empty { color: var(--muted); margin: auto; text-align: center; line-height: 1.5; max-width: 240px; }
+.chat-disabled-notice { margin: auto; max-width: 280px; text-align: center; color: #fecaca; font-size: 30px; font-weight: 900; line-height: 1.12; text-transform: uppercase; }
 
 .chat-message {
   display: grid;
   gap: 6px;
   max-width: 92%;
   padding: 11px 13px;
-  border: 1px solid rgba(148, 163, 184, 0.14);
+  border: 1px solid rgba(148,163,184,0.14);
   border-radius: 14px 14px 14px 5px;
-  background: rgba(30, 41, 59, 0.72);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+  background: rgba(30,41,59,0.72);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.16);
   animation: messageIn 0.22s ease-out;
 }
-
-.chat-message.own {
-  align-self: flex-end;
-  border-color: rgba(56, 189, 248, 0.28);
-  border-radius: 14px 14px 5px 14px;
-  background: linear-gradient(135deg, rgba(14, 116, 144, 0.42), rgba(8, 47, 73, 0.52));
-}
-
-.message-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.message-author {
-  display: inline-flex;
-  align-items: center;
-  min-width: 0;
-  gap: 6px;
-}
-
-.message-name {
-  color: #bae6fd;
-  font-weight: 950;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.message-email {
-  max-width: 210px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #fef9c3;
-  font-weight: 800;
-}
-
-.message-text {
-  color: #f8fafc;
-  overflow-wrap: anywhere;
-  line-height: 1.42;
-}
-
-.message-edited {
-  margin-top: -2px;
-  color: rgba(203, 213, 225, 0.7);
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.message-admin-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.message-admin-controls button {
-  height: 26px;
-  border: 1px solid rgba(125, 211, 252, 0.24);
-  border-radius: 999px;
-  background: rgba(2, 6, 23, 0.54);
-  color: #dff6ff;
-  cursor: pointer;
-  font: inherit;
-  font-size: 11px;
-  font-weight: 900;
-  padding: 0 9px;
-}
-
-.message-admin-controls button:hover {
-  border-color: rgba(56, 189, 248, 0.72);
-  background: rgba(8, 145, 178, 0.32);
-}
+.chat-message.own { align-self: flex-end; border-color: rgba(56,189,248,0.28); border-radius: 14px 14px 5px 14px; background: linear-gradient(135deg, rgba(14,116,144,0.42), rgba(8,47,73,0.52)); }
+.message-meta { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 11px; font-weight: 700; }
+.message-author { display: inline-flex; align-items: center; min-width: 0; gap: 6px; }
+.message-name { color: #bae6fd; font-weight: 950; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.message-email { max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fef9c3; font-weight: 800; }
+.message-text { color: #f8fafc; overflow-wrap: anywhere; line-height: 1.42; }
+.message-edited { margin-top: -2px; color: rgba(203,213,225,0.7); font-size: 10px; font-weight: 800; }
+.message-admin-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.message-admin-controls button { height: 26px; border: 1px solid rgba(125,211,252,0.24); border-radius: 999px; background: rgba(2,6,23,0.54); color: #dff6ff; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; padding: 0 9px; }
+.message-admin-controls button:hover { border-color: rgba(56,189,248,0.72); background: rgba(8,145,178,0.32); }
 
 @keyframes messageIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ─── CHAT SETUP (auth panel) ─────────────────────────────── */
 .chat-setup {
   position: absolute;
   inset: 0;
@@ -751,133 +549,46 @@ nav {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(2, 6, 23, 0.68);
+  background: rgba(2,6,23,0.68);
   backdrop-filter: blur(14px);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.22s ease, visibility 0.22s ease;
+  overflow-y: auto;
 }
-
-.chat-setup.show {
-  opacity: 1;
-  visibility: visible;
-}
-
+.chat-setup.show { opacity: 1; visibility: visible; }
 .chat-setup-panel {
-  width: min(100%, 380px);
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  width: min(100%,380px);
+  border: 1px solid rgba(148,163,184,0.24);
   border-radius: 16px;
-  padding: 18px;
-  background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
-  animation: setupIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(30,41,59,0.98), rgba(15,23,42,0.98));
+  box-shadow: 0 24px 70px rgba(0,0,0,0.48);
+  animation: setupIn 0.26s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes setupIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.chat-auth-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
+.chat-auth-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.chat-auth-screen { display: none; }
+.chat-auth-screen.active { display: block; }
+.chat-mode-actions { display: grid; gap: 10px; margin-top: 16px; }
+.chat-back-btn { height: 30px; margin: 0 0 10px; border: none; background: transparent; color: #bae6fd; cursor: pointer; font: inherit; font-size: 12px; font-weight: 900; padding: 0; text-align: left; }
+.chat-back-btn:hover { color: #fff; }
+.chat-setup-title { margin: 0 0 6px; font-size: 20px; font-weight: 900; letter-spacing: 0; }
+.chat-setup-copy { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.chat-setup-label { display: block; margin: 14px 0 7px; color: #cbd5e1; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.chat-setup-input { width: 100%; height: 42px; border: 1px solid rgba(148,163,184,0.28); border-radius: 10px; background: rgba(2,6,23,0.68); color: var(--text); outline: none; padding: 0 12px; font: inherit; }
+.chat-setup-input:focus { border-color: rgba(56,189,248,0.72); box-shadow: 0 0 0 3px rgba(56,189,248,0.16); }
 
-.chat-auth-screen {
-  display: none;
-}
-
-.chat-auth-screen.active {
-  display: block;
-}
-
-.chat-mode-actions {
-  display: grid;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.chat-back-btn {
-  height: 30px;
-  margin: 0 0 10px;
-  border: none;
-  background: transparent;
-  color: #bae6fd;
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 900;
-  padding: 0;
-  text-align: left;
-}
-
-.chat-back-btn:hover {
-  color: #fff;
-}
-
-.chat-verify-card {
-  display: grid;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 14px;
-  border: 1px solid rgba(125, 211, 252, 0.26);
-  border-radius: 12px;
-  background: rgba(8, 47, 73, 0.28);
-}
-
-.chat-verify-email {
-  color: #f8fafc;
-  font-weight: 950;
-  overflow-wrap: anywhere;
-}
-
-.chat-setup-title {
-  margin: 0 0 6px;
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: 0;
-}
-
-.chat-setup-copy {
-  margin: 0 0 14px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.chat-setup-label {
-  display: block;
-  margin: 14px 0 7px;
-  color: #cbd5e1;
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.chat-setup-input {
-  width: 100%;
-  height: 42px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  border-radius: 10px;
-  background: rgba(2, 6, 23, 0.68);
-  color: var(--text);
-  outline: none;
-  padding: 0 12px;
-  font: inherit;
-}
-
-.chat-setup-input:focus {
-  border-color: rgba(56, 189, 248, 0.72);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
-}
-
-.school-options {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
+.school-options { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
 .school-option {
   height: 40px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid rgba(148,163,184,0.22);
   border-radius: 10px;
-  background: rgba(2, 6, 23, 0.44);
+  background: rgba(2,6,23,0.44);
   color: #cbd5e1;
   cursor: pointer;
   font: inherit;
@@ -885,12 +596,10 @@ nav {
   font-weight: 900;
   transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
 }
-
-.school-option:hover,
-.school-option.selected {
+.school-option:hover, .school-option.selected {
   transform: translateY(-1px);
-  border-color: rgba(56, 189, 248, 0.76);
-  background: rgba(8, 145, 178, 0.32);
+  border-color: rgba(56,189,248,0.76);
+  background: rgba(8,145,178,0.32);
   color: #f8fafc;
 }
 
@@ -907,215 +616,157 @@ nav {
   font-weight: 950;
   transition: transform 0.16s ease, background 0.16s ease;
 }
+.chat-setup-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chat-setup-submit.secondary { border: 1px solid rgba(125,211,252,0.32); background: rgba(2,6,23,0.7); color: #e0f2fe; }
+.chat-setup-submit.flush { margin-top: 0; }
+.chat-setup-submit.secondary:hover { background: rgba(8,145,178,0.28); }
+.chat-setup-submit:hover { transform: translateY(-1px); background: #67e8f9; }
+.chat-setup-submit.secondary:hover { background: rgba(8,145,178,0.28); }
+.chat-setup-error { min-height: 18px; margin-top: 8px; color: #fecaca; font-size: 12px; font-weight: 700; }
+.chat-setup-error.ok { color: #bbf7d0; }
 
-.chat-setup-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+/* ─── PENDING / APPROVED / DENIED SCREENS ─────────────────── */
+/* Pending screen */
+.pending-screen {
+  text-align: center;
+  padding: 10px 0;
 }
-
-.chat-setup-submit.secondary {
-  border: 1px solid rgba(125, 211, 252, 0.32);
-  background: rgba(2, 6, 23, 0.7);
-  color: #e0f2fe;
+.pending-anim-wrap {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 18px;
+  position: relative;
 }
-
-.chat-setup-submit.flush {
-  margin-top: 0;
+.pending-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--accent);
+  animation: orbit 1.4s linear infinite;
 }
-
-.chat-setup-submit.secondary:hover {
-  background: rgba(8, 145, 178, 0.28);
+.pending-orbit:nth-child(2) {
+  inset: 8px;
+  border-top-color: rgba(56,189,248,0.4);
+  animation-duration: 2s;
+  animation-direction: reverse;
 }
-
-.chat-setup-submit:hover {
-  transform: translateY(-1px);
-  background: #67e8f9;
+.pending-orbit:nth-child(3) {
+  inset: 18px;
+  border-top-color: rgba(56,189,248,0.2);
+  animation-duration: 2.8s;
 }
-
-.chat-setup-submit.secondary:hover {
-  background: rgba(8, 145, 178, 0.28);
+@keyframes orbit {
+  to { transform: rotate(360deg); }
 }
-
-.chat-setup-error {
-  min-height: 18px;
-  margin-top: 8px;
-  color: #fecaca;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.chat-setup-error.ok {
-  color: #bbf7d0;
-}
-
-@keyframes setupIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.chat-toast-stack {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 1900;
-  display: grid;
-  gap: 10px;
-  width: min(330px, calc(100vw - 36px));
-  pointer-events: none;
-}
-
-.chat-toast {
-  border: 1px solid rgba(125, 211, 252, 0.34);
-  border-radius: 14px;
-  padding: 12px 14px;
-  background: rgba(15, 23, 42, 0.96);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
-  backdrop-filter: blur(14px);
-  animation: toastIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.chat-toast.hide {
-  animation: toastOut 0.2s ease forwards;
-}
-
-.toast-name {
-  color: #e0f2fe;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.toast-text {
-  margin-top: 3px;
-  color: #f8fafc;
-  font-size: 13px;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-
-@keyframes toastIn {
-  from {
-    opacity: 0;
-    transform: translate(16px, 8px) scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(0, 0) scale(1);
-  }
-}
-
-@keyframes toastOut {
-  to {
-    opacity: 0;
-    transform: translate(12px, 6px) scale(0.98);
-  }
-}
-
-.chat-form {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 10px;
-  padding: 16px 20px 20px;
-  border-top: 1px solid rgba(148, 163, 184, 0.16);
-  background: rgba(2, 6, 23, 0.72);
-}
-
-.chat-room-select {
-  display: none;
-  width: 150px;
-  height: 44px;
-  border: 1px solid rgba(125, 211, 252, 0.24);
-  border-radius: 12px;
-  background: rgba(2, 6, 23, 0.68);
-  color: var(--text);
-  outline: none;
-  padding: 0 10px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 850;
-}
-
-.site-chat.admin-mode .chat-room-select {
-  display: block;
-}
-
-.chat-input {
-  height: 44px;
-  padding: 0 12px;
-}
-
-.chat-send {
-  width: 48px;
-  height: 44px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #67e8f9, #38bdf8);
-  color: #031018;
+.pending-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22px;
-  font-weight: 900;
+}
+.pending-title { font-size: 18px; font-weight: 900; margin-bottom: 8px; }
+.pending-copy { color: var(--muted); font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
+.pending-note {
+  font-size: 11px;
+  color: rgba(148,163,184,0.7);
+  line-height: 1.5;
+  padding: 10px 14px;
+  border: 1px solid rgba(148,163,184,0.15);
+  border-radius: 10px;
+  background: rgba(2,6,23,0.4);
+  margin-bottom: 16px;
+  text-align: left;
+}
+.pending-note strong { color: #e2e8f0; }
+.pending-actions { display: flex; flex-direction: column; gap: 8px; }
+.pending-close-btn {
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(30,41,59,0.8);
+  border: 1px solid rgba(125,211,252,0.2);
+  color: #e0f2fe;
   cursor: pointer;
-  box-shadow: 0 12px 26px rgba(56, 189, 248, 0.22);
-  transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  font: inherit;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+.pending-close-btn:hover { background: rgba(8,145,178,0.25); }
+.pending-check-btn {
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.3);
+  color: #bae6fd;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+.pending-check-btn:hover { background: rgba(56,189,248,0.22); }
+
+/* Denied screen */
+.denied-banner {
+  padding: 14px;
+  border: 1px solid rgba(239,68,68,0.35);
+  border-radius: 12px;
+  background: rgba(30,5,5,0.6);
+  margin-bottom: 16px;
+}
+.denied-reason-label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #f87171; margin-bottom: 6px; }
+.denied-reason-text { color: #fca5a5; font-size: 13px; line-height: 1.5; }
+
+/* Request verification screen (post-signup, pre-request) */
+.request-verify-screen { text-align: center; }
+.check-icon-wrap {
+  width: 60px; height: 60px; margin: 0 auto 16px;
+  background: rgba(56,189,248,0.1);
+  border: 2px solid rgba(56,189,248,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  animation: iconPop 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes iconPop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
 }
 
-.chat-send:hover {
-  transform: translateY(-1px);
-  background: #67e8f9;
-  box-shadow: 0 16px 32px rgba(56, 189, 248, 0.3);
-}
+/* ─── TOAST ───────────────────────────────────────────────── */
+.chat-toast-stack { position: fixed; right: 18px; bottom: 18px; z-index: 1900; display: grid; gap: 10px; width: min(330px,calc(100vw - 36px)); pointer-events: none; }
+.chat-toast { border: 1px solid rgba(125,211,252,0.34); border-radius: 14px; padding: 12px 14px; background: rgba(15,23,42,0.96); box-shadow: 0 18px 50px rgba(0,0,0,0.38); backdrop-filter: blur(14px); animation: toastIn 0.26s cubic-bezier(0.16,1,0.3,1); }
+.chat-toast.hide { animation: toastOut 0.2s ease forwards; }
+.toast-name { color: #e0f2fe; font-size: 12px; font-weight: 900; }
+.toast-text { margin-top: 3px; color: #f8fafc; font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
+@keyframes toastIn { from { opacity: 0; transform: translate(16px,8px) scale(0.96); } to { opacity: 1; transform: translate(0,0) scale(1); } }
+@keyframes toastOut { to { opacity: 0; transform: translate(12px,6px) scale(0.98); } }
 
-.chat-send:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-  transform: none;
-}
+/* ─── CHAT FORM ───────────────────────────────────────────── */
+.chat-form { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; padding: 16px 20px 20px; border-top: 1px solid rgba(148,163,184,0.16); background: rgba(2,6,23,0.72); }
+.chat-room-select { display: none; width: 150px; height: 44px; border: 1px solid rgba(125,211,252,0.24); border-radius: 12px; background: rgba(2,6,23,0.68); color: var(--text); outline: none; padding: 0 10px; font: inherit; font-size: 13px; font-weight: 850; }
+.site-chat.admin-mode .chat-room-select { display: block; }
+.chat-input { height: 44px; padding: 0 12px; }
+.chat-send { width: 48px; height: 44px; border: none; border-radius: 12px; background: linear-gradient(135deg, #67e8f9, #38bdf8); color: #031018; font-size: 22px; font-weight: 900; cursor: pointer; box-shadow: 0 12px 26px rgba(56,189,248,0.22); transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease; }
+.chat-send:hover { transform: translateY(-1px); background: #67e8f9; box-shadow: 0 16px 32px rgba(56,189,248,0.3); }
+.chat-send:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
 
 @media (max-width: 760px) {
-  .site-chat {
-    width: min(92vw, 420px);
-    min-width: 0;
-  }
-
-  .chat-button {
-    padding: 0 12px;
-  }
-
-  .chat-button-text {
-    display: none;
-  }
-
-  .school-options {
-    grid-template-columns: 1fr;
-  }
-
-  .identity-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .chat-messages.admin-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .chat-form {
-    grid-template-columns: 1fr auto;
-  }
-
-  .site-chat.admin-mode .chat-room-select {
-    grid-column: 1 / -1;
-    width: 100%;
-  }
+  .site-chat { width: min(92vw,420px); min-width: 0; }
+  .chat-button { padding: 0 12px; }
+  .chat-button-text { display: none; }
+  .school-options { grid-template-columns: 1fr; }
+  .identity-summary { grid-template-columns: 1fr; }
+  .chat-messages.admin-grid { grid-template-columns: 1fr; }
+  .chat-form { grid-template-columns: 1fr auto; }
+  .site-chat.admin-mode .chat-room-select { grid-column: 1 / -1; width: 100%; }
 }
 </style>
 </head>
-
 <body>
 
 <div id="emailPopup" class="overlay">
@@ -1137,8 +788,13 @@ nav {
   <div class="tabs-wrapper">
     <div class="tabs-main" id="tabsMain"></div>
     <div class="dropdown" id="moreDropdown">
-      <div class="dropdown-trigger" onclick="toggleDropdown()">More Games ▾</div>
-      <div class="dropdown-menu" id="tabsMore"></div>
+      <button class="dropdown-trigger" type="button" onclick="toggleDropdown()" aria-haspopup="true" aria-expanded="false" id="dropdownTriggerBtn">
+        <svg class="dropdown-trigger-chevron" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6L8 11L13 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        More
+      </button>
+      <div class="dropdown-menu" id="tabsMore" role="menu"></div>
     </div>
     <button id="chatToggle" class="chat-button" type="button" aria-label="Open chat" title="Open chat">
       <svg class="chat-button-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
@@ -1152,6 +808,20 @@ nav {
 </nav>
 
 <iframe id="viewer"></iframe>
+
+<!-- ─── DENY MODAL ─────────────────────────────────────────── -->
+<div id="denyModalBackdrop" class="deny-modal-backdrop" role="dialog" aria-modal="true" aria-label="Deny account request">
+  <div class="deny-modal">
+    <h3 class="deny-modal-title">Deny Request</h3>
+    <p class="deny-modal-sub">You must leave a note explaining why this account was denied.</p>
+    <label class="deny-modal-label" for="denyReasonInput">Reason (required)</label>
+    <textarea id="denyReasonInput" class="deny-modal-textarea" placeholder="e.g. Unrecognized email address, please use your school email..." maxlength="300"></textarea>
+    <div class="deny-modal-actions">
+      <button class="deny-modal-cancel" type="button" id="denyModalCancel">Cancel</button>
+      <button class="deny-modal-confirm" type="button" id="denyModalConfirm">Deny Account</button>
+    </div>
+  </div>
+</div>
 
 <aside id="siteChat" class="site-chat" aria-label="Site chat">
   <header class="chat-header">
@@ -1177,6 +847,19 @@ nav {
     </div>
   </header>
 
+  <!-- Admin approval panel (only visible to admins) -->
+  <div id="adminApprovalSection" style="display:none; padding: 12px 16px 0; flex-shrink: 0;">
+    <div class="admin-approval-panel">
+      <div class="admin-approval-header">
+        <div class="admin-approval-title">⚡ Account Requests</div>
+        <div id="approvalCount" class="admin-approval-count">0</div>
+      </div>
+      <div id="approvalList" class="admin-approval-list">
+        <div class="approval-empty">No pending requests.</div>
+      </div>
+    </div>
+  </div>
+
   <div id="chatMessages" class="chat-messages">
     <div class="chat-empty">Open chat to load the latest messages.</div>
   </div>
@@ -1187,29 +870,33 @@ nav {
       <option value="middle">Middle School</option>
       <option value="elementary">Elementary</option>
     </select>
-    <input id="chatInput" class="chat-input" maxlength="240" autocomplete="off" placeholder="Message everyone... " />
+    <input id="chatInput" class="chat-input" maxlength="240" autocomplete="off" placeholder="Message everyone..." />
     <button id="chatSend" class="chat-send" type="submit" aria-label="Send message" title="Send">›</button>
   </form>
 
+  <!-- ─── AUTH OVERLAY ──────────────────────────────────── -->
   <div id="chatSetup" class="chat-setup" aria-hidden="true">
     <form id="chatSetupForm" class="chat-setup-panel">
+
+      <!-- Choice screen -->
       <div class="chat-auth-screen active" data-auth-screen="choice">
         <h2 class="chat-setup-title">Join chat</h2>
-        <p class="chat-setup-copy">Use a verified email account before sending messages.</p>
+        <p class="chat-setup-copy">Create an account or log in. Your account needs admin approval before you can chat.</p>
         <div class="chat-mode-actions">
-          <button class="chat-setup-submit flush" type="button" data-auth-mode="signup">Sign up</button>
+          <button class="chat-setup-submit flush" type="button" data-auth-mode="signup">Create account</button>
           <button class="chat-setup-submit secondary flush" type="button" data-auth-mode="signin">Log in</button>
         </div>
       </div>
 
+      <!-- Sign in -->
       <div class="chat-auth-screen" data-auth-screen="signin">
-        <button class="chat-back-btn" type="button" data-auth-mode="choice">Back</button>
+        <button class="chat-back-btn" type="button" data-auth-mode="choice">← Back</button>
         <h2 class="chat-setup-title">Log in</h2>
-        <p class="chat-setup-copy">Enter the email and password for your chat account.</p>
+        <p class="chat-setup-copy">Enter the email and password for your account.</p>
         <div class="chat-auth-grid">
           <div>
             <label class="chat-setup-label" for="chatSetupEmail">Email</label>
-            <input id="chatSetupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@example.com" />
+            <input id="chatSetupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@rsu71.org" />
           </div>
           <div>
             <label class="chat-setup-label" for="chatSetupPassword">Password</label>
@@ -1219,44 +906,79 @@ nav {
         <button class="chat-setup-submit" type="submit" data-auth-action="signin">Log in</button>
       </div>
 
+      <!-- Sign up -->
       <div class="chat-auth-screen" data-auth-screen="signup">
-        <button class="chat-back-btn" type="button" data-auth-mode="choice">Back</button>
-        <h2 class="chat-setup-title">Sign up</h2>
-        <p class="chat-setup-copy">Create your account, then verify your email before chat opens.</p>
+        <button class="chat-back-btn" type="button" data-auth-mode="choice">← Back</button>
+        <h2 class="chat-setup-title">Create account</h2>
+        <p class="chat-setup-copy">Your account will be sent for admin review before chat opens.</p>
         <div class="chat-auth-grid">
           <div>
             <label class="chat-setup-label" for="chatSignupEmail">Email</label>
-            <input id="chatSignupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@example.com" />
+            <input id="chatSignupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@rsu71.org" />
           </div>
           <div>
             <label class="chat-setup-label" for="chatSignupPassword">Password</label>
             <input id="chatSignupPassword" class="chat-setup-input" type="password" autocomplete="new-password" placeholder="At least 6 characters" />
           </div>
         </div>
-
-        <label class="chat-setup-label" for="chatSetupName">Your name</label>
-        <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Enter your name" />
-
+        <label class="chat-setup-label" for="chatSetupName">Display name</label>
+        <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Your name (up to 24 chars)" />
         <div class="chat-setup-label">Your school</div>
         <div class="school-options" role="group" aria-label="School level">
           <button class="school-option" type="button" data-school="High School">High</button>
           <button class="school-option" type="button" data-school="Middle School">Middle</button>
           <button class="school-option" type="button" data-school="Elementary School">Elementary</button>
         </div>
-
-        <button class="chat-setup-submit" type="submit" data-auth-action="signup">Create account</button>
+        <button class="chat-setup-submit" type="submit" data-auth-action="signup">Submit request</button>
       </div>
 
-      <div class="chat-auth-screen" data-auth-screen="verify">
-        <h2 class="chat-setup-title">Verify your email</h2>
-        <p class="chat-setup-copy">A verification link has been sent. Open it, then come back here to continue.</p>
-        <div class="chat-verify-card">
-          <div class="chat-verify-email" id="chatVerifyEmail">you@example.com</div>
-          <button class="chat-setup-submit flush" type="button" data-auth-action="verify-check">I verified it</button>
-          <button class="chat-setup-submit secondary flush" type="button" data-auth-action="resend-verification">Resend email</button>
-          <button class="chat-back-btn" type="button" data-auth-action="signout">Use different email</button>
+      <!-- Pending screen -->
+      <div class="chat-auth-screen" data-auth-screen="pending">
+        <div class="pending-screen">
+          <div class="pending-anim-wrap">
+            <div class="pending-orbit"></div>
+            <div class="pending-orbit"></div>
+            <div class="pending-orbit"></div>
+            <div class="pending-icon">⏳</div>
+          </div>
+          <h2 class="chat-setup-title pending-title">Request Sent!</h2>
+          <p class="pending-copy">Your account request has been sent to an admin for review.</p>
+          <div class="pending-note">
+            <strong>Note:</strong> A request was sent to New Tab 2. It may take a few hours to be accepted. Make sure you entered a valid school email — requests with unrecognized emails may be denied.
+          </div>
+          <div class="pending-actions">
+            <button type="button" class="pending-close-btn" id="pendingCloseChat">Close chat &amp; wait</button>
+            <button type="button" class="pending-check-btn" data-auth-action="check-approval">Already approved? Check status</button>
+          </div>
         </div>
       </div>
+
+      <!-- Denied screen -->
+      <div class="chat-auth-screen" data-auth-screen="denied">
+        <h2 class="chat-setup-title" style="color:#fca5a5">Request Denied</h2>
+        <p class="chat-setup-copy">Unfortunately your account request was not approved.</p>
+        <div class="denied-banner">
+          <div class="denied-reason-label">Admin note</div>
+          <div id="deniedReasonText" class="denied-reason-text">No reason provided.</div>
+        </div>
+        <p style="color:var(--muted);font-size:12px;line-height:1.5">If you believe this was a mistake, sign out and try again with a valid school email address, or contact an admin directly.</p>
+        <button class="chat-setup-submit secondary" type="button" data-auth-action="signout">Sign out</button>
+      </div>
+
+      <!-- Request verification (existing accounts without a request) -->
+      <div class="chat-auth-screen" data-auth-screen="request-verify">
+        <div class="request-verify-screen">
+          <div class="check-icon-wrap">🔑</div>
+          <h2 class="chat-setup-title">Request Chat Access</h2>
+          <p class="chat-setup-copy">Your account needs admin approval to use chat. Click below to submit a request.</p>
+          <div class="pending-note" style="text-align:left">
+            <strong>Note:</strong> A request will be sent to New Tab 2 admins. It may take a few hours. Make sure your account email is a valid school email.
+          </div>
+          <button class="chat-setup-submit" type="button" id="requestVerifyBtn">Request account verification</button>
+          <button class="chat-back-btn" type="button" data-auth-action="signout" style="margin-top:12px;display:block">Sign out</button>
+        </div>
+      </div>
+
       <div id="chatSetupError" class="chat-setup-error" aria-live="polite"></div>
     </form>
   </div>
@@ -1274,6 +996,7 @@ window.CHAT_ENABLED = false; // master chat switch
 const tabsMain = document.getElementById("tabsMain");
 const tabsMore = document.getElementById("tabsMore");
 const moreDropdown = document.getElementById("moreDropdown");
+const dropdownTriggerBtn = document.getElementById("dropdownTriggerBtn");
 const statusText = document.getElementById("status");
 const iframe = document.getElementById("viewer");
 const chatToggle = document.getElementById("chatToggle");
@@ -1292,37 +1015,36 @@ const chatSignupEmail = document.getElementById("chatSignupEmail");
 const chatSignupPassword = document.getElementById("chatSignupPassword");
 const chatSetupName = document.getElementById("chatSetupName");
 const chatSetupError = document.getElementById("chatSetupError");
-const chatVerifyEmail = document.getElementById("chatVerifyEmail");
 const chatIdentitySummary = document.getElementById("chatIdentitySummary");
 const chatLockedName = document.getElementById("chatLockedName");
 const chatLockedRoom = document.getElementById("chatLockedRoom");
 const chatAdminBadge = document.getElementById("chatAdminBadge");
 const chatSignOut = document.getElementById("chatSignOut");
 const chatRoomSelect = document.getElementById("chatRoomSelect");
+const adminApprovalSection = document.getElementById("adminApprovalSection");
+const approvalList = document.getElementById("approvalList");
+const approvalCount = document.getElementById("approvalCount");
+const deniedReasonText = document.getElementById("deniedReasonText");
+const denyModalBackdrop = document.getElementById("denyModalBackdrop");
+const denyReasonInput = document.getElementById("denyReasonInput");
+const denyModalCancel = document.getElementById("denyModalCancel");
+const denyModalConfirm = document.getElementById("denyModalConfirm");
+const pendingCloseChat = document.getElementById("pendingCloseChat");
+const requestVerifyBtn = document.getElementById("requestVerifyBtn");
 
-const MAX_VISIBLE = 8;
+const MAX_VISIBLE = 6;
 const CHAT_NAME_KEY = "site_chat_name";
 const CHAT_SCHOOL_KEY = "site_chat_school";
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
 let latestFirebaseActiveUsers = null;
 let selectedSchool = "";
 let chatAuthScreen = "choice";
-let chatAuthState = {
-  user: null,
-  profile: null,
-  isAdmin: false
-};
+let chatAuthState = { user: null, profile: null, isAdmin: false, approvalStatus: null };
+let pendingDenyUid = null;
 
+// ─── GAME TABS ────────────────────────────────────────────
 function getGameData(data) {
-  if (typeof data === "string") {
-    return {
-      url: data,
-      order: null,
-      ribbon: null,
-      ribbonColor: null
-    };
-  }
-
+  if (typeof data === "string") return { url: data, order: null, ribbon: null, ribbonColor: null };
   return {
     url: data.url,
     order: data.order,
@@ -1333,19 +1055,16 @@ function getGameData(data) {
 
 function loadGame(name, url, element) {
   iframe.src = url;
-  statusText.textContent = `${name}`;
-
+  statusText.textContent = name;
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   element.classList.add("active");
-
   moreDropdown.classList.remove("open");
-
+  if (dropdownTriggerBtn) dropdownTriggerBtn.setAttribute("aria-expanded", "false");
   window.gamePresence?.setActiveGame(name);
 }
 
 function build() {
   if (typeof PAGES === "undefined") return;
-
   tabsMain.innerHTML = "";
   tabsMore.innerHTML = "";
   moreDropdown.style.display = "none";
@@ -1353,13 +1072,7 @@ function build() {
   const entries = Object.entries(PAGES)
     .map(([name, data], originalIndex) => {
       const game = getGameData(data);
-
-      return {
-        name,
-        data: game,
-        originalIndex,
-        order: Number.isFinite(game.order) ? game.order : originalIndex
-      };
+      return { name, data: game, originalIndex, order: Number.isFinite(game.order) ? game.order : originalIndex };
     })
     .sort((a, b) => a.order - b.order || a.originalIndex - b.originalIndex);
 
@@ -1367,6 +1080,8 @@ function build() {
     const tab = document.createElement("div");
     tab.className = "tab";
     tab.dataset.gameName = name;
+    tab.setAttribute("role", "button");
+    tab.setAttribute("tabindex", "0");
 
     const tabName = document.createElement("span");
     tabName.textContent = name;
@@ -1381,6 +1096,7 @@ function build() {
     tab.appendChild(playerCount);
 
     tab.onclick = () => loadGame(name, data.url, tab);
+    tab.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); loadGame(name, data.url, tab); } };
 
     if (data.ribbon) {
       const ribbon = document.createElement("span");
@@ -1394,25 +1110,30 @@ function build() {
       tabsMain.appendChild(tab);
     } else {
       moreDropdown.style.display = "block";
+      // Add section divider for first overflow item
+      if (index === MAX_VISIBLE) {
+        const lbl = document.createElement("div");
+        lbl.className = "dropdown-section-label";
+        lbl.textContent = "More Games";
+        tabsMore.appendChild(lbl);
+      }
       tabsMore.appendChild(tab);
     }
   });
 }
 
 function toggleDropdown() {
-  moreDropdown.classList.toggle("open");
+  const isOpen = moreDropdown.classList.toggle("open");
+  if (dropdownTriggerBtn) dropdownTriggerBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
 }
 
+// ─── CHAT OPEN / CLOSE ───────────────────────────────────
 function setChatOpen(isOpen) {
   siteChat.classList.toggle("open", isOpen);
   chatToggle.classList.toggle("open", isOpen);
   chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
   chatToggle.title = isOpen ? "Close chat" : "Open chat";
-
-  document.dispatchEvent(new CustomEvent("siteChatToggled", {
-    detail: { open: isOpen }
-  }));
-
+  document.dispatchEvent(new CustomEvent("siteChatToggled", { detail: { open: isOpen } }));
   if (isOpen) {
     chatToggle.classList.remove("has-unread");
     updateChatPanelState();
@@ -1425,35 +1146,110 @@ function setChatOpen(isOpen) {
   }
 }
 
-chatToggle.addEventListener("click", () => {
-  setChatOpen(!siteChat.classList.contains("open"));
-});
-
-chatCloseBtn.addEventListener("click", () => {
-  setChatOpen(false);
-});
+chatToggle.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
+chatCloseBtn.addEventListener("click", () => setChatOpen(false));
+pendingCloseChat?.addEventListener("click", () => setChatOpen(false));
 
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
-
-  if (!CHAT_ENABLED) {
-    updateChatPanelState();
-    return;
-  }
-
-  if (!hasChatIdentity()) {
-    showChatSetup();
-    return;
-  }
-
+  if (!CHAT_ENABLED) { updateChatPanelState(); return; }
+  if (!hasChatIdentity()) { showChatSetup(); return; }
   document.dispatchEvent(new CustomEvent("siteChatSubmit"));
 });
 
-document.addEventListener("siteChatNotify", (event) => {
-  if (!siteChat.classList.contains("open")) {
-    chatToggle.classList.add("has-unread");
+// ─── DENY MODAL ──────────────────────────────────────────
+denyModalCancel.addEventListener("click", () => {
+  denyModalBackdrop.classList.remove("show");
+  pendingDenyUid = null;
+  denyReasonInput.value = "";
+});
+
+denyModalConfirm.addEventListener("click", () => {
+  const reason = denyReasonInput.value.trim();
+  if (!reason) {
+    denyReasonInput.style.borderColor = "rgba(239,68,68,0.8)";
+    denyReasonInput.focus();
+    setTimeout(() => denyReasonInput.style.borderColor = "", 1200);
+    return;
+  }
+  if (!pendingDenyUid) return;
+  document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
+    detail: { action: "deny-request", uid: pendingDenyUid, reason }
+  }));
+  denyModalBackdrop.classList.remove("show");
+  pendingDenyUid = null;
+  denyReasonInput.value = "";
+});
+
+// ─── APPROVAL REQUESTS (admin) ────────────────────────────
+document.addEventListener("siteApprovalRequestsChanged", (event) => {
+  const requests = event.detail?.requests || [];
+  const pending = requests.filter(r => r.status === "pending");
+  approvalCount.textContent = pending.length;
+  approvalCount.style.background = pending.length > 0 ? "#f59e0b" : "rgba(148,163,184,0.3)";
+  approvalCount.style.color = pending.length > 0 ? "#000" : "#94a3b8";
+
+  if (pending.length === 0) {
+    approvalList.innerHTML = '<div class="approval-empty">No pending requests.</div>';
+    return;
   }
 
+  approvalList.innerHTML = "";
+  pending.forEach(req => {
+    const card = document.createElement("div");
+    card.className = "approval-request-card";
+    const timeStr = req.submittedAt
+      ? new Intl.DateTimeFormat([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(req.submittedAt))
+      : "Unknown time";
+    card.innerHTML = `
+      <div class="approval-request-info">
+        <div class="approval-req-email">${escapeHtml(req.email || "")}</div>
+        <div class="approval-req-meta">
+          <span class="approval-req-name">${escapeHtml(req.name || "")}</span>
+          <span class="approval-req-school">${escapeHtml(req.school || "")}</span>
+          <span class="approval-req-time">${timeStr}</span>
+        </div>
+      </div>
+      <div class="approval-actions">
+        <button class="approval-btn approval-btn-approve" type="button" data-uid="${escapeHtml(req.uid)}">✓ Approve</button>
+        <button class="approval-btn approval-btn-deny" type="button" data-uid="${escapeHtml(req.uid)}">✗ Deny</button>
+      </div>
+    `;
+    card.querySelector(".approval-btn-approve").addEventListener("click", (e) => {
+      const uid = e.target.dataset.uid;
+      document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: "approve-request", uid } }));
+    });
+    card.querySelector(".approval-btn-deny").addEventListener("click", (e) => {
+      pendingDenyUid = e.target.dataset.uid;
+      denyReasonInput.value = "";
+      denyModalBackdrop.classList.add("show");
+      setTimeout(() => denyReasonInput.focus(), 50);
+    });
+    approvalList.appendChild(card);
+  });
+});
+
+function escapeHtml(str) {
+  return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ─── REQUEST VERIFY BUTTON ───────────────────────────────
+requestVerifyBtn?.addEventListener("click", () => {
+  const name = cleanChatName(chatAuthState.profile?.name || localStorage.getItem(CHAT_NAME_KEY));
+  const school = chatAuthState.profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "";
+  if (!name || !school) {
+    chatSetupError.textContent = "Your profile is incomplete. Sign out and sign in again.";
+    return;
+  }
+  chatSetupError.textContent = "Submitting request...";
+  document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
+    detail: { action: "request-approval", name, school }
+  }));
+});
+
+// ─── AUTH EVENT LISTENERS ─────────────────────────────────
+document.addEventListener("siteChatNotify", (event) => {
+  if (!siteChat.classList.contains("open")) chatToggle.classList.add("has-unread");
   showChatToast(event.detail?.name, event.detail?.text, event.detail?.room);
 });
 
@@ -1471,26 +1267,23 @@ document.addEventListener("siteChatAuthChanged", (event) => {
   chatAuthState = {
     user: event.detail?.user || null,
     profile: event.detail?.profile || null,
-    isAdmin: Boolean(event.detail?.isAdmin)
+    isAdmin: Boolean(event.detail?.isAdmin),
+    approvalStatus: event.detail?.approvalStatus || null,
+    denyReason: event.detail?.denyReason || null
   };
-
   syncChatIdentity();
 });
 
 document.addEventListener("siteChatAuthStatus", (event) => {
   chatSetupError.textContent = event.detail?.message || "";
   chatSetupError.classList.toggle("ok", !event.detail?.isError);
-  if (!event.detail?.isError && /verification email sent/i.test(event.detail?.message || "")) {
-    setChatAuthScreen("verify");
-  }
 });
 
 chatSignOut.addEventListener("click", () => {
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
-    detail: { action: "signout" }
-  }));
+  document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: "signout" } }));
 });
 
+// ─── PANEL STATE ─────────────────────────────────────────
 function updateChatPanelState() {
   const profile = chatAuthState.profile;
   const timeoutUntil = Number(profile?.timeoutUntil || 0);
@@ -1506,46 +1299,23 @@ function updateChatPanelState() {
     chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming september (maybe)</div>';
     return;
   }
-
-  if (profile?.banned) {
-    chatInput.placeholder = "Banned from chat";
-    return;
-  }
-
-  if (isTimedOut) {
-    chatInput.placeholder = `Timed out until ${new Date(timeoutUntil).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
-    return;
-  }
-
-  if (chatAuthState.user && !chatAuthState.user.emailVerified) {
-    chatInput.placeholder = "Verify your email to chat";
-    return;
-  }
-
-  if (!hasChatIdentity()) {
-    chatInput.placeholder = "Sign in to chat";
-    return;
-  }
-
+  if (profile?.banned) { chatInput.placeholder = "Banned from chat"; return; }
+  if (isTimedOut) { chatInput.placeholder = `Timed out until ${new Date(timeoutUntil).toLocaleTimeString([], { hour:"numeric", minute:"2-digit" })}`; return; }
+  if (!hasChatIdentity()) { chatInput.placeholder = "Sign in to chat"; return; }
   chatInput.placeholder = "Message everyone...";
-
   if (!chatAuthState.isAdmin && !chatMessages.querySelector(".chat-message")) {
     chatMessages.innerHTML = '<div class="chat-empty">Loading messages...</div>';
   }
 }
 
 function cleanChatName(value) {
-  return String(value || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 24);
+  return String(value || "").replace(/\s+/g," ").trim().slice(0,24);
 }
 
 function hasChatIdentity() {
   return Boolean(
     chatAuthState.user &&
-    chatAuthState.user.emailVerified &&
-    chatAuthState.profile &&
+    chatAuthState.profile?.approved &&
     cleanChatName(chatAuthState.profile.name) &&
     chatAuthState.profile.school
   );
@@ -1555,33 +1325,52 @@ function syncChatIdentity() {
   const profile = chatAuthState.profile;
   const name = cleanChatName(profile?.name || localStorage.getItem(CHAT_NAME_KEY));
   const school = profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "";
-  const isVerified = chatAuthState.user?.emailVerified === true;
-  const isReady = Boolean(chatAuthState.user && isVerified && name && school);
-
-  if (!chatAuthState.user && chatAuthScreen === "verify") {
-    setChatAuthScreen("choice");
-  }
+  const isAdmin = chatAuthState.isAdmin;
+  const isReady = hasChatIdentity();
 
   chatLockedName.textContent = chatAuthState.user?.email
     ? `${name || "Not set"} - ${chatAuthState.user.email}`
     : name || "Not signed in";
   chatLockedRoom.textContent = roomNameFromSchool(school);
-  chatIdentitySummary.classList.toggle("locked", isReady);
-  chatAdminBadge.classList.toggle("show", chatAuthState.isAdmin);
-  siteChat.classList.toggle("admin-mode", chatAuthState.isAdmin);
-  chatSetup.classList.toggle("show", !isReady);
-  chatSetup.setAttribute("aria-hidden", isReady ? "true" : "false");
-  if (!isReady && chatAuthState.user && !isVerified) {
-    setChatAuthScreen("verify");
+  chatIdentitySummary.classList.toggle("locked", isReady || isAdmin);
+  chatAdminBadge.classList.toggle("show", isAdmin);
+  siteChat.classList.toggle("admin-mode", isAdmin);
+  chatSetup.classList.toggle("show", !isReady && !isAdmin);
+  chatSetup.setAttribute("aria-hidden", (isReady || isAdmin) ? "true" : "false");
+
+  // Admin approval section
+  if (isAdmin) {
+    adminApprovalSection.style.display = "block";
+    // Make the chat panel taller to accommodate approvals
+    siteChat.style.gridTemplateRows = "auto auto 1fr auto";
+  } else {
+    adminApprovalSection.style.display = "none";
+    siteChat.style.gridTemplateRows = "";
   }
-  if (chatRoomSelect && chatAuthState.isAdmin && chatRoomSelect.value === "") {
-    chatRoomSelect.value = "high";
+
+  // Determine which auth screen to show
+  if (!chatAuthState.user) {
+    setChatAuthScreen("choice");
+  } else if (isAdmin || isReady) {
+    // No setup panel needed
+  } else {
+    const status = chatAuthState.approvalStatus;
+    if (status === "pending") {
+      setChatAuthScreen("pending");
+    } else if (status === "denied") {
+      deniedReasonText.textContent = chatAuthState.denyReason || "No reason provided.";
+      setChatAuthScreen("denied");
+    } else if (status === "none") {
+      setChatAuthScreen("request-verify");
+    } else {
+      setChatAuthScreen("choice");
+    }
   }
+
+  if (chatRoomSelect && isAdmin && chatRoomSelect.value === "") chatRoomSelect.value = "high";
   updateChatPanelState();
 
-  document.dispatchEvent(new CustomEvent("siteChatIdentityChanged", {
-    detail: { name, school, isAdmin: chatAuthState.isAdmin }
-  }));
+  document.dispatchEvent(new CustomEvent("siteChatIdentityChanged", { detail: { name, school, isAdmin } }));
 }
 
 function roomNameFromSchool(school) {
@@ -1594,18 +1383,12 @@ function roomNameFromSchool(school) {
 function showChatSetup() {
   chatSetup.classList.add("show");
   chatSetup.setAttribute("aria-hidden", "false");
-  chatSetupName.value = cleanChatName(chatAuthState.profile?.name || localStorage.getItem(CHAT_NAME_KEY));
   chatSetupEmail.value = chatAuthState.user?.email || chatSetupEmail.value;
   chatSignupEmail.value = chatAuthState.user?.email || chatSignupEmail.value;
   chatSetupPassword.value = "";
   chatSignupPassword.value = "";
   setSelectedSchool(chatAuthState.profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "");
   chatSetupError.textContent = "";
-  setChatAuthScreen(chatAuthState.user && !chatAuthState.user.emailVerified ? "verify" : chatAuthScreen);
-  requestAnimationFrame(() => {
-    if (chatAuthScreen === "signin") chatSetupEmail.focus();
-    if (chatAuthScreen === "signup") chatSignupEmail.focus();
-  });
 }
 
 function setChatAuthScreen(screen) {
@@ -1613,36 +1396,22 @@ function setChatAuthScreen(screen) {
   document.querySelectorAll("[data-auth-screen]").forEach((panel) => {
     panel.classList.toggle("active", panel.dataset.authScreen === chatAuthScreen);
   });
-  chatVerifyEmail.textContent = chatAuthState.user?.email || "your email";
   chatSetupError.textContent = "";
 }
 
 document.querySelectorAll("[data-auth-mode]").forEach((button) => {
-  button.addEventListener("click", () => {
-    setChatAuthScreen(button.dataset.authMode);
-  });
+  button.addEventListener("click", () => setChatAuthScreen(button.dataset.authMode));
 });
 
 document.querySelectorAll("button[type='button'][data-auth-action]").forEach((button) => {
   button.addEventListener("click", () => {
-    const statusByAction = {
-      "verify-check": "Checking verification...",
-      "resend-verification": "Sending verification email...",
-      signout: "Signing out..."
-    };
-
-    chatSetupError.textContent = statusByAction[button.dataset.authAction] || "";
-
-    document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
-      detail: { action: button.dataset.authAction }
-    }));
+    chatSetupError.textContent = "";
+    document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: button.dataset.authAction } }));
   });
 });
 
 document.querySelectorAll(".school-option").forEach((button) => {
-  button.addEventListener("click", () => {
-    setSelectedSchool(button.dataset.school);
-  });
+  button.addEventListener("click", () => setSelectedSchool(button.dataset.school));
 });
 
 function setSelectedSchool(school) {
@@ -1656,98 +1425,58 @@ function setSelectedSchool(school) {
 
 chatSetupForm.addEventListener("submit", (event) => {
   event.preventDefault();
-
   const action = event.submitter?.dataset.authAction || "signin";
   const isSignup = action === "signup";
   const email = String((isSignup ? chatSignupEmail.value : chatSetupEmail.value) || "").trim().toLowerCase();
   const password = String((isSignup ? chatSignupPassword.value : chatSetupPassword.value) || "");
   const name = isSignup ? cleanChatName(chatSetupName.value) : "";
-
-  if (!email || !password) {
-    chatSetupError.textContent = "Enter your email and password.";
-    return;
-  }
-
-  if (isSignup && !name) {
-    chatSetupError.textContent = "Enter a name first.";
-    return;
-  }
-
-  if (isSignup && !selectedSchool) {
-    chatSetupError.textContent = "Pick your school level.";
-    return;
-  }
-
-  chatSetupError.textContent = isSignup ? "Creating account..." : "Logging in...";
-
+  if (!email || !password) { chatSetupError.textContent = "Enter your email and password."; return; }
+  if (isSignup && !name) { chatSetupError.textContent = "Enter a display name."; return; }
+  if (isSignup && !selectedSchool) { chatSetupError.textContent = "Pick your school level."; return; }
+  chatSetupError.textContent = isSignup ? "Submitting request..." : "Logging in...";
   document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
-    detail: {
-      action,
-      email,
-      password,
-      name,
-      school: isSignup ? selectedSchool : ""
-    }
+    detail: { action, email, password, name, school: isSignup ? selectedSchool : "" }
   }));
 });
 
+// ─── TOAST ────────────────────────────────────────────────
 function showChatToast(name, text, room) {
   const stack = document.getElementById("chatToastStack");
   if (!stack || siteChat.classList.contains("open")) return;
-
   const toast = document.createElement("div");
   toast.className = "chat-toast";
-
   const toastName = document.createElement("div");
   toastName.className = "toast-name";
   toastName.textContent = `${cleanChatName(name) || "Someone"} - ${room || "Chat"}`;
-
   const toastText = document.createElement("div");
   toastText.className = "toast-text";
-  toastText.textContent = String(text || "").slice(0, 120);
-
+  toastText.textContent = String(text || "").slice(0,120);
   toast.append(toastName, toastText);
   stack.appendChild(toast);
-
-  while (stack.children.length > 3) {
-    stack.firstElementChild.remove();
-  }
-
-  setTimeout(() => {
-    toast.classList.add("hide");
-    setTimeout(() => toast.remove(), 220);
-  }, 4200);
+  while (stack.children.length > 3) stack.firstElementChild.remove();
+  setTimeout(() => { toast.classList.add("hide"); setTimeout(() => toast.remove(), 220); }, 4200);
 }
 
+// ─── ACTIVE USERS ─────────────────────────────────────────
 function updateActiveUsersFromBadges() {
   const total = [...document.querySelectorAll("[data-player-count-for]")]
-    .reduce((sum, badge) => sum + (Number.parseInt(badge.textContent, 10) || 0), 0);
-
-  if (total > 0 || latestFirebaseActiveUsers === null) {
-    updateActiveUsers(total);
-  }
+    .reduce((sum, badge) => sum + (Number.parseInt(badge.textContent,10) || 0), 0);
+  if (total > 0 || latestFirebaseActiveUsers === null) updateActiveUsers(total);
 }
 
 function updateActiveUsers(total) {
   chatActiveUsers.textContent = `${total} active`;
-  chatActiveUsers.title = `${total} active user${total === 1 ? "" : "s"} across games`;
+  chatActiveUsers.title = `${total} active user${total===1?"":'s'} across games`;
 }
 
 const activeUsersObserver = new MutationObserver(updateActiveUsersFromBadges);
-activeUsersObserver.observe(tabsMain, {
-  childList: true,
-  subtree: true,
-  characterData: true
-});
-activeUsersObserver.observe(tabsMore, {
-  childList: true,
-  subtree: true,
-  characterData: true
-});
+activeUsersObserver.observe(tabsMain, { childList:true, subtree:true, characterData:true });
+activeUsersObserver.observe(tabsMore, { childList:true, subtree:true, characterData:true });
 
 window.addEventListener("click", (e) => {
   if (!e.target.closest("#moreDropdown")) {
     moreDropdown.classList.remove("open");
+    if (dropdownTriggerBtn) dropdownTriggerBtn.setAttribute("aria-expanded","false");
   }
 });
 
@@ -1760,37 +1489,25 @@ const FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSc_Z4B0MP1d0rs0b_KwG
 if (!localStorage.getItem("email_prompt_dismissed")) {
   setTimeout(() => {
     emailPopup.classList.add("active");
-
     let count = 5;
     const timer = setInterval(() => {
       count--;
-
-      if (count > 0) {
-        noBtn.textContent = `No (${count})`;
-      } else {
-        noBtn.textContent = "No";
-        noBtn.disabled = false;
-        clearInterval(timer);
-      }
+      if (count > 0) { noBtn.textContent = `No (${count})`; }
+      else { noBtn.textContent = "No"; noBtn.disabled = false; clearInterval(timer); }
     }, 1000);
   }, 500);
 }
 
 function dismiss() {
   emailPopup.classList.remove("active");
-  localStorage.setItem("email_prompt_dismissed", "true");
+  localStorage.setItem("email_prompt_dismissed","true");
 }
 
-yesBtn.onclick = () => {
-  window.open(FORM_LINK, "_blank");
-  dismiss();
-};
-
+yesBtn.onclick = () => { window.open(FORM_LINK,"_blank"); dismiss(); };
 noBtn.onclick = dismiss;
 
 syncChatIdentity();
 build();
 </script>
-
 </body>
 </html>
