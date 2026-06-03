@@ -288,6 +288,8 @@ function watchApprovalRequestStatus(user) {
       stopOwnApprovalRequestWatch();
       dispatchAuthChanged({ approvalStatus: "denied", denyReason: data.denyReason });
       showChatStatus("Your account request was denied.");
+      // Sign them out after a short delay so they see the denied screen briefly
+      setTimeout(() => signOut(auth).catch(console.warn), 3000);
     }
   }, (error) => {
     console.warn("Approval request watch failed:", error);
@@ -306,13 +308,13 @@ async function approveRequest(uid) {
   if (!snapshot.exists()) return;
   const data = snapshot.val();
 
-  // Write user profile with approved flag
+  // Only write fields the admin role is permitted to write.
+  // uid and email are owner-only per Firebase rules — including them here
+  // would cause the entire update to be rejected.
   const userRef = ref(database, `siteChat/users/${uid}`);
   const userSnap = await get(userRef);
   const now = Date.now();
   const profile = {
-    uid: data.uid,
-    email: cleanEmail(data.email),
     name: cleanName(data.name),
     school: cleanSchool(data.school),
     approved: true,
@@ -321,7 +323,7 @@ async function approveRequest(uid) {
   if (!userSnap.exists()) profile.createdAt = now;
   await update(userRef, profile);
 
-  // Update request status
+  // Mark request approved
   await update(requestRef, { status: "approved", reviewedAt: now });
 }
 
@@ -391,6 +393,8 @@ function setupAuth() {
       if (request.status === "denied") {
         dispatchAuthChanged({ approvalStatus: "denied", denyReason: request.denyReason });
         showChatStatus("Your account request was denied.");
+        // Auto sign-out after a short delay so they see the denial reason
+        setTimeout(() => signOut(auth).catch(console.warn), 3000);
         return;
       }
 
@@ -495,6 +499,9 @@ async function handleAuthAction(detail = {}) {
       watchUserProfile(currentUser);
     } else if (request?.status === "pending") {
       dispatchAuthStatus("Still pending. Admins will review soon.", false);
+    } else if (request?.status === "denied") {
+      dispatchAuthChanged({ approvalStatus: "denied", denyReason: request.denyReason });
+      showChatStatus("Your account request was denied.");
     } else {
       dispatchAuthStatus("No request found. Submit a request first.", true);
     }
