@@ -261,6 +261,8 @@ function watchApprovalRequests() {
       });
     }
     document.dispatchEvent(new CustomEvent("siteApprovalRequestsChanged", { detail: { requests } }));
+  }, (error) => {
+    console.error("watchApprovalRequests failed — check Firebase rules for siteChat/approvalRequests:", error.code, error.message);
   });
 }
 
