@@ -7,11 +7,11 @@ window.PAGES = {
 
   
   "Drive Mad": { 
-    "url": "https://newnewnewtab.github.io/drive-mad/drive-mad-new/"
+    "url": "https://newnewnewnewtab.github.io/drive-mad/drive-mad-new/"
   },
 
   "Polytrack": { 
-    "url": "https://newnewnewtab.github.io/Polytrack/"
+    "url": "https://newnewnewnewtab.github.io/Polytrack/"
   },
   
   "Snow Rider": { 
@@ -45,11 +45,11 @@ window.PAGES = {
   },
   
   "Moto X3M 2": { 
-    "url": "https://newnewnewtab.github.io/Moto-X3M-2/" 
+    "url": "https://newnewnewnewtab.github.io/Moto-X3M-2/" 
   },
 
   "Gunspin": {
-    "url": "https://newnewnewtab.github.io/Gunspin/"
+    "url": "https://newnewnewnewtab.github.io/Gunspin/"
   },
 
   "Dig Out Of Prison": { 
@@ -67,15 +67,15 @@ window.PAGES = {
   },
   
   "Rocket League 3D": { 
-    "url": "https://newnewnewtab.github.io/RL3D/" 
+    "url": "https://newnewnewnewtab.github.io/RL3D/" 
   },
   
   "Slots": { 
-    "url": "https://newnewnewtab.github.io/Slot-Machine/"
+    "url": "https://newnewnewnewtab.github.io/Slot-Machine/"
   },
     
   "Slope 2": { 
-    "url": "https://newnewnewtab.github.io/Slope2/"
+    "url": "https://newnewnewnewtab.github.io/Slope2/"
   },
   
   "Geometry Dash": { 
@@ -87,19 +87,19 @@ window.PAGES = {
   },
   
   "Eggy Car": { 
-    "url": "https://newnewnewtab.github.io/EggyCar/" 
+    "url": "https://newnewnewnewtab.github.io/EggyCar/" 
   },
 
    "Flappy Bird": { 
-    "url": "https://newnewnewtab.github.io/flappy-bird/"
+    "url": "https://newnewnewnewtab.github.io/flappy-bird/"
   },
   
   "Retro Bowl": { 
-    "url": "https://newnewnewtab.github.io/rb/" 
+    "url": "https://newnewnewnewtab.github.io/rb/" 
   },
 
   "Five Nights at Epsteins": { 
-    "url": "https://newnewnewtab.github.io/FNAE-4-1-26/"
+    "url": "https://newnewnewnewtab.github.io/FNAE-4-1-26/"
   }
   
 };
