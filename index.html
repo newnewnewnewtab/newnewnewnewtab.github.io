@@ -78,156 +78,355 @@ nav {
 .brand { display: flex; flex-direction: column; flex-shrink: 0; margin-right: 4px; }
 .title { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; white-space: nowrap; }
 .status { font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; white-space: nowrap; }
+.nav-spacer { flex: 1; }
 
-/* tabs-wrapper takes all remaining space; tabs-main clips internally so the
-   More button and Chat button at the end are always fully visible */
-.tabs-wrapper { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
-.tabs-main { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; overflow: hidden; min-width: 0; flex: 1; }
-
-.tab {
-  position: relative;
-  padding: 7px 14px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  background: transparent;
-  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-  font-weight: 500;
-  white-space: nowrap;
-  font-size: 13px;
-  color: var(--muted);
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  flex-shrink: 0;
+/* ─── GAME LAUNCHER ───────────────────────────────────────── */
+#gameLauncher {
+  position: fixed;
+  left: 0;
+  top: var(--nav-height);
+  height: calc(100vh - var(--nav-height));
+  z-index: 900;
+  display: flex;
+  pointer-events: none;
 }
-.tab:hover { background: rgba(255,255,255,0.05); color: #fff; }
-.tab.active { background: var(--accent); color: #000; font-weight: 700; }
 
-.tab-player-count {
+/* The tab that sticks out on the left edge */
+#launcherTab {
   position: absolute;
-  right: -5px;
-  bottom: -5px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 5px;
-  border-radius: 999px;
-  background: #22c55e;
-  color: #052e16;
-  border: 2px solid rgba(15,23,42,0.95);
-  box-shadow: 0 0 0 1px rgba(34,197,94,0.35), 0 4px 10px rgba(0,0,0,0.28);
-  display: none;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  background: linear-gradient(180deg, rgba(56,189,248,0.18), rgba(14,165,233,0.1));
+  border: 1px solid rgba(56,189,248,0.28);
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  cursor: pointer;
+  pointer-events: all;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: 900;
-  line-height: 1;
-  text-align: center;
-  pointer-events: none;
+  gap: 5px;
+  padding: 14px 0;
+  transition: all 0.28s cubic-bezier(0.16,1,0.3,1);
+  backdrop-filter: blur(10px);
+  box-shadow: 3px 0 20px rgba(0,0,0,0.35), inset -1px 0 0 rgba(56,189,248,0.1);
 }
-.tab-player-count.has-players { display: inline-flex; }
-.tab.active .tab-player-count { border-color: var(--accent); }
+#launcherTab:hover {
+  width: 32px;
+  background: linear-gradient(180deg, rgba(56,189,248,0.3), rgba(14,165,233,0.2));
+  border-color: rgba(103,232,249,0.5);
+  box-shadow: 4px 0 28px rgba(56,189,248,0.18);
+}
+#gameLauncher.open #launcherTab {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(-40px);
+}
+.launcher-tab-line {
+  width: 3px;
+  border-radius: 99px;
+  background: rgba(103,232,249,0.7);
+  transition: all 0.2s ease;
+}
+.launcher-tab-line:nth-child(1) { height: 16px; }
+.launcher-tab-line:nth-child(2) { height: 10px; opacity: 0.5; }
+.launcher-tab-line:nth-child(3) { height: 6px; opacity: 0.28; }
+#launcherTab:hover .launcher-tab-line { background: #67e8f9; }
+#launcherTab:hover .launcher-tab-line:nth-child(1) { height: 18px; }
+#launcherTab:hover .launcher-tab-line:nth-child(2) { opacity: 0.7; }
+#launcherTab:hover .launcher-tab-line:nth-child(3) { opacity: 0.45; }
 
-/* ─── MORE DROPDOWN (redesigned) ──────────────────────────── */
-.dropdown { position: relative; display: none; flex-shrink: 0; }
+/* The panel that slides in */
+#launcherPanel {
+  width: 260px;
+  height: 100%;
+  background: linear-gradient(180deg,
+    rgba(10,18,35,0.97) 0%,
+    rgba(8,14,28,0.98) 100%
+  );
+  border-right: 1px solid rgba(56,189,248,0.18);
+  box-shadow: 6px 0 48px rgba(0,0,0,0.55), inset -1px 0 0 rgba(56,189,248,0.06);
+  backdrop-filter: blur(24px);
+  transform: translateX(-100%);
+  transition: transform 0.38s cubic-bezier(0.16,1,0.3,1);
+  pointer-events: all;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#gameLauncher.open #launcherPanel {
+  transform: translateX(0);
+}
 
-.dropdown-trigger {
+/* Panel header */
+.launcher-header {
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
-  background: rgba(30,41,59,0.8);
-  border: 1px solid rgba(125,211,252,0.2);
-  border-radius: var(--radius);
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 13px;
-  color: #e0f2fe;
-  transition: all 0.22s ease;
-  white-space: nowrap;
-  font-family: inherit;
+  justify-content: space-between;
+  flex-shrink: 0;
 }
-.dropdown-trigger:hover {
-  background: rgba(8,145,178,0.25);
-  border-color: rgba(125,211,252,0.45);
-  color: #fff;
+.launcher-title {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(148,163,184,0.7);
 }
-.dropdown.open .dropdown-trigger {
-  background: rgba(8,145,178,0.32);
-  border-color: rgba(103,232,249,0.6);
-  color: #fff;
-}
-.dropdown-trigger-chevron {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.22s ease;
-  opacity: 0.8;
-}
-.dropdown.open .dropdown-trigger-chevron { transform: rotate(180deg); }
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  background: rgba(10,20,40,0.98);
-  border: 1px solid rgba(125,211,252,0.22);
-  border-radius: 14px;
-  padding: 8px;
-  min-width: 220px;
-  max-width: 300px;
-  box-shadow: 0 24px 60px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(125,211,252,0.08);
-  backdrop-filter: blur(20px);
-  display: none;
-  flex-direction: column;
-  gap: 3px;
-  z-index: 1100;
-}
-.dropdown.open .dropdown-menu {
-  display: flex;
-  animation: dropdownIn 0.22s cubic-bezier(0.16,1,0.3,1);
-}
-@keyframes dropdownIn {
-  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* Tabs inside dropdown inherit .tab styles but full width */
-.dropdown-menu .tab {
-  width: 100%;
-  border-radius: 9px;
-  font-size: 13px;
-  padding: 9px 12px;
-  flex-shrink: 1;
-}
-.dropdown-menu .tab:hover { background: rgba(255,255,255,0.06); }
-.dropdown-menu .tab.active { background: var(--accent); }
-.dropdown-divider {
-  height: 1px;
-  background: rgba(148,163,184,0.12);
-  margin: 4px 0;
+.launcher-close {
+  width: 26px;
+  height: 26px;
   border: none;
+  background: rgba(255,255,255,0.06);
+  border-radius: 7px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  line-height: 1;
 }
-.dropdown-section-label {
-  padding: 4px 10px 3px;
+.launcher-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* Search bar */
+.launcher-search-wrap {
+  padding: 12px 14px 10px;
+  flex-shrink: 0;
+}
+.launcher-search {
+  width: 100%;
+  height: 34px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 9px;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  padding: 0 10px 0 32px;
+  outline: none;
+  transition: border-color 0.18s, background 0.18s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%2364748b' stroke-width='2'/%3E%3Cpath d='M16.5 16.5 21 21' stroke='%2364748b' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.launcher-search:focus {
+  border-color: rgba(56,189,248,0.45);
+  background-color: rgba(56,189,248,0.05);
+}
+.launcher-search::placeholder { color: rgba(148,163,184,0.45); }
+
+/* Scrollable game list */
+#launcherList {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56,189,248,0.2) transparent;
+}
+#launcherList::-webkit-scrollbar { width: 4px; }
+#launcherList::-webkit-scrollbar-track { background: transparent; }
+#launcherList::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.2); border-radius: 99px; }
+
+/* Individual game row */
+.game-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: 9px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  user-select: none;
+  animation: rowSlideIn 0.35s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes rowSlideIn {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.game-row:hover {
+  background: rgba(56,189,248,0.07);
+  border-color: rgba(56,189,248,0.14);
+  transform: translateX(3px);
+}
+.game-row.active {
+  background: linear-gradient(135deg, rgba(56,189,248,0.16), rgba(14,165,233,0.08));
+  border-color: rgba(56,189,248,0.35);
+}
+.game-row.active .game-row-name { color: #7dd3fc; font-weight: 800; }
+
+/* Color swatch — replaces the image */
+.game-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: rgba(255,255,255,0.9);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease;
+}
+.game-row:hover .game-swatch { transform: scale(1.08) rotate(-2deg); }
+.game-row.active .game-swatch { transform: scale(1.06); }
+/* Shimmer effect on the swatch */
+.game-swatch::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 60%);
+  border-radius: inherit;
+}
+
+.game-row-info { flex: 1; min-width: 0; }
+.game-row-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.18s;
+  letter-spacing: -0.1px;
+}
+.game-row:hover .game-row-name { color: #e2e8f0; }
+
+.game-row-players {
+  display: none;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+  color: #22c55e;
+  margin-top: 2px;
+}
+.game-row-players.has-players { display: flex; }
+.game-row-players::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+  animation: playerPulse 2s ease-in-out infinite;
+}
+@keyframes playerPulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.8); }
 }
 
-.ribbon {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  padding: 2px 6px;
+.game-row-ribbon {
   font-size: 9px;
   font-weight: 900;
-  color: white;
+  color: #fff;
   text-transform: uppercase;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  z-index: 10;
+  padding: 2px 6px;
+  border-radius: 5px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+/* Active game indicator in nav */
+.nav-active-game {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 8px;
+  background: rgba(56,189,248,0.1);
+  border: 1px solid rgba(56,189,248,0.22);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  max-width: 200px;
+}
+.nav-active-game:hover {
+  background: rgba(56,189,248,0.17);
+  border-color: rgba(56,189,248,0.38);
+}
+.nav-active-game-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: navDotPulse 2.2s ease-in-out infinite;
+}
+@keyframes navDotPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(56,189,248,0.5); }
+  50% { box-shadow: 0 0 0 4px rgba(56,189,248,0); }
+}
+.nav-active-game-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #7dd3fc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-games-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  background: rgba(30,41,59,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-games-btn:hover {
+  background: rgba(56,189,248,0.12);
+  border-color: rgba(56,189,248,0.3);
+  color: #e0f2fe;
+}
+.nav-games-btn svg { width: 13px; height: 13px; opacity: 0.8; transition: transform 0.3s ease; }
+.nav-games-btn:hover svg { transform: rotate(90deg); opacity: 1; }
+
+/* Launcher overlay backdrop on mobile */
+.launcher-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 890;
+  background: rgba(0,0,0,0);
   pointer-events: none;
+  transition: background 0.3s ease;
+}
+#gameLauncher.open ~ .launcher-backdrop {
+  display: block;
+  pointer-events: all;
+  background: rgba(0,0,0,0.45);
+}
+
+/* Hidden stub elements kept for JS compatibility */
+.tabs-wrapper { display: none; }
+.tab { display: none; }
+
+.ribbon {
+  display: none; /* ribbons are now handled inside game-row-ribbon */
 }
 
 /* ─── CHAT BUTTON ──────────────────────────────────────────── */
@@ -787,27 +986,63 @@ nav {
     <div id="status" class="status">Idle</div>
   </div>
 
-  <div class="tabs-wrapper">
+  <!-- Hidden stubs kept for JS compatibility -->
+  <div class="tabs-wrapper" aria-hidden="true">
     <div class="tabs-main" id="tabsMain"></div>
     <div class="dropdown" id="moreDropdown">
-      <button class="dropdown-trigger" type="button" onclick="toggleDropdown()" aria-haspopup="true" aria-expanded="false" id="dropdownTriggerBtn">
-        <svg class="dropdown-trigger-chevron" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 6L8 11L13 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        More
-      </button>
-      <div class="dropdown-menu" id="tabsMore" role="menu"></div>
+      <button class="dropdown-trigger" type="button" id="dropdownTriggerBtn" aria-expanded="false">More</button>
+      <div class="dropdown-menu" id="tabsMore"></div>
     </div>
-    <button id="chatToggle" class="chat-button" type="button" aria-label="Open chat" title="Open chat">
-      <svg class="chat-button-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
-        <path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        <path d="M8.25 9.25H15.75M8.25 12H13.25" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <span class="chat-button-text">Chat</span>
-      <span class="chat-unread-dot" aria-hidden="true"></span>
-    </button>
   </div>
+
+  <div class="nav-spacer"></div>
+
+  <!-- Active game pill — shows what's currently playing, click to open launcher -->
+  <div id="navActiveGame" class="nav-active-game" style="display:none" title="Open game launcher" onclick="openLauncher()">
+    <span class="nav-active-game-dot"></span>
+    <span id="navActiveGameName" class="nav-active-game-name">—</span>
+  </div>
+
+  <!-- Games button — always visible -->
+  <button class="nav-games-btn" type="button" onclick="openLauncher()" title="Browse games">
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/>
+      <rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/>
+      <rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/>
+      <rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/>
+    </svg>
+    Games
+  </button>
+
+  <button id="chatToggle" class="chat-button" type="button" aria-label="Open chat" title="Open chat">
+    <svg class="chat-button-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M8.25 9.25H15.75M8.25 12H13.25" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="chat-button-text">Chat</span>
+    <span class="chat-unread-dot" aria-hidden="true"></span>
+  </button>
 </nav>
+
+<!-- ─── GAME LAUNCHER ─────────────────────────────────────── -->
+<div id="gameLauncher">
+  <div id="launcherTab" onclick="openLauncher()" title="Open game launcher" role="button" aria-label="Open game launcher">
+    <div class="launcher-tab-line"></div>
+    <div class="launcher-tab-line"></div>
+    <div class="launcher-tab-line"></div>
+  </div>
+  <div id="launcherPanel">
+    <div class="launcher-header">
+      <span class="launcher-title">Games</span>
+      <button class="launcher-close" onclick="closeLauncher()" aria-label="Close game launcher">✕</button>
+    </div>
+    <div class="launcher-search-wrap">
+      <input id="launcherSearch" class="launcher-search" type="text" placeholder="Search games..." autocomplete="off" spellcheck="false" />
+    </div>
+    <div id="launcherList"></div>
+  </div>
+</div>
+<div class="launcher-backdrop" onclick="closeLauncher()"></div>
 
 <iframe id="viewer"></iframe>
 
@@ -1044,7 +1279,7 @@ let chatAuthScreen = "choice";
 let chatAuthState = { user: null, profile: null, isAdmin: false, approvalStatus: null };
 let pendingDenyUid = null;
 
-// ─── GAME TABS ────────────────────────────────────────────
+// ─── GAME LAUNCHER ───────────────────────────────────────
 function getGameData(data) {
   if (typeof data === "string") return { url: data, order: null, ribbon: null, ribbonColor: null };
   return {
@@ -1055,78 +1290,161 @@ function getGameData(data) {
   };
 }
 
-function loadGame(name, url, element) {
-  iframe.src = url;
-  statusText.textContent = name;
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  element.classList.add("active");
-  moreDropdown.classList.remove("open");
-  if (dropdownTriggerBtn) dropdownTriggerBtn.setAttribute("aria-expanded", "false");
-  window.gamePresence?.setActiveGame(name);
+const launcher = document.getElementById("gameLauncher");
+const launcherList = document.getElementById("launcherList");
+const launcherSearch = document.getElementById("launcherSearch");
+const navActiveGame = document.getElementById("navActiveGame");
+const navActiveGameName = document.getElementById("navActiveGameName");
+
+// Palette for game swatches — cycles through these
+const SWATCH_PALETTES = [
+  ["#1e3a5f","#38bdf8"],["#1a3326","#34d399"],["#2d1b4e","#a78bfa"],
+  ["#3b1f0e","#fb923c"],["#1f2937","#e2e8f0"],["#1a2744","#60a5fa"],
+  ["#2e1065","#e879f9"],["#1c2335","#f472b6"],["#0c2c1a","#4ade80"],
+  ["#2c1810","#f97316"],["#0f172a","#38bdf8"],["#1e1b4b","#818cf8"],
+  ["#1a1a2e","#c084fc"],["#0d2137","#22d3ee"],["#1a2e1a","#86efac"],
+  ["#2d1515","#f87171"],["#1c1917","#a8a29e"],["#1a2744","#7dd3fc"],
+  ["#2a1f00","#fbbf24"],["#0f1f1f","#2dd4bf"],["#1e0a2e","#d946ef"],
+];
+
+function getInitials(name) {
+  return name.split(/\s+/).map(w => w[0] || "").join("").slice(0,2).toUpperCase() || "??";
 }
 
-function build() {
-  if (typeof PAGES === "undefined") return;
-  tabsMain.innerHTML = "";
-  tabsMore.innerHTML = "";
-  moreDropdown.style.display = "none";
+let allGameEntries = [];
+let currentActive = null;
 
-  const entries = Object.entries(PAGES)
+function buildLauncher() {
+  if (typeof PAGES === "undefined") return;
+  // Also build old tabsMain/tabsMore for JS compatibility (player counts etc)
+  if (tabsMain) tabsMain.innerHTML = "";
+  if (tabsMore) tabsMore.innerHTML = "";
+
+  allGameEntries = Object.entries(PAGES)
     .map(([name, data], originalIndex) => {
       const game = getGameData(data);
       return { name, data: game, originalIndex, order: Number.isFinite(game.order) ? game.order : originalIndex };
     })
     .sort((a, b) => a.order - b.order || a.originalIndex - b.originalIndex);
 
-  entries.forEach(({ name, data }, index) => {
-    const tab = document.createElement("div");
-    tab.className = "tab";
-    tab.dataset.gameName = name;
-    tab.setAttribute("role", "button");
-    tab.setAttribute("tabindex", "0");
+  // Invisible stubs in tabsMain/tabsMore for player-count compatibility
+  allGameEntries.forEach(({ name, data }, index) => {
+    const stub = document.createElement("div");
+    stub.className = "tab";
+    stub.dataset.gameName = name;
+    stub.setAttribute("role", "none");
+    stub.setAttribute("aria-hidden", "true");
+    stub.style.cssText = "display:none!important";
+    const pc = document.createElement("span");
+    pc.className = "tab-player-count";
+    pc.dataset.playerCountFor = name;
+    pc.setAttribute("aria-hidden", "true");
+    stub.appendChild(pc);
+    if (index < MAX_VISIBLE) tabsMain?.appendChild(stub);
+    else tabsMore?.appendChild(stub);
+  });
 
-    const tabName = document.createElement("span");
-    tabName.textContent = name;
-    tab.appendChild(tabName);
+  renderLauncherRows(allGameEntries);
+}
 
-    const playerCount = document.createElement("span");
-    playerCount.className = "tab-player-count";
-    playerCount.dataset.playerCountFor = name;
-    playerCount.textContent = "";
-    playerCount.setAttribute("aria-hidden", "true");
-    playerCount.title = "Players online";
-    tab.appendChild(playerCount);
+function renderLauncherRows(entries) {
+  launcherList.innerHTML = "";
+  entries.forEach(({ name, data }, i) => {
+    const palette = SWATCH_PALETTES[i % SWATCH_PALETTES.length];
+    const row = document.createElement("div");
+    row.className = "game-row";
+    row.dataset.gameName = name;
+    row.style.animationDelay = `${Math.min(i * 28, 400)}ms`;
 
-    tab.onclick = () => loadGame(name, data.url, tab);
-    tab.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); loadGame(name, data.url, tab); } };
+    // Swatch
+    const swatch = document.createElement("div");
+    swatch.className = "game-swatch";
+    swatch.style.background = `linear-gradient(145deg, ${palette[0]}, color-mix(in srgb, ${palette[0]} 50%, ${palette[1]} 50%))`;
+    swatch.style.boxShadow = `0 3px 10px rgba(0,0,0,0.4), inset 0 1px 0 ${palette[1]}44`;
+    const initEl = document.createElement("span");
+    initEl.textContent = getInitials(name);
+    initEl.style.cssText = `color:${palette[1]};text-shadow:0 0 12px ${palette[1]}88;font-size:11px;font-weight:900;position:relative;z-index:1`;
+    swatch.appendChild(initEl);
 
+    // Info
+    const info = document.createElement("div");
+    info.className = "game-row-info";
+    const nameEl = document.createElement("div");
+    nameEl.className = "game-row-name";
+    nameEl.textContent = name;
+    const players = document.createElement("div");
+    players.className = "game-row-players";
+    players.dataset.playersFor = name;
+    players.textContent = "";
+    info.appendChild(nameEl);
+    info.appendChild(players);
+
+    row.appendChild(swatch);
+    row.appendChild(info);
+
+    // Ribbon badge
     if (data.ribbon) {
-      const ribbon = document.createElement("span");
-      ribbon.className = "ribbon";
-      ribbon.textContent = data.ribbon;
-      ribbon.style.backgroundColor = data.ribbonColor;
-      tab.appendChild(ribbon);
+      const badge = document.createElement("span");
+      badge.className = "game-row-ribbon";
+      badge.textContent = data.ribbon;
+      badge.style.background = data.ribbonColor || "var(--accent)";
+      row.appendChild(badge);
     }
 
-    if (index < MAX_VISIBLE) {
-      tabsMain.appendChild(tab);
-    } else {
-      moreDropdown.style.display = "block";
-      // Add section divider for first overflow item
-      if (index === MAX_VISIBLE) {
-        const lbl = document.createElement("div");
-        lbl.className = "dropdown-section-label";
-        lbl.textContent = "More Games";
-        tabsMore.appendChild(lbl);
-      }
-      tabsMore.appendChild(tab);
-    }
+    row.onclick = () => loadGame(name, data.url, row);
+    row.setAttribute("tabindex", "0");
+    row.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); loadGame(name, data.url, row); } };
+
+    launcherList.appendChild(row);
   });
 }
 
+// Search filtering
+launcherSearch.addEventListener("input", () => {
+  const q = launcherSearch.value.trim().toLowerCase();
+  if (!q) { renderLauncherRows(allGameEntries); return; }
+  renderLauncherRows(allGameEntries.filter(({ name }) => name.toLowerCase().includes(q)));
+});
+
+// Keyboard: close on Escape
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && launcher.classList.contains("open")) closeLauncher();
+});
+
+function openLauncher() {
+  launcher.classList.add("open");
+  setTimeout(() => launcherSearch.focus(), 300);
+}
+function closeLauncher() {
+  launcher.classList.remove("open");
+}
+
+// ─── GAME TABS (compatibility shim) ─────────────────────────
+function build() {
+  buildLauncher();
+}
+
 function toggleDropdown() {
-  const isOpen = moreDropdown.classList.toggle("open");
-  if (dropdownTriggerBtn) dropdownTriggerBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  // no-op — kept for any external calls
+}
+
+function loadGame(name, url, element) {
+  iframe.src = url;
+  statusText.textContent = name;
+  // Update all .active states (stubs + launcher rows)
+  document.querySelectorAll(".tab, .game-row").forEach(t => t.classList.remove("active"));
+  element.classList.add("active");
+  // Also mark the matching stub tab as active for player count JS
+  const stub = tabsMain?.querySelector(`[data-game-name="${CSS.escape(name)}"]`)
+    || tabsMore?.querySelector(`[data-game-name="${CSS.escape(name)}"]`);
+  if (stub) stub.classList.add("active");
+  // Show active game in nav
+  navActiveGame.style.display = "flex";
+  navActiveGameName.textContent = name;
+  currentActive = name;
+  // Close the launcher after picking
+  closeLauncher();
+  window.gamePresence?.setActiveGame(name);
 }
 
 // ─── CHAT OPEN / CLOSE ───────────────────────────────────
@@ -1475,12 +1793,24 @@ const activeUsersObserver = new MutationObserver(updateActiveUsersFromBadges);
 activeUsersObserver.observe(tabsMain, { childList:true, subtree:true, characterData:true });
 activeUsersObserver.observe(tabsMore, { childList:true, subtree:true, characterData:true });
 
-window.addEventListener("click", (e) => {
-  if (!e.target.closest("#moreDropdown")) {
-    moreDropdown.classList.remove("open");
-    if (dropdownTriggerBtn) dropdownTriggerBtn.setAttribute("aria-expanded","false");
-  }
+// ─── PLAYER COUNT → LAUNCHER ROWS ────────────────────────
+// Whenever player-count badges change, mirror them into launcher rows
+document.addEventListener("DOMSubtreeModified", () => {}, { passive: true });
+const launcherPlayerObserver = new MutationObserver(() => {
+  document.querySelectorAll("[data-player-count-for]").forEach(badge => {
+    const n = parseInt(badge.textContent, 10) || 0;
+    const gameName = badge.dataset.playerCountFor;
+    const playerEl = launcherList?.querySelector(`[data-players-for="${CSS.escape(gameName)}"]`);
+    if (playerEl) {
+      playerEl.textContent = n > 0 ? `${n} playing` : "";
+      playerEl.classList.toggle("has-players", n > 0);
+    }
+  });
 });
+if (tabsMain) launcherPlayerObserver.observe(tabsMain, { subtree: true, characterData: true, childList: true });
+if (tabsMore) launcherPlayerObserver.observe(tabsMore, { subtree: true, characterData: true, childList: true });
+
+// launcher closes via backdrop click and Escape key (see above)
 
 /* POPUP LOGIC */
 const emailPopup = document.getElementById("emailPopup");
