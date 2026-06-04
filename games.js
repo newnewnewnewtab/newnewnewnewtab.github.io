@@ -1,4 +1,10 @@
 window.PAGES = {
+  //Pottentials 
+  //https://script.google.com/macros/s/AKfycbw8iHPqdVFEzquUYbNxFVAu1Tw4Nri5SWMRLdP_c7a84vCOHVG7YUWuhjSVptg1SVHr/exec
+  //https://script.google.com/macros/s/AKfycbzGxfKS5Uv4MC2N__iKoytC7F5HxVSH3GBPkkqKc0WLf7aIOFkZr3AMsN03VbEPKMGQ/exec
+  //https://script.google.com/macros/s/AKfycbwfUFXy27bYwMfp4xHUVbpN9PSWWzB7bKs-qA01ZYJ7hgeZbvFZgkdjydsAYWrYGPQb/exec
+  
+
   
   "Drive Mad": { 
     "url": "https://newnewnewtab.github.io/drive-mad/drive-mad-new/"
