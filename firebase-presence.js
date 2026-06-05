@@ -35,7 +35,7 @@ const firebaseConfig = {
   appId: "1:347559506222:web:e854997d9048686b988abf"
 };
 
-const ADMIN_EMAILS = ["sagaasg29@rsu71.org"];
+const ADMIN_EMAILS = ["newtabgmail@gmail.com"];
 window.SITE_CHAT_ADMIN_EMAILS = ADMIN_EMAILS;
 
 const SESSION_ID_KEY = "game_hoster_session_id";
