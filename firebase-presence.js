@@ -35,7 +35,7 @@ const firebaseConfig = {
   appId: "1:347559506222:web:e854997d9048686b988abf"
 };
 
-const ADMIN_EMAILS = ["newtabgmail@gmail.com"];
+const ADMIN_EMAILS = ["sagaasg29@rsu71.org"];
 window.SITE_CHAT_ADMIN_EMAILS = ADMIN_EMAILS;
 
 const SESSION_ID_KEY = "game_hoster_session_id";
@@ -47,6 +47,7 @@ const CHAT_PENDING_SCHOOL_KEY = "site_chat_pending_school";
 const CHAT_MESSAGE_LIMIT = 25;
 const MAX_MESSAGE_LENGTH = 180;
 const MAX_NAME_LENGTH = 24;
+const NAME_CHANGE_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const CHAT_ROOMS = {
   "High School": { id: "high", label: "High School" },
@@ -272,8 +273,6 @@ function stopApprovalRequestsWatch() {
   unsubscribeApprovalRequests = null;
 }
 
-// Live watcher for a non-admin user's own approval request — fires when admin
-// approves or denies directly in the Firebase console or via the UI.
 function watchApprovalRequestStatus(user) {
   stopOwnApprovalRequestWatch();
   const requestRef = ref(database, `siteChat/approvalRequests/${user.uid}`);
@@ -288,7 +287,6 @@ function watchApprovalRequestStatus(user) {
       stopOwnApprovalRequestWatch();
       dispatchAuthChanged({ approvalStatus: "denied", denyReason: data.denyReason });
       showChatStatus("Your account request was denied.");
-      // Sign them out after a short delay so they see the denied screen briefly
       setTimeout(() => signOut(auth).catch(console.warn), 3000);
     }
   }, (error) => {
@@ -302,29 +300,31 @@ function stopOwnApprovalRequestWatch() {
   unsubscribeOwnApprovalRequest = null;
 }
 
-async function approveRequest(uid) {
+// approveRequest now takes an optional targetSchool to override the requested school
+async function approveRequest(uid, targetSchool) {
   const requestRef = ref(database, `siteChat/approvalRequests/${uid}`);
   const snapshot = await get(requestRef);
   if (!snapshot.exists()) return;
   const data = snapshot.val();
 
-  // Only write fields the admin role is permitted to write.
-  // uid and email are owner-only per Firebase rules — including them here
-  // would cause the entire update to be rejected.
+  const school = targetSchool ? cleanSchool(targetSchool) : cleanSchool(data.school);
+
   const userRef = ref(database, `siteChat/users/${uid}`);
   const userSnap = await get(userRef);
   const now = Date.now();
   const profile = {
     name: cleanName(data.name),
-    school: cleanSchool(data.school),
+    school: school || cleanSchool(data.school),
     approved: true,
     updatedAt: now
   };
   if (!userSnap.exists()) profile.createdAt = now;
   await update(userRef, profile);
 
-  // Mark request approved
-  await update(requestRef, { status: "approved", reviewedAt: now });
+  // Update the request with overridden school if changed
+  const requestUpdates = { status: "approved", reviewedAt: now };
+  if (school && school !== data.school) requestUpdates.school = school;
+  await update(requestRef, requestUpdates);
 }
 
 async function denyRequest(uid, reason) {
@@ -333,6 +333,16 @@ async function denyRequest(uid, reason) {
     status: "denied",
     denyReason: cleanMessageText(reason).slice(0, 300),
     reviewedAt: Date.now()
+  });
+}
+
+// ─── ADMIN: move user to a different room ─────────────────────────────────────
+async function moveUserToRoom(uid, newSchool) {
+  const school = cleanSchool(newSchool);
+  if (!school) return;
+  await update(ref(database, `siteChat/users/${uid}`), {
+    school,
+    updatedAt: Date.now()
   });
 }
 
@@ -364,20 +374,16 @@ function setupAuth() {
     connectDatabase();
 
     try {
-      // Check if admin
       if (currentIsAdmin) {
-        // Admins are always approved — set their profile if missing
         await ensureAdminProfile(user);
         watchApprovalRequests();
         watchUserProfile(user);
         return;
       }
 
-      // Check approval status
       const request = await checkApprovalStatus(user);
 
       if (!request) {
-        // No request at all — show "request verification" state
         dispatchAuthChanged({ approvalStatus: "none" });
         showChatStatus("Your account needs approval. Request verification to chat.");
         return;
@@ -393,13 +399,11 @@ function setupAuth() {
       if (request.status === "denied") {
         dispatchAuthChanged({ approvalStatus: "denied", denyReason: request.denyReason });
         showChatStatus("Your account request was denied.");
-        // Auto sign-out after a short delay so they see the denial reason
         setTimeout(() => signOut(auth).catch(console.warn), 3000);
         return;
       }
 
       if (request.status === "approved") {
-        // Ensure their profile exists in siteChat/users
         await ensureApprovedProfile(user, request);
         watchUserProfile(user);
         return;
@@ -481,13 +485,19 @@ async function handleAuthAction(detail = {}) {
 
   if (action === "approve-request") {
     if (!currentIsAdmin) throw new Error("Admins only.");
-    await approveRequest(detail.uid);
+    await approveRequest(detail.uid, detail.targetSchool || null);
     return;
   }
 
   if (action === "deny-request") {
     if (!currentIsAdmin) throw new Error("Admins only.");
     await denyRequest(detail.uid, detail.reason);
+    return;
+  }
+
+  if (action === "move-user-room") {
+    if (!currentIsAdmin) throw new Error("Admins only.");
+    await moveUserToRoom(detail.uid, detail.school);
     return;
   }
 
@@ -508,6 +518,21 @@ async function handleAuthAction(detail = {}) {
     return;
   }
 
+  if (action === "change-name") {
+    if (!currentUser || !currentProfile) throw new Error("Sign in first.");
+    const newName = cleanName(detail.name);
+    if (!newName) throw new Error("Enter a valid name.");
+    const now = Date.now();
+    const lastChanged = Number(currentProfile.nameLastChangedAt || 0);
+    if (!currentIsAdmin && now - lastChanged < NAME_CHANGE_COOLDOWN_MS) {
+      const hoursLeft = Math.ceil((NAME_CHANGE_COOLDOWN_MS - (now - lastChanged)) / 3600000);
+      throw new Error(`You can change your name again in ${hoursLeft} hour${hoursLeft === 1 ? "" : "s"}.`);
+    }
+    const userRef = ref(database, `siteChat/users/${currentUser.uid}`);
+    await update(userRef, { name: newName, nameLastChangedAt: now, updatedAt: now });
+    return;
+  }
+
   const email = cleanEmail(detail.email);
   const password = String(detail.password || "");
   const name = cleanName(detail.name);
@@ -521,7 +546,6 @@ async function handleAuthAction(detail = {}) {
   if (action === "signup") {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     savePendingSignup(name, school);
-    // Immediately submit approval request
     await submitApprovalRequest(credential.user, name, school);
     dispatchAuthChanged({ approvalStatus: "pending" });
     dispatchAuthStatus("Account created! Your request has been submitted for approval.", false);
@@ -529,7 +553,6 @@ async function handleAuthAction(detail = {}) {
   }
 
   const credential = await signInWithEmailAndPassword(auth, email, password);
-  // Auth state change handler takes over from here
 }
 
 function savePendingSignup(name, school) {
@@ -544,8 +567,6 @@ function clearPendingSignup() {
 
 function watchUserProfile(user) {
   const userRef = ref(database, `siteChat/users/${user.uid}`);
-  // Immediately dispatch so the admin panel / identity row shows before the
-  // first snapshot arrives from Firebase.
   dispatchAuthChanged({ approvalStatus: currentIsAdmin ? "approved" : undefined });
   unsubscribeUserProfile = onValue(userRef, async (snapshot) => {
     if (!currentUser) return;
@@ -591,7 +612,8 @@ function normalizeProfile(user, value) {
     school: cleanSchool(value.school) || "High School",
     banned: value.banned === true,
     timeoutUntil: Number(value.timeoutUntil) || 0,
-    approved: value.approved === true
+    approved: value.approved === true,
+    nameLastChangedAt: Number(value.nameLastChangedAt) || 0
   };
 }
 
@@ -601,7 +623,7 @@ function dispatchAuthChanged(extra = {}) {
       user: currentUser ? {
         uid: currentUser.uid,
         email: cleanEmail(currentUser.email),
-        emailVerified: true // always true in new system (approval-based)
+        emailVerified: true
       } : null,
       profile: currentProfile,
       isAdmin: currentIsAdmin,
@@ -705,6 +727,8 @@ function subscribeRoom(roomId, container) {
     });
     hasLoadedChat = true;
     container.scrollTop = container.scrollHeight;
+    // After rendering, clean up overflow in Firebase (all users participate)
+    cleanupOldChatMessages(roomId);
   }, (error) => {
     console.warn("Firebase chat read failed:", error);
     showChatStatus("Chat could not load. Check the Firebase database rules for this room.");
@@ -719,7 +743,7 @@ function renderMessage(key, message, roomId, container = chatMessages) {
   if (message.uid === currentUser?.uid || message.sid === SESSION_ID) item.classList.add("own");
   const meta = document.createElement("div");
   meta.className = "message-meta";
-  const author = document.createElement("span");
+  const author = document.createElement("div");
   author.className = "message-author";
   const name = document.createElement("span");
   name.className = "message-name";
@@ -732,6 +756,7 @@ function renderMessage(key, message, roomId, container = chatMessages) {
     author.append(email);
   }
   const time = document.createElement("span");
+  time.className = "message-time";
   time.textContent = formatMessageTime(message.createdAt);
   const text = document.createElement("div");
   text.className = "message-text";
@@ -756,7 +781,8 @@ function createAdminControls(key, message, roomId) {
     ["Ban", () => banUser(message)],
     ["Delete", () => deleteMessage(key, roomId)],
     ["Edit", () => editMessage(key, message, roomId)],
-    ["Name", () => renameUser(message)]
+    ["Rename", () => renameUser(message)],
+    ["Move Room", () => moveUserRoomPrompt(message)]
   ];
   actions.forEach(([label, handler]) => {
     const button = document.createElement("button");
@@ -766,6 +792,22 @@ function createAdminControls(key, message, roomId) {
     controls.appendChild(button);
   });
   return controls;
+}
+
+function moveUserRoomPrompt(message) {
+  if (!message.uid) return;
+  const rooms = ["High School", "Middle School", "Elementary School"];
+  const current = rooms.find(r => chatRoomIdFromSchool(r) === message.room) || "High School";
+  const choice = prompt(
+    `Move ${message.name || message.email} to which room?\n1 = High School\n2 = Middle School\n3 = Elementary School\nCurrent: ${current}`,
+    "1"
+  );
+  const map = { "1": "High School", "2": "Middle School", "3": "Elementary School" };
+  const newSchool = map[choice?.trim()];
+  if (!newSchool) return;
+  document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
+    detail: { action: "move-user-room", uid: message.uid, school: newSchool }
+  }));
 }
 
 function sendChatMessage() {
@@ -795,15 +837,15 @@ function sendChatMessage() {
     school: currentProfile.school,
     room: roomId,
     createdAt: Date.now()
-  }).then(() => {
-    if (currentIsAdmin) cleanupOldChatMessages(roomId);
   }).catch((error) => {
     console.warn("Firebase chat write failed:", error);
     showChatStatus("Message was not sent. Check the Firebase database rules for this room.");
   });
 }
 
-function cleanupOldChatMessages(roomId = activeChatRoomId) {
+// Cleanup visible-overflow messages — called after every room render
+// Any user can run the count check; only delete if admin (rules enforced server-side too)
+function cleanupOldChatMessages(roomId) {
   if (!roomId || !currentIsAdmin) return;
   get(ref(database, `siteChat/rooms/${roomId}/messages`)).then((snapshot) => {
     if (!snapshot.exists()) return;
