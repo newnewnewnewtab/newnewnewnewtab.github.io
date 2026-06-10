@@ -16,23 +16,23 @@ window.PAGES = {
     "url": "https://vexacloud-assets.github.io/basket-bros/"
   },
 
-   "Paper.io": { 
+  "Paper.io": { 
     "url": "https://script.google.com/macros/s/AKfycbwNxCzUuQVmLRWTwYK2D4yTqpWg2O-qge8BwCkxhLmqWd1DtXynwJXPEDClPt7ERZr-/exec"
   },
 
-   "Drift Hunters": { 
+  "Drift Hunters": { 
     "url": "https://script.google.com/macros/s/AKfycbw8iHPqdVFEzquUYbNxFVAu1Tw4Nri5SWMRLdP_c7a84vCOHVG7YUWuhjSVptg1SVHr/exec",
     "ribbon": "New",
     "ribbonColor": "#ff77ff"
   },
 
-    "Skyblock 2D": { 
+  "Skyblock 2D": { 
     "url": "https://script.google.com/macros/s/AKfycbzGxfKS5Uv4MC2N__iKoytC7F5HxVSH3GBPkkqKc0WLf7aIOFkZr3AMsN03VbEPKMGQ/exec",
     "ribbon": "New",
     "ribbonColor": "#ff77ff"
   },
 
-    "There is No Game": { 
+  "There is No Game": { 
     "url": "https://script.google.com/a/macros/rsu71.org/s/AKfycbwfUFXy27bYwMfp4xHUVbpN9PSWWzB7bKs-qA01ZYJ7hgeZbvFZgkdjydsAYWrYGPQb/exec",
     "ribbon": "New",
     "ribbonColor": "#ff77ff"
