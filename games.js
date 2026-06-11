@@ -76,7 +76,8 @@ window.PAGES = {
   },
 
   "Minecraft": { 
-    "url": "https://glennfb83.github.io/ec/"
+    "url": "https://glennfb83.github.io/ec/",
+    "cover": "minecraft.jpg"
   },
 
   "Police Pursuit 2 ": { 
@@ -96,23 +97,28 @@ window.PAGES = {
   },
   
   "Geometry Dash": { 
-    "url": "https://threekho.github.io/gdl/" 
+    "url": "https://threekho.github.io/gdl/",
+    "cover": "geometrydash.jpeg"
   },
   
   "Basket Random": { 
-    "url": "https://unblocked-games-786.github.io/Basket-Random/" 
+    "url": "https://unblocked-games-786.github.io/Basket-Random/",
+    "cover": "basketrandom.jpeg"
   },
   
   "Eggy Car": { 
-    "url": "https://newnewnewnewtab.github.io/EggyCar/" 
+    "url": "https://newnewnewnewtab.github.io/EggyCar/",
+    "cover": "eggycar.jpeg"
   },
 
    "Flappy Bird": { 
-    "url": "https://newnewnewnewtab.github.io/flappy-bird/"
+    "url": "https://newnewnewnewtab.github.io/flappy-bird/",
+     "cover": "flappybird.png"
   },
   
   "Retro Bowl": { 
-    "url": "https://newnewnewnewtab.github.io/rb/" 
+    "url": "https://newnewnewnewtab.github.io/rb/",
+    "cover": "retrobowl.png"
   },
 
   "Five Nights at Epsteins": { 
