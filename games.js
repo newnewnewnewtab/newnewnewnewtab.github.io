@@ -1,15 +1,18 @@
 window.PAGES = {
   
   "Drive Mad": { 
-    "url": "https://newnewnewnewtab.github.io/drive-mad/drive-mad-new/"
+    "url": "https://newnewnewnewtab.github.io/drive-mad/drive-mad-new/",
+    "cover": "drivemad.png"
   },
 
   "Polytrack": { 
-    "url": "https://newnewnewnewtab.github.io/Polytrack/"
+    "url": "https://newnewnewnewtab.github.io/Polytrack/",
+    "cover": "polytrack.png"
   },
   
   "Snow Rider": { 
-    "url": "https://jigar1234nob.github.io/snowrider3d/" 
+    "url": "https://jigar1234nob.github.io/snowrider3d/",
+    "cover": "snowrider.PNG"
   },
   
   "Basket Bros": { 
@@ -55,7 +58,8 @@ window.PAGES = {
   },
 
   "Gunspin": {
-    "url": "https://newnewnewnewtab.github.io/Gunspin/"
+    "url": "https://newnewnewnewtab.github.io/Gunspin/",
+    "cover": "gunspin.png"
   },
 
   "Dig Out Of Prison": { 
