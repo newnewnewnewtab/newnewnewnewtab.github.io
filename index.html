@@ -162,6 +162,40 @@ body {
 .game-card-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.9); margin-bottom: 11px; position: relative; overflow: hidden; flex-shrink: 0; }
 .game-card-icon::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,0.18) 0%,transparent 60%); }
 .game-card-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+
+/* === COVER IMAGE CARDS === */
+.game-card.has-cover {
+  padding: 0;
+  background: #000;
+  border-color: rgba(255,255,255,0.1);
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.game-card.has-cover .game-card-cover-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius);
+  display: block;
+  transition: transform 0.3s var(--ease-spring), filter 0.2s;
+  filter: brightness(0.88);
+}
+.game-card.has-cover:hover .game-card-cover-img { transform: scale(1.04); filter: brightness(1); }
+.game-card.has-cover .game-card-cover-label {
+  position: relative;
+  z-index: 2;
+  padding: 28px 12px 12px;
+  background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 100%);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.game-card.has-cover .game-card-cover-label .game-card-name { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); margin-bottom: 0; }
+.game-card.has-cover .game-card-glow { display: none; }
+.game-card.has-cover .game-card-icon { display: none; }
+.game-card.has-cover .game-card-players { position: relative; z-index: 2; padding: 0 12px 8px; margin-top: -4px; }
 .game-card-players { display: none; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; color: #22c55e; }
 .game-card-players.has-players { display: flex; }
 .game-card-players::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #22c55e; flex-shrink: 0; animation: playerPulse 2s ease-in-out infinite; }
@@ -890,8 +924,8 @@ const SWATCH_PALETTES = [
 ];
 
 function getGameData(data) {
-  if (typeof data === "string") return { url: data, order: null, ribbon: null, ribbonColor: null };
-  return { url: data.url, order: data.order, ribbon: data.ribbon || data.ribbonText || data.badge || data.tag || null, ribbonColor: data.ribbonColor || data.badgeColor || data.tagColor || "var(--accent)" };
+  if (typeof data === "string") return { url: data, order: null, ribbon: null, ribbonColor: null, cover: null };
+  return { url: data.url, order: data.order, ribbon: data.ribbon || data.ribbonText || data.badge || data.tag || null, ribbonColor: data.ribbonColor || data.badgeColor || data.tagColor || "var(--accent)", cover: data.cover || null };
 }
 function getInitials(name) {
   return name.split(/\s+/).map(w => w[0] || "").join("").slice(0,2).toUpperCase() || "??";
@@ -949,28 +983,58 @@ function renderHomeGrid(entries) {
     card.style.animationDelay = Math.min(i * 18, 400) + "ms";
     if (currentActive === name) card.classList.add("active");
 
-    const glow = document.createElement("div");
-    glow.className = "game-card-glow";
-    card.appendChild(glow);
+    const hasCover = Boolean(data.cover);
 
-    const icon = document.createElement("div");
-    icon.className = "game-card-icon";
-    icon.style.background = "linear-gradient(145deg, " + palette[0] + ", color-mix(in srgb, " + palette[0] + " 50%, " + palette[1] + " 50%))";
-    const initEl = document.createElement("span");
-    initEl.textContent = getInitials(name);
-    initEl.style.cssText = "color:" + accentColor + ";text-shadow:0 0 10px " + accentColor + "88;position:relative;z-index:1;font-size:11px;font-weight:900;letter-spacing:-0.5px";
-    icon.appendChild(initEl);
-    card.appendChild(icon);
+    if (hasCover) {
+      // === COVER IMAGE CARD ===
+      card.classList.add("has-cover");
 
-    const nameEl = document.createElement("div");
-    nameEl.className = "game-card-name";
-    nameEl.textContent = name;
-    card.appendChild(nameEl);
+      const img = document.createElement("img");
+      img.className = "game-card-cover-img";
+      img.src = "covers/" + data.cover;
+      img.alt = name;
+      img.draggable = false;
+      card.appendChild(img);
 
-    const players = document.createElement("div");
-    players.className = "game-card-players";
-    players.dataset.playersFor = name;
-    card.appendChild(players);
+      const label = document.createElement("div");
+      label.className = "game-card-cover-label";
+
+      const nameEl = document.createElement("div");
+      nameEl.className = "game-card-name";
+      nameEl.textContent = name;
+      label.appendChild(nameEl);
+
+      const players = document.createElement("div");
+      players.className = "game-card-players";
+      players.dataset.playersFor = name;
+      label.appendChild(players);
+      card.appendChild(label);
+
+    } else {
+      // === DEFAULT (initials) CARD ===
+      const glow = document.createElement("div");
+      glow.className = "game-card-glow";
+      card.appendChild(glow);
+
+      const icon = document.createElement("div");
+      icon.className = "game-card-icon";
+      icon.style.background = "linear-gradient(145deg, " + palette[0] + ", color-mix(in srgb, " + palette[0] + " 50%, " + palette[1] + " 50%))";
+      const initEl = document.createElement("span");
+      initEl.textContent = getInitials(name);
+      initEl.style.cssText = "color:" + accentColor + ";text-shadow:0 0 10px " + accentColor + "88;position:relative;z-index:1;font-size:11px;font-weight:900;letter-spacing:-0.5px";
+      icon.appendChild(initEl);
+      card.appendChild(icon);
+
+      const nameEl = document.createElement("div");
+      nameEl.className = "game-card-name";
+      nameEl.textContent = name;
+      card.appendChild(nameEl);
+
+      const players = document.createElement("div");
+      players.className = "game-card-players";
+      players.dataset.playersFor = name;
+      card.appendChild(players);
+    }
 
     if (data.ribbon) {
       const badge = document.createElement("span");
