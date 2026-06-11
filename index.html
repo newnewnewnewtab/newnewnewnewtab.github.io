@@ -18,931 +18,557 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,900;1,9..40,400&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
-  --nav-height: 52px;
-  --nav-mini-height: 38px;
   --bg: #020617;
-  --bg-card: #1e293b;
-  --border: rgba(255,255,255,0.1);
+  --bg-card: #0f172a;
+  --bg-card-hover: #1a2540;
+  --border: rgba(255,255,255,0.07);
+  --border-accent: rgba(56,189,248,0.25);
   --text: #f8fafc;
-  --muted: #94a3b8;
+  --muted: #64748b;
+  --muted-light: #94a3b8;
   --accent: #38bdf8;
-  --radius: 12px;
+  --radius: 14px;
   --ease-spring: cubic-bezier(0.16,1,0.3,1);
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  margin: 0;
   font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
+  height: 100vh;
+  width: 100vw;
 }
 
-/* ─── OVERLAY ─────────────────────────────────────────────── */
+/* === OVERLAY (email prompt) === */
 .overlay {
-  position: fixed; inset: 0; background: #000;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.92);
   display: flex; align-items: center; justify-content: center;
   z-index: 9999; opacity: 0; visibility: hidden;
   transition: opacity 0.3s ease;
+  backdrop-filter: blur(20px);
 }
 .overlay.active { opacity: 1; visibility: visible; }
-.overlay-content { text-align: center; max-width: 900px; padding: 40px; width: 100%; }
-.overlay-content h1 { color: #fff; font-size: clamp(2rem,8vw,4rem); font-weight: 800; margin-bottom: 50px; line-height: 1.1; letter-spacing: -2px; }
-.overlay-btns { display: flex; flex-direction: column; align-items: center; gap: 25px; }
-.btn-yes { background: #fff; color: #000; padding: 24px 80px; font-size: 1.5rem; font-weight: 900; border-radius: 100px; border: none; cursor: pointer; width: 100%; max-width: 400px; transition: transform 0.2s, background-color 0.2s; text-transform: uppercase; }
-.btn-yes:hover { transform: scale(1.05); background: #f0f0f0; }
-.btn-no { background: transparent; color: #666; padding: 10px 20px; font-size: 1.1rem; font-weight: 600; border: none; cursor: pointer; transition: color 0.2s; }
-.btn-no:hover:not(:disabled) { color: #999; }
+.overlay-content { text-align: center; max-width: 520px; padding: 48px 40px; width: 100%; }
+.overlay-content h1 { color: #fff; font-size: clamp(1.4rem,4vw,2.2rem); font-weight: 800; margin-bottom: 36px; line-height: 1.25; letter-spacing: -0.5px; }
+.overlay-btns { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.btn-yes { background: var(--accent); color: #031018; padding: 15px 56px; font-size: 1rem; font-weight: 900; border-radius: 100px; border: none; cursor: pointer; width: 100%; max-width: 300px; transition: transform 0.2s, box-shadow 0.2s; text-transform: uppercase; letter-spacing: 0.06em; font-family: inherit; }
+.btn-yes:hover { transform: scale(1.04); box-shadow: 0 0 32px rgba(56,189,248,0.45); }
+.btn-no { background: transparent; color: var(--muted); padding: 10px 20px; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer; transition: color 0.2s; font-family: inherit; }
+.btn-no:hover:not(:disabled) { color: var(--muted-light); }
 .btn-no:disabled { opacity: 0.3; cursor: not-allowed; }
 
-/* ─── NAVBAR ──────────────────────────────────────────────── */
-nav {
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: var(--nav-height);
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  background: rgba(15,23,42,0.92);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
-  z-index: 1000;
-  gap: 6px;
-  transition: height 0.35s var(--ease-spring), transform 0.35s var(--ease-spring), opacity 0.3s ease;
+/* === HIDDEN JS STUBS === */
+.tabs-wrapper, .tab, .ribbon { display: none !important; }
+.nav-active-game, .nav-active-game-dot, .nav-active-game-name { display: none !important; }
+.chat-button, .chat-button-icon, .chat-button-text, .chat-unread-dot { display: none !important; }
+
+/* === HOMEPAGE === */
+#homepage {
+  position: fixed; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  z-index: 10;
+  background: var(--bg);
+  transition: opacity 0.35s ease, transform 0.35s var(--ease-spring);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56,189,248,0.12) transparent;
+}
+#homepage.hidden { opacity: 0; pointer-events: none; transform: scale(0.97); }
+#homepage::-webkit-scrollbar { width: 5px; }
+#homepage::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.15); border-radius: 99px; }
+#homepage::before {
+  content: '';
+  position: fixed; top: -20%; left: 50%; transform: translateX(-50%);
+  width: 80vw; height: 60vh;
+  background: radial-gradient(ellipse, rgba(56,189,248,0.05) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
 }
 
-/* Compact nav when game is active */
-nav.game-active {
-  height: var(--nav-mini-height);
+.homepage-inner {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 64px 32px 80px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  margin-right: 2px;
-  overflow: hidden;
+/* === HOME HEADER === */
+.home-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 44px; gap: 24px; flex-wrap: wrap;
 }
-.title {
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: -0.3px;
-  white-space: nowrap;
-  transition: font-size 0.3s ease;
+.home-eyebrow {
+  font-size: 10px; font-weight: 900; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
 }
-nav.game-active .title { font-size: 13px; }
-.status {
-  font-size: 10px;
-  color: var(--accent);
-  font-weight: 600;
-  text-transform: uppercase;
-  white-space: nowrap;
-  display: none;
-}
-nav:not(.game-active) .status { display: block; }
+.home-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--accent); display: block; }
+.home-title { font-size: clamp(2.2rem, 5vw, 3.2rem); font-weight: 900; letter-spacing: -2px; line-height: 1; }
+.home-title span { color: var(--accent); }
+.home-sub { margin-top: 10px; font-size: 0.9rem; color: var(--muted); font-weight: 400; line-height: 1.5; }
 
-.nav-divider {
-  width: 1px;
-  height: 18px;
-  background: rgba(255,255,255,0.1);
-  flex-shrink: 0;
-}
-
-.nav-spacer { flex: 1; }
-
-/* ─── NAV GAME PILL ─── */
-.nav-active-game {
-  display: none;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px 3px 6px;
-  background: rgba(56,189,248,0.1);
-  border: 1px solid rgba(56,189,248,0.22);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  max-width: 180px;
-  animation: pillIn 0.3s var(--ease-spring);
-}
-@keyframes pillIn {
-  from { opacity: 0; transform: scale(0.85); }
-  to   { opacity: 1; transform: scale(1); }
-}
-.nav-active-game.visible { display: flex; }
-.nav-active-game:hover { background: rgba(56,189,248,0.17); border-color: rgba(56,189,248,0.38); }
-.nav-active-game-dot {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0;
-  animation: navDotPulse 2.2s ease-in-out infinite;
-}
-@keyframes navDotPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(56,189,248,0.5); }
-  50% { box-shadow: 0 0 0 4px rgba(56,189,248,0); }
-}
-.nav-active-game-name {
-  font-size: 11px; font-weight: 700; color: #7dd3fc;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-/* Games nav button */
-.nav-games-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  background: rgba(30,41,59,0.7);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 11px;
-  font-weight: 700;
-  color: #94a3b8;
-  font-family: inherit;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.nav-games-btn:hover {
-  background: rgba(56,189,248,0.12);
-  border-color: rgba(56,189,248,0.3);
-  color: #e0f2fe;
-}
-.nav-games-btn svg { width: 11px; height: 11px; opacity: 0.8; transition: transform 0.3s ease; }
-.nav-games-btn:hover svg { transform: rotate(90deg); opacity: 1; }
-
-/* ─── FLOATING CHAT BUTTON (nav) ──── */
-.chat-button {
-  position: relative;
-  height: 30px;
-  padding: 0 12px 0 10px;
-  border: 1px solid rgba(103,232,249,0.42);
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(6,182,212,0.3), rgba(15,23,42,0.9));
-  color: #f0f9ff;
-  font-weight: 900;
-  cursor: pointer;
-  font-size: 11px;
-  font-family: inherit;
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  flex-shrink: 0;
-}
-.chat-button:hover {
-  transform: translateY(-1px);
-  background: linear-gradient(135deg, rgba(34,211,238,0.45), rgba(15,23,42,0.92));
-  border-color: rgba(165,243,252,0.78);
-  color: #fff;
-}
-.chat-button.open {
-  background: linear-gradient(135deg, #67e8f9, #38bdf8);
-  color: #031018;
-  border-color: transparent;
-}
-.chat-button-icon { width: 16px; height: 16px; opacity: 0.96; transition: transform 0.18s ease; }
-.chat-button.open .chat-button-icon { transform: rotate(-4deg) scale(1.04); }
-.chat-unread-dot {
-  position: absolute; top: -3px; right: -3px;
-  width: 9px; height: 9px; border-radius: 999px;
-  background: #22c55e; border: 2px solid rgba(15,23,42,0.98);
-  opacity: 0; transform: scale(0.72);
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-.chat-button.has-unread .chat-unread-dot {
-  opacity: 1; transform: scale(1);
-  animation: unreadPulse 1.8s ease-out infinite;
-}
-@keyframes unreadPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.34); }
-  100% { box-shadow: 0 0 0 9px rgba(34,197,94,0); }
-}
-
-/* Hidden stubs for JS compatibility */
-.tabs-wrapper { display: none; }
-.tab { display: none; }
-.ribbon { display: none; }
-
-/* ─── GAME LAUNCHER ───────────────────────────────────────── */
-#gameLauncher {
-  position: fixed;
-  left: 0;
-  top: var(--nav-height);
-  height: calc(100vh - var(--nav-height));
-  z-index: 900;
-  display: flex;
-  pointer-events: none;
-  transition: top 0.35s var(--ease-spring), height 0.35s var(--ease-spring);
-}
-body.game-active #gameLauncher {
-  top: var(--nav-mini-height);
-  height: calc(100vh - var(--nav-mini-height));
-}
-
-#launcherTab {
-  position: absolute; left: 0; top: 50%;
-  transform: translateY(-50%);
-  width: 26px;
-  background: linear-gradient(180deg, rgba(56,189,248,0.18), rgba(14,165,233,0.1));
-  border: 1px solid rgba(56,189,248,0.28); border-left: none;
-  border-radius: 0 10px 10px 0;
-  cursor: pointer; pointer-events: all;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 5px; padding: 12px 0;
-  transition: all 0.28s var(--ease-spring);
-  backdrop-filter: blur(10px);
-  box-shadow: 3px 0 20px rgba(0,0,0,0.35);
-}
-#launcherTab:hover {
-  width: 30px;
-  background: linear-gradient(180deg, rgba(56,189,248,0.3), rgba(14,165,233,0.2));
-  border-color: rgba(103,232,249,0.5);
-}
-#gameLauncher.open #launcherTab { opacity: 0; pointer-events: none; transform: translateY(-50%) translateX(-40px); }
-.launcher-tab-line {
-  width: 3px; border-radius: 99px; background: rgba(103,232,249,0.7);
-  transition: all 0.2s ease;
-}
-.launcher-tab-line:nth-child(1) { height: 14px; }
-.launcher-tab-line:nth-child(2) { height: 9px; opacity: 0.5; }
-.launcher-tab-line:nth-child(3) { height: 5px; opacity: 0.28; }
-#launcherTab:hover .launcher-tab-line { background: #67e8f9; }
-
-#launcherPanel {
-  width: 256px; height: 100%;
-  background: linear-gradient(180deg, rgba(10,18,35,0.97) 0%, rgba(8,14,28,0.98) 100%);
-  border-right: 1px solid rgba(56,189,248,0.18);
-  box-shadow: 6px 0 48px rgba(0,0,0,0.55);
-  backdrop-filter: blur(24px);
-  transform: translateX(-100%);
-  transition: transform 0.38s var(--ease-spring);
-  pointer-events: all;
-  display: flex; flex-direction: column; overflow: hidden;
-}
-#gameLauncher.open #launcherPanel { transform: translateX(0); }
-
-.launcher-header {
-  padding: 14px 16px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
-}
-.launcher-title {
-  font-size: 10px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: 0.14em; color: rgba(148,163,184,0.7);
-}
-.launcher-close {
-  width: 24px; height: 24px; border: none;
-  background: rgba(255,255,255,0.06); border-radius: 7px;
-  color: var(--muted); cursor: pointer; font-size: 13px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.18s ease;
-}
-.launcher-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
-
-.launcher-search-wrap { padding: 10px 12px 8px; flex-shrink: 0; }
-.launcher-search {
-  width: 100%; height: 32px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09); border-radius: 9px;
-  color: #fff; font: inherit; font-size: 12px;
-  padding: 0 10px 0 30px; outline: none;
-  transition: border-color 0.18s, background 0.18s;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%2364748b' stroke-width='2'/%3E%3Cpath d='M16.5 16.5 21 21' stroke='%2364748b' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: 9px center;
-}
-.launcher-search:focus { border-color: rgba(56,189,248,0.45); background-color: rgba(56,189,248,0.05); }
-.launcher-search::placeholder { color: rgba(148,163,184,0.45); }
-
-#launcherList {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 4px 8px 14px;
-  display: flex; flex-direction: column; gap: 1px;
-  scrollbar-width: thin; scrollbar-color: rgba(56,189,248,0.2) transparent;
-}
-#launcherList::-webkit-scrollbar { width: 4px; }
-#launcherList::-webkit-scrollbar-track { background: transparent; }
-#launcherList::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.2); border-radius: 99px; }
-
-.game-row {
-  position: relative; display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px; border-radius: 9px; cursor: pointer;
-  border: 1px solid transparent;
-  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
-  user-select: none;
-  animation: rowSlideIn 0.35s var(--ease-spring) both;
-}
-@keyframes rowSlideIn {
-  from { opacity: 0; transform: translateX(-14px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-.game-row:hover {
+.home-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.home-chat-btn {
+  display: flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 18px;
   background: rgba(56,189,248,0.07);
-  border-color: rgba(56,189,248,0.14);
-  transform: translateX(3px);
+  border: 1px solid var(--border-accent);
+  border-radius: 100px;
+  color: #7dd3fc; font: inherit; font-size: 13px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; position: relative;
+  transition: all 0.2s ease;
 }
-.game-row.active {
-  background: linear-gradient(135deg, rgba(56,189,248,0.16), rgba(14,165,233,0.08));
-  border-color: rgba(56,189,248,0.35);
-}
-.game-row.active .game-row-name { color: #7dd3fc; font-weight: 800; }
+.home-chat-btn:hover { background: rgba(56,189,248,0.14); border-color: rgba(56,189,248,0.5); color: #e0f9ff; }
+.home-chat-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.home-chat-unread { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; border: 2px solid var(--bg); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
+.home-chat-btn.has-unread .home-chat-unread { opacity: 1; transform: scale(1); }
 
-.game-swatch {
-  width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 900; letter-spacing: -0.5px;
-  color: rgba(255,255,255,0.9); position: relative; overflow: hidden;
-  transition: transform 0.18s ease;
-}
-.game-row:hover .game-swatch { transform: scale(1.08) rotate(-2deg); }
-.game-swatch::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 60%);
-  border-radius: inherit;
-}
-.game-row-info { flex: 1; min-width: 0; }
-.game-row-name {
-  font-size: 12px; font-weight: 600; color: #cbd5e1;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  transition: color 0.18s; letter-spacing: -0.1px;
-}
-.game-row:hover .game-row-name { color: #e2e8f0; }
-.game-row-players {
-  display: none; align-items: center; gap: 4px;
-  font-size: 9px; font-weight: 800; color: #22c55e; margin-top: 1px;
-}
-.game-row-players.has-players { display: flex; }
-.game-row-players::before {
-  content: ''; width: 4px; height: 4px; border-radius: 50%; background: #22c55e; flex-shrink: 0;
-  animation: playerPulse 2s ease-in-out infinite;
-}
-@keyframes playerPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.8); } }
-.game-row-ribbon {
-  font-size: 8px; font-weight: 900; color: #fff; text-transform: uppercase;
-  padding: 2px 5px; border-radius: 5px; letter-spacing: 0.04em; flex-shrink: 0;
-}
+/* === SEARCH ROW === */
+.home-search-row { margin-bottom: 24px; display: flex; align-items: center; gap: 14px; }
+.home-search-wrap { position: relative; flex: 1; max-width: 360px; }
+.home-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.home-search { width: 100%; height: 42px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 100px; color: var(--text); font: inherit; font-size: 13px; padding: 0 16px 0 42px; outline: none; transition: border-color 0.2s, background 0.2s; }
+.home-search:focus { border-color: var(--border-accent); background: rgba(56,189,248,0.04); }
+.home-search::placeholder { color: var(--muted); }
+.home-game-count { font-size: 11px; font-weight: 700; color: var(--muted); white-space: nowrap; padding: 0 4px; }
 
-.launcher-backdrop {
-  display: none; position: fixed; inset: 0; z-index: 890;
-  background: rgba(0,0,0,0); pointer-events: none;
-  transition: background 0.3s ease;
-}
-#gameLauncher.open ~ .launcher-backdrop {
-  display: block; pointer-events: all; background: rgba(0,0,0,0.45);
-}
-
-/* ─── VIEWER ───────────────────────────────────────────────── */
-#viewer {
-  position: fixed;
-  top: var(--nav-height);
-  left: 0;
-  width: 100%;
-  height: calc(100% - var(--nav-height));
-  border: none;
-  background: #000;
-  transition: top 0.35s var(--ease-spring), height 0.35s var(--ease-spring);
-}
-body.game-active #viewer {
-  top: var(--nav-mini-height);
-  height: calc(100% - var(--nav-mini-height));
-}
-
-/* ─── CHAT PANEL ──────────────────────────────────────────── */
-.site-chat {
-  position: fixed;
-  inset: 0 0 0 auto;
-  width: min(34vw, 460px);
-  min-width: 330px;
-  max-width: 100vw;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(20,184,166,0.1), transparent 34%),
-    linear-gradient(180deg, rgba(17,24,39,0.98), rgba(2,6,23,0.98));
-  border-left: 1px solid rgba(125,211,252,0.2);
-  box-shadow: -24px 0 64px rgba(0,0,0,0.5);
-  backdrop-filter: blur(18px);
+/* === GAME GRID === */
+.game-grid {
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  transform: translateX(100%);
-  transition: transform 0.32s var(--ease-spring);
-  z-index: 1700;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 10px;
 }
+
+.game-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 16px 14px;
+  cursor: pointer; overflow: hidden;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  animation: cardFadeIn 0.4s var(--ease-spring) both;
+  user-select: none;
+}
+@keyframes cardFadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.game-card:hover { background: var(--bg-card-hover); border-color: rgba(56,189,248,0.22); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.38); }
+.game-card.active { border-color: rgba(56,189,248,0.45); background: linear-gradient(135deg,rgba(14,116,144,0.2),rgba(8,47,73,0.3)); }
+.game-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--card-color, var(--accent)), transparent); opacity: 0; transition: opacity 0.2s; }
+.game-card:hover::before, .game-card.active::before { opacity: 1; }
+
+.game-card-glow { position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, var(--card-color, var(--accent)), transparent 70%); opacity: 0.05; pointer-events: none; transition: opacity 0.2s; }
+.game-card:hover .game-card-glow { opacity: 0.1; }
+
+.game-card-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.9); margin-bottom: 11px; position: relative; overflow: hidden; flex-shrink: 0; }
+.game-card-icon::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,0.18) 0%,transparent 60%); }
+.game-card-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+.game-card-players { display: none; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; color: #22c55e; }
+.game-card-players.has-players { display: flex; }
+.game-card-players::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #22c55e; flex-shrink: 0; animation: playerPulse 2s ease-in-out infinite; }
+@keyframes playerPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+.game-card-ribbon { position: absolute; top: 10px; right: 10px; font-size: 8px; font-weight: 900; color: #fff; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; letter-spacing: 0.04em; }
+
+/* === TOP-LEFT GAME HUD === */
+#gameHud {
+  position: fixed; top: 16px; left: 16px;
+  display: flex; align-items: center; gap: 0;
+  z-index: 1100;
+  opacity: 0; pointer-events: none;
+  transform: translateY(-6px) scale(0.96);
+  transition: opacity 0.3s ease, transform 0.35s var(--ease-spring);
+}
+body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+
+/* The outer glass card */
+.hud-shell {
+  display: flex; align-items: center;
+  background: rgba(5, 10, 22, 0.82);
+  border: 1px solid rgba(56,189,248,0.18);
+  border-radius: 14px;
+  backdrop-filter: blur(20px) saturate(1.6);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  overflow: hidden;
+  height: 38px;
+}
+
+/* NT2 logo section */
+.hud-logo {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px 0 11px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  height: 100%;
+  cursor: default;
+  user-select: none;
+}
+.hud-logo-mark {
+  width: 20px; height: 20px; border-radius: 6px;
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(56,189,248,0.35);
+}
+.hud-logo-mark svg { width: 11px; height: 11px; }
+.hud-logo-text {
+  font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.75);
+  letter-spacing: -0.4px; white-space: nowrap;
+  line-height: 1;
+}
+.hud-logo-text span { color: var(--accent); }
+
+/* Home icon button */
+.hud-home-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 100%;
+  border: none; border-right: 1px solid rgba(255,255,255,0.07);
+  background: transparent;
+  color: rgba(255,255,255,0.38);
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+  flex-shrink: 0;
+}
+.hud-home-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+.hud-home-btn svg { width: 14px; height: 14px; }
+
+/* Divider for game name area */
+.hud-game-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 12px 0 10px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  height: 100%; cursor: pointer;
+  transition: background 0.18s;
+}
+.hud-game-pill:hover { background: rgba(56,189,248,0.07); }
+.hud-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+  animation: dotPulse 2.2s ease-in-out infinite;
+}
+@keyframes dotPulse { 0%,100%{box-shadow:0 0 0 0 rgba(56,189,248,0.5)} 50%{box-shadow:0 0 0 4px rgba(56,189,248,0)} }
+.hud-game-name {
+  font-size: 11px; font-weight: 700; color: #7dd3fc;
+  white-space: nowrap; max-width: 140px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Chat icon button */
+.hud-chat-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 100%;
+  border: none; background: transparent;
+  color: rgba(255,255,255,0.38);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.18s, background 0.18s;
+  flex-shrink: 0;
+}
+.hud-chat-btn:hover { background: rgba(56,189,248,0.1); color: #7dd3fc; }
+.hud-chat-btn.open { background: rgba(56,189,248,0.15); color: #38bdf8; }
+.hud-chat-btn svg { width: 14px; height: 14px; }
+.hud-chat-unread {
+  position: absolute; top: 6px; right: 6px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #22c55e; border: 1.5px solid rgba(5,10,22,0.9);
+  opacity: 0; transform: scale(0.6);
+  transition: opacity 0.18s, transform 0.18s;
+}
+.hud-chat-btn.has-unread .hud-chat-unread { opacity: 1; transform: scale(1); animation: unreadPulse 1.8s ease-out infinite; }
+@keyframes unreadPulse { 0%{box-shadow:0 0 0 0 rgba(34,197,94,0.45)} 100%{box-shadow:0 0 0 7px rgba(34,197,94,0)} }
+
+/* Keep old stubs working, just invisible */
+.hud-brand,.hud-sep { display: none; }
+
+/* === FLOAT ACTION BUTTONS (bottom-right, homepage only) === */
+#floatActions { position: fixed; bottom: 20px; right: 20px; display: flex; align-items: center; gap: 8px; z-index: 1100; }
+.float-btn { display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px; border-radius: 100px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; backdrop-filter: blur(12px); border: 1px solid; }
+.float-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.float-btn-games { display: none; }
+.float-btn-chat { background: linear-gradient(135deg,rgba(6,182,212,0.25),rgba(15,23,42,0.9)); border-color: rgba(103,232,249,0.32); color: #e0f9ff; position: relative; }
+.float-btn-chat:hover { background: linear-gradient(135deg,rgba(34,211,238,0.38),rgba(15,23,42,0.92)); border-color: rgba(165,243,252,0.6); color: #fff; }
+.float-btn-chat.open { background: linear-gradient(135deg,#67e8f9,#38bdf8); color: #031018; border-color: transparent; }
+body.game-active .float-btn-chat { display: none; }
+.float-chat-unread { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; border: 2px solid var(--bg); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
+.float-btn-chat.has-unread .float-chat-unread { opacity: 1; transform: scale(1); }
+
+/* === GAME LAUNCHER (slide-in panel for in-game switching) === */
+#gameLauncher { position: fixed; left: 0; top: 0; bottom: 0; z-index: 900; display: flex; pointer-events: none; }
+#launcherTab { display: none; }
+#launcherPanel { width: 256px; height: 100%; background: linear-gradient(180deg,rgba(8,14,30,0.98),rgba(6,10,22,0.99)); border-right: 1px solid rgba(56,189,248,0.14); box-shadow: 8px 0 48px rgba(0,0,0,0.6); backdrop-filter: blur(24px); transform: translateX(-100%); transition: transform 0.38s var(--ease-spring); pointer-events: all; display: flex; flex-direction: column; overflow: hidden; }
+#gameLauncher.open #launcherPanel { transform: translateX(0); }
+.launcher-header { padding: 18px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.launcher-title { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em; color: rgba(148,163,184,0.55); }
+.launcher-close { width: 26px; height: 26px; border: none; background: rgba(255,255,255,0.06); border-radius: 7px; color: var(--muted); cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.18s; }
+.launcher-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.launcher-search-wrap { padding: 10px 12px 8px; flex-shrink: 0; }
+.launcher-search { width: 100%; height: 34px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 9px; color: #fff; font: inherit; font-size: 12px; padding: 0 10px 0 32px; outline: none; transition: border-color 0.18s, background 0.18s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' fill='none' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%2364748b' stroke-width='2'/%3E%3Cpath d='M16.5 16.5 21 21' stroke='%2364748b' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 9px center; }
+.launcher-search:focus { border-color: rgba(56,189,248,0.38); background-color: rgba(56,189,248,0.04); }
+.launcher-search::placeholder { color: rgba(148,163,184,0.38); }
+#launcherList { flex: 1; overflow-y: auto; padding: 4px 8px 14px; display: flex; flex-direction: column; gap: 1px; scrollbar-width: thin; scrollbar-color: rgba(56,189,248,0.14) transparent; }
+#launcherList::-webkit-scrollbar { width: 4px; }
+#launcherList::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.18); border-radius: 99px; }
+
+.game-row { position: relative; display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 9px; cursor: pointer; border: 1px solid transparent; transition: background 0.18s, border-color 0.18s, transform 0.18s; user-select: none; animation: rowSlideIn 0.3s var(--ease-spring) both; }
+@keyframes rowSlideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+.game-row:hover { background: rgba(56,189,248,0.07); border-color: rgba(56,189,248,0.13); transform: translateX(3px); }
+.game-row.active { background: linear-gradient(135deg,rgba(56,189,248,0.13),rgba(14,165,233,0.06)); border-color: rgba(56,189,248,0.28); }
+.game-row.active .game-row-name { color: #7dd3fc; font-weight: 800; }
+.game-swatch { width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.9); position: relative; overflow: hidden; }
+.game-swatch::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,0.18) 0%,transparent 60%); }
+.game-row-info { flex: 1; min-width: 0; }
+.game-row-name { font-size: 12px; font-weight: 600; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.game-row-players { display: none; align-items: center; gap: 4px; font-size: 9px; font-weight: 800; color: #22c55e; margin-top: 1px; }
+.game-row-players.has-players { display: flex; }
+.game-row-players::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #22c55e; flex-shrink: 0; animation: playerPulse 2s ease-in-out infinite; }
+.game-row-ribbon { font-size: 8px; font-weight: 900; color: #fff; text-transform: uppercase; padding: 2px 5px; border-radius: 5px; letter-spacing: 0.04em; flex-shrink: 0; }
+.launcher-backdrop { display: none; position: fixed; inset: 0; z-index: 890; pointer-events: none; transition: background 0.3s ease; }
+#gameLauncher.open ~ .launcher-backdrop { display: block; pointer-events: all; background: rgba(0,0,0,0.4); }
+
+/* === IFRAME VIEWER === */
+#viewer { position: fixed; inset: 0; width: 100%; height: 100%; border: none; background: #000; opacity: 0; pointer-events: none; z-index: 5; }
+body.game-active #viewer { opacity: 1; pointer-events: all; }
+
+/* === CHAT PANEL === */
+.site-chat { position: fixed; inset: 0 0 0 auto; width: min(34vw,460px); min-width: 330px; max-width: 100vw; background: radial-gradient(circle at 20% 0%,rgba(20,184,166,0.07),transparent 34%), linear-gradient(180deg,rgba(17,24,39,0.99),rgba(2,6,23,0.99)); border-left: 1px solid rgba(125,211,252,0.13); box-shadow: -24px 0 64px rgba(0,0,0,0.5); backdrop-filter: blur(18px); display: grid; grid-template-rows: auto 1fr auto; transform: translateX(100%); transition: transform 0.32s var(--ease-spring); z-index: 1700; }
 .site-chat.open { transform: translateX(0); }
 .site-chat.admin-mode.open { inset: 0; width: 100vw; min-width: 0; border-left: none; }
 .site-chat.admin-mode { grid-template-rows: auto auto 1fr auto; }
-
-.chat-header {
-  padding: 14px 18px 12px;
-  border-bottom: 1px solid rgba(148,163,184,0.14);
-  background: linear-gradient(180deg, rgba(15,23,42,0.92), rgba(15,23,42,0.64));
-}
-.chat-title-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px;
-}
-.chat-title { font-size: 17px; font-weight: 950; letter-spacing: 0; }
+.chat-header { padding: 18px 18px 14px; border-bottom: 1px solid rgba(148,163,184,0.09); }
+.chat-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.chat-title { font-size: 16px; font-weight: 900; letter-spacing: -0.3px; }
 .chat-header-actions { display: flex; align-items: center; gap: 8px; }
-
-.chat-close-btn {
-  width: 28px; height: 28px; padding: 0; border: none;
-  background: rgba(255,255,255,0.08); color: var(--text);
-  font-size: 18px; font-weight: 600; border-radius: 7px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s ease; flex-shrink: 0;
-}
-.chat-close-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
-
-.active-users {
-  border: 1px solid rgba(74,222,128,0.35);
-  border-radius: 999px; padding: 4px 10px;
-  color: #dcfce7; background: rgba(22,101,52,0.2);
-  font-size: 11px; font-weight: 800; white-space: nowrap;
-}
-
+.chat-close-btn { width: 28px; height: 28px; border: none; background: rgba(255,255,255,0.07); color: var(--text); font-size: 16px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.chat-close-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
+.active-users { border: 1px solid rgba(74,222,128,0.28); border-radius: 100px; padding: 4px 10px; color: #dcfce7; background: rgba(22,101,52,0.16); font-size: 11px; font-weight: 800; white-space: nowrap; }
 .chat-profile { display: grid; gap: 6px; }
-.identity-summary {
-  display: none;
-  grid-template-columns: 1fr auto;
-  align-items: center; gap: 8px; padding: 10px 12px;
-  border: 1px solid rgba(125,211,252,0.18); border-radius: 12px;
-  background: linear-gradient(135deg, rgba(8,47,73,0.3), rgba(15,23,42,0.7));
-}
+.identity-summary { display: none; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid rgba(125,211,252,0.13); border-radius: 11px; background: linear-gradient(135deg,rgba(8,47,73,0.22),rgba(15,23,42,0.6)); }
 .identity-summary.locked { display: grid; }
 .identity-main { min-width: 0; }
 .identity-label { color: var(--muted); font-size: 9px; font-weight: 900; text-transform: uppercase; }
-.identity-name { color: #f8fafc; font-size: 13px; font-weight: 950; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.identity-room { border: 1px solid rgba(45,212,191,0.4); border-radius: 999px; padding: 4px 9px; color: #ccfbf1; background: rgba(13,148,136,0.18); font-size: 10px; font-weight: 950; white-space: nowrap; }
+.identity-name { color: #f8fafc; font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.identity-room { border: 1px solid rgba(45,212,191,0.3); border-radius: 100px; padding: 3px 9px; color: #ccfbf1; background: rgba(13,148,136,0.13); font-size: 10px; font-weight: 900; white-space: nowrap; display: inline-block; margin-top: 3px; }
 .identity-actions { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-.admin-badge { display: none; border: 1px solid rgba(250,204,21,0.5); border-radius: 999px; padding: 4px 9px; color: #fef9c3; background: rgba(161,98,7,0.25); font-size: 10px; font-weight: 950; white-space: nowrap; }
+.admin-badge { display: none; border: 1px solid rgba(250,204,21,0.42); border-radius: 100px; padding: 3px 9px; color: #fef9c3; background: rgba(161,98,7,0.18); font-size: 10px; font-weight: 900; white-space: nowrap; }
 .admin-badge.show { display: inline-flex; }
-.identity-signout { height: 27px; border: 1px solid rgba(148,163,184,0.22); border-radius: 999px; background: rgba(15,23,42,0.78); color: #e2e8f0; cursor: pointer; font: inherit; font-size: 10px; font-weight: 900; padding: 0 10px; transition: all 0.18s; }
-.identity-signout:hover { border-color: rgba(125,211,252,0.5); color: #fff; }
+.identity-signout { height: 27px; border: 1px solid rgba(148,163,184,0.18); border-radius: 100px; background: rgba(15,23,42,0.7); color: #e2e8f0; cursor: pointer; font: inherit; font-size: 10px; font-weight: 800; padding: 0 10px; transition: all 0.18s; }
+.identity-signout:hover { border-color: rgba(125,211,252,0.42); color: #fff; }
+.identity-rename-btn { height: 27px; border: 1px solid rgba(56,189,248,0.22); border-radius: 100px; background: rgba(8,47,73,0.32); color: #bae6fd; cursor: pointer; font: inherit; font-size: 10px; font-weight: 800; padding: 0 10px; transition: all 0.18s; }
+.identity-rename-btn:hover { border-color: rgba(56,189,248,0.52); color: #e0f9ff; }
 
-/* Name change button */
-.identity-rename-btn {
-  height: 27px; border: 1px solid rgba(56,189,248,0.28); border-radius: 999px;
-  background: rgba(8,47,73,0.4); color: #bae6fd; cursor: pointer; font: inherit;
-  font-size: 10px; font-weight: 900; padding: 0 10px; transition: all 0.18s;
-}
-.identity-rename-btn:hover { border-color: rgba(56,189,248,0.6); background: rgba(8,47,73,0.7); color: #e0f9ff; }
-
-/* ─── CHAT INPUT ─────────────────────────────────────────── */
-.chat-input {
-  width: 100%; min-width: 0;
-  border: 1px solid rgba(125,211,252,0.22);
-  border-radius: 11px;
-  background: rgba(2,6,23,0.65);
-  color: var(--text); outline: none; font: inherit;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-.chat-input:focus {
-  border-color: rgba(56,189,248,0.65);
-  box-shadow: 0 0 0 3px rgba(56,189,248,0.13);
-}
-
-/* ─── CHAT MESSAGES ──────────────────────────────────────── */
-.chat-messages {
-  min-height: 0; overflow-y: auto;
-  padding: 14px 16px;
-  display: flex; flex-direction: column; gap: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(56,189,248,0.15) transparent;
-}
+.chat-messages { min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: rgba(56,189,248,0.1) transparent; }
 .chat-messages::-webkit-scrollbar { width: 4px; }
-.chat-messages::-webkit-scrollbar-track { background: transparent; }
-.chat-messages::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.15); border-radius: 99px; }
-
-.chat-messages.admin-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch; gap: 10px; padding: 12px;
-}
-
-.admin-room-panel {
-  min-height: 0; display: grid; grid-template-rows: auto 1fr;
-  border: 1px solid rgba(125,211,252,0.18); border-radius: 11px;
-  overflow: hidden; background: rgba(15,23,42,0.5);
-}
-.admin-room-title {
-  padding: 9px 11px; border-bottom: 1px solid rgba(148,163,184,0.13);
-  color: #e0f2fe; font-size: 11px; font-weight: 950; text-transform: uppercase; letter-spacing: 0.05em;
-}
-.admin-room-messages {
-  min-height: 0; overflow-y: auto; padding: 10px;
-  display: flex; flex-direction: column; gap: 8px;
-  scrollbar-width: thin; scrollbar-color: rgba(56,189,248,0.1) transparent;
-}
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.14); border-radius: 99px; }
+.chat-messages.admin-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; gap: 10px; padding: 12px; }
+.admin-room-panel { min-height: 0; display: grid; grid-template-rows: auto 1fr; border: 1px solid rgba(125,211,252,0.13); border-radius: 11px; overflow: hidden; background: rgba(15,23,42,0.42); }
+.admin-room-title { padding: 9px 11px; border-bottom: 1px solid rgba(148,163,184,0.09); color: #e0f2fe; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
+.admin-room-messages { min-height: 0; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; }
 .admin-room-messages .chat-message { max-width: 100%; }
 
-/* ─── ADMIN APPROVAL PANEL ─────────────────────────────────── */
-#adminApprovalSection {
-  padding: 10px 14px 0;
-  flex-shrink: 0;
-  animation: slideDown 0.28s var(--ease-spring);
-}
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.admin-approval-panel {
-  border: 1px solid rgba(250,204,21,0.24);
-  border-radius: 12px;
-  background: rgba(10,8,0,0.55);
-  overflow: hidden;
-}
-.admin-approval-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 9px 13px;
-  border-bottom: 1px solid rgba(250,204,21,0.15);
-  background: rgba(161,98,7,0.1);
-}
+#adminApprovalSection { padding: 10px 14px 0; flex-shrink: 0; animation: slideDown 0.28s var(--ease-spring); }
+@keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.admin-approval-panel { border: 1px solid rgba(250,204,21,0.18); border-radius: 12px; background: rgba(10,8,0,0.5); overflow: hidden; }
+.admin-approval-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 13px; border-bottom: 1px solid rgba(250,204,21,0.1); background: rgba(161,98,7,0.07); }
 .admin-approval-title { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.07em; color: #fef3c7; }
-.admin-approval-count {
-  background: #f59e0b; color: #000; font-size: 10px; font-weight: 900;
-  border-radius: 999px; padding: 2px 7px; min-width: 18px; text-align: center;
-  transition: background 0.25s, color 0.25s;
-}
-
-.admin-approval-list {
-  padding: 6px; display: flex; flex-direction: column; gap: 5px;
-  max-height: 220px; overflow-y: auto;
-  scrollbar-width: thin; scrollbar-color: rgba(250,204,21,0.15) transparent;
-}
-
-.approval-request-card {
-  padding: 10px;
-  border: 1px solid rgba(148,163,184,0.12);
-  border-radius: 9px;
-  background: rgba(15,23,42,0.65);
-  animation: cardIn 0.25s var(--ease-spring);
-}
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+.admin-approval-count { background: #f59e0b; color: #000; font-size: 10px; font-weight: 900; border-radius: 100px; padding: 2px 7px; min-width: 18px; text-align: center; }
+.admin-approval-list { padding: 6px; display: flex; flex-direction: column; gap: 5px; max-height: 220px; overflow-y: auto; scrollbar-width: thin; }
+.approval-request-card { padding: 10px; border: 1px solid rgba(148,163,184,0.1); border-radius: 9px; background: rgba(15,23,42,0.6); animation: cardIn 0.25s var(--ease-spring); }
+@keyframes cardIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
 .approval-request-info { display: grid; gap: 2px; margin-bottom: 8px; }
-.approval-req-email { color: #bae6fd; font-size: 12px; font-weight: 700; font-family: 'Space Mono', monospace; }
+.approval-req-email { color: #bae6fd; font-size: 12px; font-weight: 700; font-family: 'Space Mono',monospace; }
 .approval-req-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .approval-req-name { color: #f8fafc; font-size: 11px; font-weight: 600; }
-.approval-req-school {
-  font-size: 9px; font-weight: 900; text-transform: uppercase;
-  border-radius: 999px; padding: 2px 7px;
-  border: 1px solid rgba(45,212,191,0.35); color: #ccfbf1; background: rgba(13,148,136,0.18);
-}
+.approval-req-school { font-size: 9px; font-weight: 900; text-transform: uppercase; border-radius: 100px; padding: 2px 7px; border: 1px solid rgba(45,212,191,0.28); color: #ccfbf1; background: rgba(13,148,136,0.13); }
 .approval-req-time { color: var(--muted); font-size: 9px; }
-
-/* Room selector inside approval card */
-.approval-room-select {
-  width: 100%; height: 28px; margin-bottom: 7px;
-  border: 1px solid rgba(125,211,252,0.2); border-radius: 7px;
-  background: rgba(2,6,23,0.6); color: var(--text);
-  outline: none; padding: 0 8px; font: inherit; font-size: 11px; font-weight: 700;
-  transition: border-color 0.18s;
-}
-.approval-room-select:focus { border-color: rgba(56,189,248,0.5); }
-
+.approval-room-select { width: 100%; height: 28px; margin-bottom: 7px; border: 1px solid rgba(125,211,252,0.16); border-radius: 7px; background: rgba(2,6,23,0.6); color: var(--text); outline: none; padding: 0 8px; font: inherit; font-size: 11px; font-weight: 700; transition: border-color 0.18s; }
+.approval-room-select:focus { border-color: rgba(56,189,248,0.42); }
 .approval-actions { display: flex; gap: 5px; }
-.approval-btn {
-  flex: 1; height: 29px; border-radius: 7px; border: none; cursor: pointer;
-  font: inherit; font-size: 11px; font-weight: 800;
-  transition: transform 0.15s ease, background 0.15s ease;
-}
+.approval-btn { flex: 1; height: 29px; border-radius: 7px; border: none; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; transition: transform 0.15s, background 0.15s; }
 .approval-btn:hover { transform: translateY(-1px); }
 .approval-btn-approve { background: #22c55e; color: #052e16; }
 .approval-btn-approve:hover { background: #4ade80; }
-.approval-btn-deny { background: rgba(239,68,68,0.18); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; }
-.approval-btn-deny:hover { background: rgba(239,68,68,0.3); }
+.approval-btn-deny { background: rgba(239,68,68,0.13); border: 1px solid rgba(239,68,68,0.28); color: #fca5a5; }
+.approval-btn-deny:hover { background: rgba(239,68,68,0.25); }
 .approval-empty { padding: 14px; text-align: center; color: var(--muted); font-size: 12px; }
 
-/* ─── DENY MODAL ─────────────────────────────────────────────── */
-.deny-modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(8px); z-index: 2200;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; visibility: hidden;
-  transition: opacity 0.22s ease, visibility 0.22s ease;
-}
+.deny-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2200; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.22s, visibility 0.22s; }
 .deny-modal-backdrop.show { opacity: 1; visibility: visible; }
-.deny-modal {
-  width: min(90vw, 380px);
-  border: 1px solid rgba(239,68,68,0.35); border-radius: 16px;
-  background: linear-gradient(180deg, rgba(30,20,20,0.99), rgba(15,5,5,0.99));
-  padding: 22px;
-  box-shadow: 0 24px 70px rgba(0,0,0,0.6);
-  animation: denyModalIn 0.26s var(--ease-spring);
-}
-@keyframes denyModalIn {
-  from { opacity: 0; transform: scale(0.94) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
+.deny-modal { width: min(90vw,380px); border: 1px solid rgba(239,68,68,0.28); border-radius: 16px; background: linear-gradient(180deg,rgba(30,20,20,0.99),rgba(15,5,5,0.99)); padding: 22px; box-shadow: 0 24px 70px rgba(0,0,0,0.6); animation: modalIn 0.26s var(--ease-spring); }
+@keyframes modalIn { from{opacity:0;transform:scale(0.94) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
 .deny-modal-title { font-size: 17px; font-weight: 900; margin: 0 0 5px; color: #fca5a5; }
 .deny-modal-sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
 .deny-modal-label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #cbd5e1; display: block; margin-bottom: 7px; }
-.deny-modal-textarea {
-  width: 100%; min-height: 80px; resize: vertical;
-  border: 1px solid rgba(239,68,68,0.3); border-radius: 9px;
-  background: rgba(2,6,23,0.7); color: var(--text); font: inherit; font-size: 12px;
-  padding: 9px 11px; outline: none; margin-bottom: 13px;
-}
-.deny-modal-textarea:focus { border-color: rgba(239,68,68,0.7); box-shadow: 0 0 0 3px rgba(239,68,68,0.14); }
+.deny-modal-textarea { width: 100%; min-height: 80px; resize: vertical; border: 1px solid rgba(239,68,68,0.26); border-radius: 9px; background: rgba(2,6,23,0.7); color: var(--text); font: inherit; font-size: 12px; padding: 9px 11px; outline: none; margin-bottom: 13px; }
+.deny-modal-textarea:focus { border-color: rgba(239,68,68,0.62); box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
 .deny-modal-actions { display: flex; gap: 9px; }
-.deny-modal-cancel { flex: 1; height: 38px; border: 1px solid rgba(148,163,184,0.22); border-radius: 9px; background: rgba(15,23,42,0.8); color: #e2e8f0; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px; transition: background 0.15s; }
+.deny-modal-cancel { flex: 1; height: 38px; border: 1px solid rgba(148,163,184,0.18); border-radius: 9px; background: rgba(15,23,42,0.8); color: #e2e8f0; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px; transition: background 0.15s; }
 .deny-modal-cancel:hover { background: rgba(30,41,59,0.9); }
 .deny-modal-confirm { flex: 1; height: 38px; border: none; border-radius: 9px; background: #ef4444; color: #fff; cursor: pointer; font: inherit; font-weight: 800; font-size: 12px; transition: background 0.15s, transform 0.15s; }
 .deny-modal-confirm:hover { background: #f87171; transform: translateY(-1px); }
 
-/* ─── MESSAGES ───────────────────────────────────────────────── */
-.chat-empty { color: var(--muted); margin: auto; text-align: center; line-height: 1.5; max-width: 230px; font-size: 13px; }
-.chat-disabled-notice { margin: auto; max-width: 280px; text-align: center; color: #fecaca; font-size: 28px; font-weight: 900; line-height: 1.12; text-transform: uppercase; }
-
-.chat-message {
-  display: grid; gap: 5px;
-  max-width: 92%; padding: 9px 12px;
-  border: 1px solid rgba(148,163,184,0.12);
-  border-radius: 13px 13px 13px 5px;
-  background: rgba(30,41,59,0.7);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.14);
-  animation: messageIn 0.22s ease-out;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.chat-message:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(0,0,0,0.2); }
-.chat-message.own {
-  align-self: flex-end;
-  border-color: rgba(56,189,248,0.24);
-  border-radius: 13px 13px 5px 13px;
-  background: linear-gradient(135deg, rgba(14,116,144,0.38), rgba(8,47,73,0.5));
-}
-.message-meta {
-  display: flex; justify-content: space-between; gap: 8px;
-  color: var(--muted); font-size: 10px; font-weight: 700;
-}
+.chat-empty { color: var(--muted); margin: auto; text-align: center; line-height: 1.5; max-width: 220px; font-size: 13px; }
+.chat-disabled-notice { margin: auto; max-width: 280px; text-align: center; color: #fecaca; font-size: 24px; font-weight: 900; line-height: 1.12; text-transform: uppercase; }
+.chat-message { display: grid; gap: 5px; max-width: 92%; padding: 9px 12px; border: 1px solid rgba(148,163,184,0.09); border-radius: 13px 13px 13px 5px; background: rgba(30,41,59,0.62); box-shadow: 0 5px 16px rgba(0,0,0,0.1); animation: messageIn 0.22s ease-out; transition: transform 0.2s, box-shadow 0.2s; }
+.chat-message:hover { transform: translateY(-1px); box-shadow: 0 9px 22px rgba(0,0,0,0.16); }
+.chat-message.own { align-self: flex-end; border-color: rgba(56,189,248,0.18); border-radius: 13px 13px 5px 13px; background: linear-gradient(135deg,rgba(14,116,144,0.32),rgba(8,47,73,0.45)); }
+.message-meta { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 10px; font-weight: 700; }
 .message-author { display: inline-flex; align-items: center; min-width: 0; gap: 5px; }
-.message-name { color: #bae6fd; font-weight: 950; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.message-name { color: #bae6fd; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .message-time { color: var(--muted); font-size: 10px; white-space: nowrap; }
 .message-email { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fef9c3; font-weight: 800; font-size: 10px; }
 .message-text { color: #f8fafc; overflow-wrap: anywhere; line-height: 1.4; font-size: 13px; }
-.message-edited { margin-top: -1px; color: rgba(203,213,225,0.6); font-size: 9px; font-weight: 800; }
-.message-admin-controls {
-  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px;
-}
-.message-admin-controls button {
-  height: 22px;
-  border: 1px solid rgba(125,211,252,0.2);
-  border-radius: 999px;
-  background: rgba(2,6,23,0.5);
-  color: #dff6ff; cursor: pointer; font: inherit;
-  font-size: 10px; font-weight: 900; padding: 0 8px;
-  transition: all 0.15s ease;
-}
-.message-admin-controls button:hover {
-  border-color: rgba(56,189,248,0.65);
-  background: rgba(8,145,178,0.28);
-  transform: translateY(-1px);
-}
-@keyframes messageIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+.message-edited { margin-top: -1px; color: rgba(203,213,225,0.52); font-size: 9px; font-weight: 800; }
+.message-admin-controls { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.message-admin-controls button { height: 22px; border: 1px solid rgba(125,211,252,0.16); border-radius: 100px; background: rgba(2,6,23,0.5); color: #dff6ff; cursor: pointer; font: inherit; font-size: 10px; font-weight: 900; padding: 0 8px; transition: all 0.15s; }
+.message-admin-controls button:hover { border-color: rgba(56,189,248,0.58); background: rgba(8,145,178,0.22); transform: translateY(-1px); }
+@keyframes messageIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
 
-/* ─── CHAT SETUP (auth panel) ─────────────────────────────── */
-.chat-setup {
-  position: absolute; inset: 0; z-index: 2;
-  display: grid; place-items: center; padding: 18px;
-  background: rgba(2,6,23,0.7);
-  backdrop-filter: blur(16px);
-  opacity: 0; visibility: hidden;
-  transition: opacity 0.22s ease, visibility 0.22s ease;
-  overflow-y: auto;
-}
+.chat-setup { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 18px; background: rgba(2,6,23,0.7); backdrop-filter: blur(16px); opacity: 0; visibility: hidden; transition: opacity 0.22s, visibility 0.22s; overflow-y: auto; }
 .chat-setup.show { opacity: 1; visibility: visible; }
-.chat-setup-panel {
-  width: min(100%, 360px);
-  border: 1px solid rgba(148,163,184,0.22); border-radius: 15px;
-  padding: 18px;
-  background: linear-gradient(180deg, rgba(30,41,59,0.98), rgba(15,23,42,0.98));
-  box-shadow: 0 22px 66px rgba(0,0,0,0.48);
-  animation: setupIn 0.26s var(--ease-spring);
-}
-@keyframes setupIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
+.chat-setup-panel { width: min(100%,360px); border: 1px solid rgba(148,163,184,0.18); border-radius: 15px; padding: 18px; background: linear-gradient(180deg,rgba(30,41,59,0.98),rgba(15,23,42,0.98)); box-shadow: 0 22px 66px rgba(0,0,0,0.48); animation: setupIn 0.26s var(--ease-spring); }
+@keyframes setupIn { from{opacity:0;transform:translateY(10px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
 .chat-auth-grid { display: grid; grid-template-columns: 1fr; gap: 9px; }
 .chat-auth-screen { display: none; }
 .chat-auth-screen.active { display: block; }
 .chat-mode-actions { display: grid; gap: 9px; margin-top: 14px; }
 .chat-back-btn { height: 28px; margin: 0 0 9px; border: none; background: transparent; color: #bae6fd; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; padding: 0; text-align: left; }
 .chat-back-btn:hover { color: #fff; }
-.chat-setup-title { margin: 0 0 5px; font-size: 18px; font-weight: 900; letter-spacing: 0; }
+.chat-setup-title { margin: 0 0 5px; font-size: 18px; font-weight: 900; }
 .chat-setup-copy { margin: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.45; }
 .chat-setup-label { display: block; margin: 12px 0 6px; color: #cbd5e1; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-.chat-setup-input {
-  width: 100%; height: 40px;
-  border: 1px solid rgba(148,163,184,0.25); border-radius: 9px;
-  background: rgba(2,6,23,0.65); color: var(--text); outline: none;
-  padding: 0 11px; font: inherit; font-size: 13px;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-.chat-setup-input:focus { border-color: rgba(56,189,248,0.65); box-shadow: 0 0 0 3px rgba(56,189,248,0.13); }
-
+.chat-setup-input { width: 100%; height: 40px; border: 1px solid rgba(148,163,184,0.2); border-radius: 9px; background: rgba(2,6,23,0.65); color: var(--text); outline: none; padding: 0 11px; font: inherit; font-size: 13px; transition: border-color 0.18s, box-shadow 0.18s; }
+.chat-setup-input:focus { border-color: rgba(56,189,248,0.58); box-shadow: 0 0 0 3px rgba(56,189,248,0.11); }
 .school-options { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
-.school-option {
-  height: 36px;
-  border: 1px solid rgba(148,163,184,0.2); border-radius: 9px;
-  background: rgba(2,6,23,0.4); color: #cbd5e1; cursor: pointer;
-  font: inherit; font-size: 11px; font-weight: 900;
-  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
-}
-.school-option:hover, .school-option.selected {
-  transform: translateY(-1px);
-  border-color: rgba(56,189,248,0.72);
-  background: rgba(8,145,178,0.28);
-  color: #f8fafc;
-}
-
-.chat-setup-submit {
-  width: 100%; height: 40px; margin-top: 14px;
-  border: none; border-radius: 9px; background: var(--accent);
-  color: #031018; cursor: pointer; font: inherit; font-weight: 950; font-size: 13px;
-  transition: transform 0.16s ease, background 0.16s ease;
-}
+.school-option { height: 36px; border: 1px solid rgba(148,163,184,0.16); border-radius: 9px; background: rgba(2,6,23,0.4); color: #cbd5e1; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; transition: transform 0.16s, border-color 0.16s, background 0.16s, color 0.16s; }
+.school-option:hover,.school-option.selected { transform: translateY(-1px); border-color: rgba(56,189,248,0.68); background: rgba(8,145,178,0.22); color: #f8fafc; }
+.chat-setup-submit { width: 100%; height: 40px; margin-top: 14px; border: none; border-radius: 9px; background: var(--accent); color: #031018; cursor: pointer; font: inherit; font-weight: 900; font-size: 13px; transition: transform 0.16s, background 0.16s; }
 .chat-setup-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-.chat-setup-submit.secondary { border: 1px solid rgba(125,211,252,0.3); background: rgba(2,6,23,0.7); color: #e0f2fe; }
+.chat-setup-submit.secondary { border: 1px solid rgba(125,211,252,0.25); background: rgba(2,6,23,0.7); color: #e0f2fe; }
 .chat-setup-submit.flush { margin-top: 0; }
 .chat-setup-submit:hover { transform: translateY(-1px); background: #67e8f9; }
-.chat-setup-submit.secondary:hover { background: rgba(8,145,178,0.26); }
+.chat-setup-submit.secondary:hover { background: rgba(8,145,178,0.2); }
 .chat-setup-error { min-height: 16px; margin-top: 7px; color: #fecaca; font-size: 11px; font-weight: 700; }
 .chat-setup-error.ok { color: #bbf7d0; }
-
-/* ─── PENDING / APPROVED / DENIED SCREENS ─────────────────── */
+.chat-setup-panel { position: relative; }
+.chat-setup-close-btn { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border: none; background: rgba(255,255,255,0.07); color: var(--muted-light); font-size: 14px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.18s, color 0.18s; }
+.chat-setup-close-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
 .pending-screen { text-align: center; padding: 8px 0; }
 .pending-anim-wrap { width: 66px; height: 66px; margin: 0 auto 16px; position: relative; }
-.pending-orbit {
-  position: absolute; inset: 0; border-radius: 50%;
-  border: 3px solid transparent; border-top-color: var(--accent);
-  animation: orbit 1.4s linear infinite;
-}
+.pending-orbit { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--accent); animation: orbit 1.4s linear infinite; }
 .pending-orbit:nth-child(2) { inset: 8px; border-top-color: rgba(56,189,248,0.4); animation-duration: 2s; animation-direction: reverse; }
 .pending-orbit:nth-child(3) { inset: 18px; border-top-color: rgba(56,189,248,0.2); animation-duration: 2.8s; }
-@keyframes orbit { to { transform: rotate(360deg); } }
+@keyframes orbit { to{transform:rotate(360deg)} }
 .pending-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .pending-title { font-size: 17px; font-weight: 900; margin-bottom: 7px; }
 .pending-copy { color: var(--muted); font-size: 12px; line-height: 1.5; margin-bottom: 14px; }
-.pending-note {
-  font-size: 10px; color: rgba(148,163,184,0.7); line-height: 1.5;
-  padding: 9px 12px; border: 1px solid rgba(148,163,184,0.14); border-radius: 9px;
-  background: rgba(2,6,23,0.4); margin-bottom: 14px; text-align: left;
-}
+.pending-note { font-size: 10px; color: rgba(148,163,184,0.62); line-height: 1.5; padding: 9px 12px; border: 1px solid rgba(148,163,184,0.1); border-radius: 9px; background: rgba(2,6,23,0.4); margin-bottom: 14px; text-align: left; }
 .pending-note strong { color: #e2e8f0; }
 .pending-actions { display: flex; flex-direction: column; gap: 7px; }
-.pending-close-btn {
-  height: 38px; border: none; border-radius: 9px;
-  background: rgba(30,41,59,0.8); border: 1px solid rgba(125,211,252,0.18);
-  color: #e0f2fe; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px;
-  transition: background 0.15s;
-}
-.pending-close-btn:hover { background: rgba(8,145,178,0.22); }
-.pending-check-btn {
-  height: 38px; border: none; border-radius: 9px;
-  background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.28);
-  color: #bae6fd; cursor: pointer; font: inherit; font-weight: 700; font-size: 11px;
-  transition: background 0.15s;
-}
-.pending-check-btn:hover { background: rgba(56,189,248,0.2); }
-
-.denied-banner { padding: 12px; border: 1px solid rgba(239,68,68,0.3); border-radius: 11px; background: rgba(30,5,5,0.6); margin-bottom: 14px; }
+.pending-close-btn { height: 38px; border: 1px solid rgba(125,211,252,0.14); border-radius: 9px; background: rgba(30,41,59,0.8); color: #e0f2fe; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px; transition: background 0.15s; }
+.pending-close-btn:hover { background: rgba(8,145,178,0.18); }
+.pending-check-btn { height: 38px; border: 1px solid rgba(56,189,248,0.22); border-radius: 9px; background: rgba(56,189,248,0.07); color: #bae6fd; cursor: pointer; font: inherit; font-weight: 700; font-size: 11px; transition: background 0.15s; }
+.pending-check-btn:hover { background: rgba(56,189,248,0.16); }
+.denied-banner { padding: 12px; border: 1px solid rgba(239,68,68,0.25); border-radius: 11px; background: rgba(30,5,5,0.52); margin-bottom: 14px; }
 .denied-reason-label { font-size: 9px; font-weight: 900; text-transform: uppercase; color: #f87171; margin-bottom: 5px; }
 .denied-reason-text { color: #fca5a5; font-size: 12px; line-height: 1.5; }
-
 .request-verify-screen { text-align: center; }
-.check-icon-wrap {
-  width: 56px; height: 56px; margin: 0 auto 14px;
-  background: rgba(56,189,248,0.1); border: 2px solid rgba(56,189,248,0.28);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px;
-  animation: iconPop 0.4s var(--ease-spring);
-}
-@keyframes iconPop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.check-icon-wrap { width: 56px; height: 56px; margin: 0 auto 14px; background: rgba(56,189,248,0.09); border: 2px solid rgba(56,189,248,0.22); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; animation: iconPop 0.4s var(--ease-spring); }
+@keyframes iconPop { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
 
-/* ─── TOAST ───────────────────────────────────────────────── */
-.chat-toast-stack {
-  position: fixed; right: 16px; bottom: 16px; z-index: 1900;
-  display: grid; gap: 8px;
-  width: min(310px, calc(100vw - 32px)); pointer-events: none;
-}
-.chat-toast {
-  border: 1px solid rgba(125,211,252,0.3); border-radius: 13px;
-  padding: 10px 13px; background: rgba(15,23,42,0.96);
-  box-shadow: 0 16px 44px rgba(0,0,0,0.35);
-  backdrop-filter: blur(14px);
-  animation: toastIn 0.26s var(--ease-spring);
-}
+.chat-form { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; padding: 12px 16px 16px; border-top: 1px solid rgba(148,163,184,0.08); background: rgba(2,6,23,0.65); }
+.chat-room-select { display: none; width: 140px; height: 42px; border: 1px solid rgba(125,211,252,0.16); border-radius: 11px; background: rgba(2,6,23,0.65); color: var(--text); outline: none; padding: 0 9px; font: inherit; font-size: 12px; font-weight: 800; transition: border-color 0.18s; }
+.chat-room-select:focus { border-color: rgba(56,189,248,0.42); }
+.site-chat.admin-mode .chat-room-select { display: block; }
+.chat-input { height: 42px; padding: 0 11px; font-size: 13px; width: 100%; min-width: 0; border: 1px solid rgba(125,211,252,0.18); border-radius: 11px; background: rgba(2,6,23,0.65); color: var(--text); outline: none; font: inherit; transition: border-color 0.18s, box-shadow 0.18s; }
+.chat-input:focus { border-color: rgba(56,189,248,0.55); box-shadow: 0 0 0 3px rgba(56,189,248,0.1); }
+.chat-send { width: 44px; height: 42px; border: none; border-radius: 11px; background: linear-gradient(135deg,#67e8f9,#38bdf8); color: #031018; font-size: 20px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 16px rgba(56,189,248,0.16); transition: transform 0.16s, box-shadow 0.16s; }
+.chat-send:hover { transform: translateY(-1px); box-shadow: 0 9px 26px rgba(56,189,248,0.25); }
+.chat-send:disabled { cursor: not-allowed; opacity: 0.5; transform: none; }
+
+.chat-toast-stack { position: fixed; right: 16px; bottom: 72px; z-index: 1900; display: grid; gap: 8px; width: min(310px,calc(100vw - 32px)); pointer-events: none; }
+.chat-toast { border: 1px solid rgba(125,211,252,0.22); border-radius: 13px; padding: 10px 13px; background: rgba(15,23,42,0.97); box-shadow: 0 16px 44px rgba(0,0,0,0.35); backdrop-filter: blur(14px); animation: toastIn 0.26s var(--ease-spring); }
 .chat-toast.hide { animation: toastOut 0.2s ease forwards; }
 .toast-name { color: #e0f2fe; font-size: 11px; font-weight: 900; }
 .toast-text { margin-top: 2px; color: #f8fafc; font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
-@keyframes toastIn { from { opacity: 0; transform: translate(14px,7px) scale(0.96); } to { opacity: 1; transform: translate(0,0) scale(1); } }
-@keyframes toastOut { to { opacity: 0; transform: translate(10px,5px) scale(0.98); } }
+@keyframes toastIn { from{opacity:0;transform:translate(14px,7px) scale(0.96)} to{opacity:1;transform:translate(0,0) scale(1)} }
+@keyframes toastOut { to{opacity:0;transform:translate(10px,5px) scale(0.98)} }
 
-/* ─── CHAT FORM ───────────────────────────────────────────── */
-.chat-form {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 8px;
-  padding: 12px 16px 16px; border-top: 1px solid rgba(148,163,184,0.13);
-  background: rgba(2,6,23,0.7);
-}
-.chat-room-select {
-  display: none; width: 140px; height: 42px;
-  border: 1px solid rgba(125,211,252,0.2); border-radius: 11px;
-  background: rgba(2,6,23,0.65); color: var(--text); outline: none;
-  padding: 0 9px; font: inherit; font-size: 12px; font-weight: 850;
-  transition: border-color 0.18s;
-}
-.chat-room-select:focus { border-color: rgba(56,189,248,0.5); }
-.site-chat.admin-mode .chat-room-select { display: block; }
-.chat-input { height: 42px; padding: 0 11px; font-size: 13px; }
-.chat-send {
-  width: 44px; height: 42px; border: none; border-radius: 11px;
-  background: linear-gradient(135deg, #67e8f9, #38bdf8);
-  color: #031018; font-size: 20px; font-weight: 900; cursor: pointer;
-  box-shadow: 0 8px 22px rgba(56,189,248,0.2);
-  transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
-}
-.chat-send:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(56,189,248,0.3); }
-.chat-send:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
-
-/* ─── RENAME COOLDOWN NOTICE ─────────────────────────────── */
-.rename-modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(8px); z-index: 2300;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; visibility: hidden;
-  transition: opacity 0.22s ease, visibility 0.22s ease;
-}
+.rename-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); z-index: 2300; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.22s, visibility 0.22s; }
 .rename-modal-backdrop.show { opacity: 1; visibility: visible; }
-.rename-modal {
-  width: min(90vw, 360px);
-  border: 1px solid rgba(56,189,248,0.3); border-radius: 15px;
-  background: linear-gradient(180deg, rgba(8,20,40,0.99), rgba(2,8,20,0.99));
-  padding: 20px;
-  box-shadow: 0 22px 60px rgba(0,0,0,0.55);
-  animation: denyModalIn 0.26s var(--ease-spring);
-}
+.rename-modal { width: min(90vw,360px); border: 1px solid rgba(56,189,248,0.25); border-radius: 15px; background: linear-gradient(180deg,rgba(8,20,40,0.99),rgba(2,8,20,0.99)); padding: 20px; box-shadow: 0 22px 60px rgba(0,0,0,0.55); animation: modalIn 0.26s var(--ease-spring); }
 .rename-modal-title { font-size: 16px; font-weight: 900; margin: 0 0 4px; color: #7dd3fc; }
 .rename-modal-sub { font-size: 11px; color: var(--muted); margin: 0 0 12px; }
 .rename-modal-label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #cbd5e1; display: block; margin-bottom: 6px; }
-.rename-modal-input {
-  width: 100%; height: 38px;
-  border: 1px solid rgba(56,189,248,0.25); border-radius: 9px;
-  background: rgba(2,6,23,0.65); color: var(--text); font: inherit; font-size: 13px;
-  padding: 0 11px; outline: none; margin-bottom: 12px;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-.rename-modal-input:focus { border-color: rgba(56,189,248,0.6); box-shadow: 0 0 0 3px rgba(56,189,248,0.12); }
+.rename-modal-input { width: 100%; height: 38px; border: 1px solid rgba(56,189,248,0.2); border-radius: 9px; background: rgba(2,6,23,0.65); color: var(--text); font: inherit; font-size: 13px; padding: 0 11px; outline: none; margin-bottom: 12px; transition: border-color 0.18s, box-shadow 0.18s; }
+.rename-modal-input:focus { border-color: rgba(56,189,248,0.55); box-shadow: 0 0 0 3px rgba(56,189,248,0.1); }
 .rename-modal-error { min-height: 14px; color: #fecaca; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
 .rename-modal-actions { display: flex; gap: 8px; }
-.rename-modal-cancel { flex: 1; height: 36px; border: 1px solid rgba(148,163,184,0.2); border-radius: 8px; background: rgba(15,23,42,0.8); color: #e2e8f0; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px; transition: background 0.15s; }
+.rename-modal-cancel { flex: 1; height: 36px; border: 1px solid rgba(148,163,184,0.16); border-radius: 8px; background: rgba(15,23,42,0.8); color: #e2e8f0; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px; transition: background 0.15s; }
 .rename-modal-cancel:hover { background: rgba(30,41,59,0.9); }
 .rename-modal-confirm { flex: 1; height: 36px; border: none; border-radius: 8px; background: var(--accent); color: #031018; cursor: pointer; font: inherit; font-weight: 900; font-size: 12px; transition: background 0.15s, transform 0.15s; }
 .rename-modal-confirm:hover { background: #67e8f9; transform: translateY(-1px); }
 
-/* ─── RESPONSIVE ─────────────────────────────────────────── */
 @media (max-width: 760px) {
-  .site-chat { width: min(94vw, 420px); min-width: 0; }
-  .chat-button-text { display: none; }
+  .homepage-inner { padding: 44px 18px 60px; }
+  .home-header { margin-bottom: 28px; }
+  .game-grid { grid-template-columns: repeat(auto-fill,minmax(148px,1fr)); gap: 8px; }
+  .site-chat { width: min(94vw,420px); min-width: 0; }
   .school-options { grid-template-columns: 1fr; }
   .identity-summary { grid-template-columns: 1fr; }
   .chat-messages.admin-grid { grid-template-columns: 1fr; }
   .chat-form { grid-template-columns: 1fr auto; }
-  .site-chat.admin-mode .chat-room-select { grid-column: 1 / -1; width: 100%; }
+  .site-chat.admin-mode .chat-room-select { grid-column: 1/-1; width: 100%; }
+  #gameHud { top: 10px; left: 10px; }
+  #floatActions { bottom: 14px; right: 14px; }
+}
+@media (max-width: 480px) {
+  .game-grid { grid-template-columns: repeat(2,1fr); }
+  .hud-logo-text { display: none; }
 }
 </style>
 </head>
 <body>
 
+<!-- EMAIL POPUP -->
 <div id="emailPopup" class="overlay">
   <div class="overlay-content">
-    <h1>Would you like to be sent the new URL when this site is blocked?</h1>
+    <h1>Want the new URL when this site gets blocked?</h1>
     <div class="overlay-btns">
-      <button id="yesBtn" class="btn-yes">YES</button>
-      <button id="noBtn" class="btn-no" disabled>No (5)</button>
+      <button id="yesBtn" class="btn-yes">Yes, send it</button>
+      <button id="noBtn" class="btn-no" disabled>No thanks (5)</button>
     </div>
   </div>
 </div>
 
-<nav id="siteNav">
-  <div class="brand">
-    <div class="title">New Tab 2</div>
-    <div id="status" class="status">Idle</div>
+<!-- HOMEPAGE -->
+<div id="homepage">
+  <div class="homepage-inner">
+    <header class="home-header">
+      <div class="home-brand">
+        <div class="home-eyebrow">Home</div>
+        <h1 class="home-title">New Tab<span> 2</span></h1>
+        <p class="home-sub">NewTabGmail@Gmail.com</p>
+      </div>
+      <div class="home-actions">
+        <button class="home-chat-btn" id="homeChatBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          Chat
+          <span class="home-chat-unread"></span>
+        </button>
+      </div>
+    </header>
+    <div class="home-search-row">
+      <div class="home-search-wrap">
+        <svg class="home-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="homeSearch" class="home-search" type="text" placeholder="Search games..." autocomplete="off" spellcheck="false" />
+      </div>
+      <span id="homeGameCount" class="home-game-count"></span>
+    </div>
+    <div id="gameGrid" class="game-grid"></div>
   </div>
+</div>
 
-  <!-- Active game pill — shows in compact mode -->
-  <div id="navActiveGame" class="nav-active-game" title="Open game launcher" onclick="openLauncher()">
-    <span class="nav-active-game-dot"></span>
-    <span id="navActiveGameName" class="nav-active-game-name">—</span>
-  </div>
-
-  <!-- Hidden stubs kept for JS compatibility -->
+<!-- HIDDEN NAV STUBS (JS compatibility) -->
+<nav id="siteNav" style="display:none" aria-hidden="true">
+  <div class="brand"><div class="title">New Tab 2</div><div id="status" class="status">Idle</div></div>
+  <div id="navActiveGame" class="nav-active-game"><span class="nav-active-game-dot"></span><span id="navActiveGameName" class="nav-active-game-name">—</span></div>
   <div class="tabs-wrapper" aria-hidden="true">
     <div class="tabs-main" id="tabsMain"></div>
     <div class="dropdown" id="moreDropdown">
@@ -950,55 +576,87 @@ body.game-active #viewer {
       <div class="dropdown-menu" id="tabsMore"></div>
     </div>
   </div>
-
   <div class="nav-spacer"></div>
-
-  <!-- Games button -->
-  <button class="nav-games-btn" type="button" onclick="openLauncher()" title="Browse games">
-    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/>
-      <rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/>
-      <rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/>
-      <rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/>
-    </svg>
-    Games
-  </button>
-
-  <!-- Chat button in nav -->
-  <button id="chatToggle" class="chat-button" type="button" aria-label="Open chat" title="Open chat">
-    <svg class="chat-button-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none">
-      <path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-      <path d="M8.25 9.25H15.75M8.25 12H13.25" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    </svg>
+  <button id="chatToggle" class="chat-button" type="button" style="display:none">
     <span class="chat-button-text">Chat</span>
-    <span class="chat-unread-dot" aria-hidden="true"></span>
+    <span class="chat-unread-dot"></span>
   </button>
 </nav>
 
-<!-- ─── GAME LAUNCHER ─────────────────────────────────────── -->
+<!-- GAME LAUNCHER (in-game switcher) -->
 <div id="gameLauncher">
-  <div id="launcherTab" onclick="openLauncher()" title="Open game launcher" role="button" aria-label="Open game launcher">
-    <div class="launcher-tab-line"></div>
-    <div class="launcher-tab-line"></div>
-    <div class="launcher-tab-line"></div>
-  </div>
+  <div id="launcherTab"></div>
   <div id="launcherPanel">
     <div class="launcher-header">
-      <span class="launcher-title">Games</span>
-      <button class="launcher-close" onclick="closeLauncher()" aria-label="Close game launcher">✕</button>
+      <span class="launcher-title">Switch Game</span>
+      <button class="launcher-close" onclick="closeLauncher()" aria-label="Close">&#x2715;</button>
     </div>
     <div class="launcher-search-wrap">
-      <input id="launcherSearch" class="launcher-search" type="text" placeholder="Search games..." autocomplete="off" spellcheck="false" />
+      <input id="launcherSearch" class="launcher-search" type="text" placeholder="Search..." autocomplete="off" spellcheck="false" />
     </div>
     <div id="launcherList"></div>
   </div>
 </div>
 <div class="launcher-backdrop" onclick="closeLauncher()"></div>
 
+<!-- IFRAME -->
 <iframe id="viewer"></iframe>
 
-<!-- ─── RENAME MODAL ─────────────────────────────────────────── -->
-<div id="renameModalBackdrop" class="rename-modal-backdrop" role="dialog" aria-modal="true" aria-label="Change display name">
+<!-- TOP-LEFT GAME HUD -->
+<div id="gameHud">
+  <div class="hud-shell">
+    <!-- NT2 logo -->
+    <div class="hud-logo" title="New Tab 2">
+      <div class="hud-logo-mark">
+        <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="4" height="4" rx="1.2" fill="white" opacity="0.95"/>
+          <rect x="7" y="1" width="4" height="4" rx="1.2" fill="white" opacity="0.6"/>
+          <rect x="1" y="7" width="4" height="4" rx="1.2" fill="white" opacity="0.6"/>
+          <rect x="7" y="7" width="4" height="4" rx="1.2" fill="white" opacity="0.95"/>
+        </svg>
+      </div>
+      <span class="hud-logo-text">NT<span>2</span></span>
+    </div>
+    <!-- Home button — house icon -->
+    <button class="hud-home-btn" id="hudHomeBtn" type="button" title="Go home">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 12L12 4L21 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5 10V20C5 20.55 5.45 21 6 21H10V16H14V21H18C18.55 21 19 20.55 19 20V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <!-- Current game pill — click to switch -->
+    <div class="hud-game-pill" onclick="openLauncher()" title="Switch game">
+      <span class="hud-dot"></span>
+      <span id="hudGameName" class="hud-game-name">&#8212;</span>
+    </div>
+    <!-- Chat icon button -->
+    <button class="hud-chat-btn" id="hudChatBtn" type="button" title="Open chat">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+      </svg>
+      <span class="hud-chat-unread"></span>
+    </button>
+  </div>
+  <!-- keep legacy spans for JS compat -->
+  <span class="hud-brand" style="display:none">New Tab 2</span>
+  <span class="hud-sep" style="display:none">&middot;</span>
+</div>
+
+<!-- FLOAT ACTION BUTTONS (bottom-right) -->
+<div id="floatActions">
+  <button class="float-btn float-btn-games" type="button" onclick="openLauncher()">
+    <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/></svg>
+    Games
+  </button>
+  <button id="floatChatBtn" class="float-btn float-btn-chat" type="button">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>
+    Chat
+    <span class="float-chat-unread"></span>
+  </button>
+</div>
+
+<!-- RENAME MODAL -->
+<div id="renameModalBackdrop" class="rename-modal-backdrop" role="dialog" aria-modal="true">
   <div class="rename-modal">
     <h3 class="rename-modal-title">Change Display Name</h3>
     <p class="rename-modal-sub">You can change your name once every 24 hours.</p>
@@ -1012,13 +670,13 @@ body.game-active #viewer {
   </div>
 </div>
 
-<!-- ─── DENY MODAL ─────────────────────────────────────────── -->
-<div id="denyModalBackdrop" class="deny-modal-backdrop" role="dialog" aria-modal="true" aria-label="Deny account request">
+<!-- DENY MODAL -->
+<div id="denyModalBackdrop" class="deny-modal-backdrop" role="dialog" aria-modal="true">
   <div class="deny-modal">
     <h3 class="deny-modal-title">Deny Request</h3>
-    <p class="deny-modal-sub">You must leave a note explaining why this account was denied.</p>
+    <p class="deny-modal-sub">Leave a note explaining why this account was denied.</p>
     <label class="deny-modal-label" for="denyReasonInput">Reason (required)</label>
-    <textarea id="denyReasonInput" class="deny-modal-textarea" placeholder="e.g. Unrecognized email address, please use your school email..." maxlength="300"></textarea>
+    <textarea id="denyReasonInput" class="deny-modal-textarea" placeholder="e.g. Unrecognized email address..." maxlength="300"></textarea>
     <div class="deny-modal-actions">
       <button class="deny-modal-cancel" type="button" id="denyModalCancel">Cancel</button>
       <button class="deny-modal-confirm" type="button" id="denyModalConfirm">Deny Account</button>
@@ -1026,13 +684,14 @@ body.game-active #viewer {
   </div>
 </div>
 
+<!-- CHAT PANEL -->
 <aside id="siteChat" class="site-chat" aria-label="Site chat">
   <header class="chat-header">
     <div class="chat-title-row">
       <div class="chat-title">Live Chat</div>
       <div class="chat-header-actions">
         <div id="chatActiveUsers" class="active-users">0 active</div>
-        <button id="chatCloseBtn" class="chat-close-btn" type="button" aria-label="Close chat" title="Close chat">✕</button>
+        <button id="chatCloseBtn" class="chat-close-btn" type="button" aria-label="Close chat">&#x2715;</button>
       </div>
     </div>
     <div class="chat-profile">
@@ -1044,18 +703,16 @@ body.game-active #viewer {
         </div>
         <div class="identity-actions">
           <span id="chatAdminBadge" class="admin-badge">Admin</span>
-          <button id="chatRenameBtn" class="identity-rename-btn" type="button" title="Change display name">✏️ Rename</button>
+          <button id="chatRenameBtn" class="identity-rename-btn" type="button">&#x270F;&#xFE0F; Rename</button>
           <button id="chatSignOut" class="identity-signout" type="button">Sign out</button>
         </div>
       </div>
     </div>
   </header>
-
-  <!-- Admin approval panel (only visible to admins) -->
   <div id="adminApprovalSection" style="display:none">
     <div class="admin-approval-panel">
       <div class="admin-approval-header">
-        <div class="admin-approval-title">⚡ Account Requests</div>
+        <div class="admin-approval-title">&#x26A1; Account Requests</div>
         <div id="approvalCount" class="admin-approval-count">0</div>
       </div>
       <div id="approvalList" class="admin-approval-list">
@@ -1063,26 +720,21 @@ body.game-active #viewer {
       </div>
     </div>
   </div>
-
   <div id="chatMessages" class="chat-messages">
     <div class="chat-empty">Open chat to load the latest messages.</div>
   </div>
-
   <form id="chatForm" class="chat-form">
-    <select id="chatRoomSelect" class="chat-room-select" aria-label="Room to message">
+    <select id="chatRoomSelect" class="chat-room-select" aria-label="Room">
       <option value="high">High School</option>
       <option value="middle">Middle School</option>
       <option value="elementary">Elementary</option>
     </select>
     <input id="chatInput" class="chat-input" maxlength="240" autocomplete="off" placeholder="Message everyone..." />
-    <button id="chatSend" class="chat-send" type="submit" aria-label="Send message" title="Send">›</button>
+    <button id="chatSend" class="chat-send" type="submit" aria-label="Send">&#x203A;</button>
   </form>
-
-  <!-- ─── AUTH OVERLAY ──────────────────────────────────── -->
   <div id="chatSetup" class="chat-setup" aria-hidden="true">
     <form id="chatSetupForm" class="chat-setup-panel">
-
-      <!-- Choice screen -->
+      <button id="chatSetupCloseBtn" class="chat-setup-close-btn" type="button" aria-label="Close">&#x2715;</button>
       <div class="chat-auth-screen active" data-auth-screen="choice">
         <h2 class="chat-setup-title">Join chat</h2>
         <p class="chat-setup-copy">Create an account or log in. Your account needs admin approval before you can chat.</p>
@@ -1091,39 +743,23 @@ body.game-active #viewer {
           <button class="chat-setup-submit secondary flush" type="button" data-auth-mode="signin">Log in</button>
         </div>
       </div>
-
-      <!-- Sign in -->
       <div class="chat-auth-screen" data-auth-screen="signin">
-        <button class="chat-back-btn" type="button" data-auth-mode="choice">← Back</button>
+        <button class="chat-back-btn" type="button" data-auth-mode="choice">&#x2190; Back</button>
         <h2 class="chat-setup-title">Log in</h2>
         <p class="chat-setup-copy">Enter the email and password for your account.</p>
         <div class="chat-auth-grid">
-          <div>
-            <label class="chat-setup-label" for="chatSetupEmail">Email</label>
-            <input id="chatSetupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@rsu71.org" />
-          </div>
-          <div>
-            <label class="chat-setup-label" for="chatSetupPassword">Password</label>
-            <input id="chatSetupPassword" class="chat-setup-input" type="password" autocomplete="current-password" placeholder="Password" />
-          </div>
+          <div><label class="chat-setup-label" for="chatSetupEmail">Email</label><input id="chatSetupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@rsu71.org" /></div>
+          <div><label class="chat-setup-label" for="chatSetupPassword">Password</label><input id="chatSetupPassword" class="chat-setup-input" type="password" autocomplete="current-password" placeholder="Password" /></div>
         </div>
         <button class="chat-setup-submit" type="submit" data-auth-action="signin">Log in</button>
       </div>
-
-      <!-- Sign up -->
       <div class="chat-auth-screen" data-auth-screen="signup">
-        <button class="chat-back-btn" type="button" data-auth-mode="choice">← Back</button>
+        <button class="chat-back-btn" type="button" data-auth-mode="choice">&#x2190; Back</button>
         <h2 class="chat-setup-title">Create account</h2>
         <p class="chat-setup-copy">Your account will be sent for admin review before chat opens.</p>
         <div class="chat-auth-grid">
-          <div>
-            <label class="chat-setup-label" for="chatSignupEmail">Email</label>
-            <input id="chatSignupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@rsu71.org" />
-          </div>
-          <div>
-            <label class="chat-setup-label" for="chatSignupPassword">Password</label>
-            <input id="chatSignupPassword" class="chat-setup-input" type="password" autocomplete="new-password" placeholder="At least 6 characters" />
-          </div>
+          <div><label class="chat-setup-label" for="chatSignupEmail">Email</label><input id="chatSignupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@rsu71.org" /></div>
+          <div><label class="chat-setup-label" for="chatSignupPassword">Password</label><input id="chatSignupPassword" class="chat-setup-input" type="password" autocomplete="new-password" placeholder="At least 6 characters" /></div>
         </div>
         <label class="chat-setup-label" for="chatSetupName">Display name</label>
         <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Your name (up to 24 chars)" />
@@ -1135,54 +771,35 @@ body.game-active #viewer {
         </div>
         <button class="chat-setup-submit" type="submit" data-auth-action="signup">Submit request</button>
       </div>
-
-      <!-- Pending screen -->
       <div class="chat-auth-screen" data-auth-screen="pending">
         <div class="pending-screen">
-          <div class="pending-anim-wrap">
-            <div class="pending-orbit"></div>
-            <div class="pending-orbit"></div>
-            <div class="pending-orbit"></div>
-            <div class="pending-icon">⏳</div>
-          </div>
+          <div class="pending-anim-wrap"><div class="pending-orbit"></div><div class="pending-orbit"></div><div class="pending-orbit"></div><div class="pending-icon">&#x23F3;</div></div>
           <h2 class="chat-setup-title pending-title">Request Sent!</h2>
           <p class="pending-copy">Your account request has been sent to an admin for review.</p>
-          <div class="pending-note">
-            <strong>Note:</strong> A request was sent to New Tab 2. It may take a few hours to be accepted. Make sure you entered a valid school email — requests with unrecognized emails may be denied.
-          </div>
+          <div class="pending-note"><strong>Note:</strong> A request was sent to New Tab 2. It may take a few hours. Make sure you entered a valid school email.</div>
           <div class="pending-actions">
             <button type="button" class="pending-close-btn" id="pendingCloseChat">Close chat &amp; wait</button>
             <button type="button" class="pending-check-btn" data-auth-action="check-approval">Already approved? Check status</button>
           </div>
         </div>
       </div>
-
-      <!-- Denied screen -->
       <div class="chat-auth-screen" data-auth-screen="denied">
         <h2 class="chat-setup-title" style="color:#fca5a5">Request Denied</h2>
         <p class="chat-setup-copy">Unfortunately your account request was not approved.</p>
-        <div class="denied-banner">
-          <div class="denied-reason-label">Admin note</div>
-          <div id="deniedReasonText" class="denied-reason-text">No reason provided.</div>
-        </div>
-        <p style="color:var(--muted);font-size:11px;line-height:1.5">If you believe this was a mistake, sign out and try again with a valid school email address, or contact an admin directly.</p>
+        <div class="denied-banner"><div class="denied-reason-label">Admin note</div><div id="deniedReasonText" class="denied-reason-text">No reason provided.</div></div>
+        <p style="color:var(--muted);font-size:11px;line-height:1.5">If you believe this was a mistake, sign out and try again with a valid school email, or contact an admin directly.</p>
         <button class="chat-setup-submit secondary" type="button" data-auth-action="signout">Sign out</button>
       </div>
-
-      <!-- Request verification screen -->
       <div class="chat-auth-screen" data-auth-screen="request-verify">
         <div class="request-verify-screen">
-          <div class="check-icon-wrap">🔑</div>
+          <div class="check-icon-wrap">&#x1F511;</div>
           <h2 class="chat-setup-title">Request Chat Access</h2>
-          <p class="chat-setup-copy">Your account needs admin approval to use chat. Click below to submit a request.</p>
-          <div class="pending-note" style="text-align:left">
-            <strong>Note:</strong> A request will be sent to New Tab 2 admins. It may take a few hours. Make sure your account email is a valid school email.
-          </div>
+          <p class="chat-setup-copy">Your account needs admin approval to use chat.</p>
+          <div class="pending-note" style="text-align:left"><strong>Note:</strong> A request will be sent to New Tab 2 admins. It may take a few hours.</div>
           <button class="chat-setup-submit" type="button" id="requestVerifyBtn">Request account verification</button>
           <button class="chat-back-btn" type="button" data-auth-action="signout" style="margin-top:12px;display:block">Sign out</button>
         </div>
       </div>
-
       <div id="chatSetupError" class="chat-setup-error" aria-live="polite"></div>
     </form>
   </div>
@@ -1191,12 +808,11 @@ body.game-active #viewer {
 <div id="chatToastStack" class="chat-toast-stack" aria-live="polite"></div>
 
 <script src="games.js"></script>
-<script>
-window.CHAT_ENABLED = true;
-</script>
+<script>window.CHAT_ENABLED = true;</script>
 <script type="module" src="firebase-presence.js"></script>
 
 <script>
+// DOM REFS
 const tabsMain = document.getElementById("tabsMain");
 const tabsMore = document.getElementById("tabsMore");
 const moreDropdown = document.getElementById("moreDropdown");
@@ -1244,6 +860,14 @@ const renameModalCancel = document.getElementById("renameModalCancel");
 const renameModalConfirm = document.getElementById("renameModalConfirm");
 const navActiveGame = document.getElementById("navActiveGame");
 const navActiveGameName = document.getElementById("navActiveGameName");
+const homepage = document.getElementById("homepage");
+const gameGrid = document.getElementById("gameGrid");
+const homeSearch = document.getElementById("homeSearch");
+const homeGameCount = document.getElementById("homeGameCount");
+const hudGameName = document.getElementById("hudGameName");
+const hudHomeBtn = document.getElementById("hudHomeBtn");
+const floatChatBtn = document.getElementById("floatChatBtn");
+const homeChatBtn = document.getElementById("homeChatBtn");
 
 const MAX_VISIBLE = 10;
 const CHAT_NAME_KEY = "site_chat_name";
@@ -1255,21 +879,6 @@ let chatAuthScreen = "choice";
 let chatAuthState = { user: null, profile: null, isAdmin: false, approvalStatus: null };
 let pendingDenyUid = null;
 
-// ─── GAME LAUNCHER ───────────────────────────────────────
-function getGameData(data) {
-  if (typeof data === "string") return { url: data, order: null, ribbon: null, ribbonColor: null };
-  return {
-    url: data.url,
-    order: data.order,
-    ribbon: data.ribbon || data.ribbonText || data.badge || data.tag || null,
-    ribbonColor: data.ribbonColor || data.badgeColor || data.tagColor || "var(--accent)"
-  };
-}
-
-const launcher = document.getElementById("gameLauncher");
-const launcherList = document.getElementById("launcherList");
-const launcherSearch = document.getElementById("launcherSearch");
-
 const SWATCH_PALETTES = [
   ["#1e3a5f","#38bdf8"],["#1a3326","#34d399"],["#2d1b4e","#a78bfa"],
   ["#3b1f0e","#fb923c"],["#1f2937","#e2e8f0"],["#1a2744","#60a5fa"],
@@ -1280,12 +889,20 @@ const SWATCH_PALETTES = [
   ["#2a1f00","#fbbf24"],["#0f1f1f","#2dd4bf"],["#1e0a2e","#d946ef"],
 ];
 
+function getGameData(data) {
+  if (typeof data === "string") return { url: data, order: null, ribbon: null, ribbonColor: null };
+  return { url: data.url, order: data.order, ribbon: data.ribbon || data.ribbonText || data.badge || data.tag || null, ribbonColor: data.ribbonColor || data.badgeColor || data.tagColor || "var(--accent)" };
+}
 function getInitials(name) {
   return name.split(/\s+/).map(w => w[0] || "").join("").slice(0,2).toUpperCase() || "??";
 }
 
 let allGameEntries = [];
 let currentActive = null;
+
+const launcher = document.getElementById("gameLauncher");
+const launcherList = document.getElementById("launcherList");
+const launcherSearch = document.getElementById("launcherSearch");
 
 function buildLauncher() {
   if (typeof PAGES === "undefined") return;
@@ -1299,7 +916,7 @@ function buildLauncher() {
     })
     .sort((a, b) => a.order - b.order || a.originalIndex - b.originalIndex);
 
-  allGameEntries.forEach(({ name, data }, index) => {
+  allGameEntries.forEach(({ name }, index) => {
     const stub = document.createElement("div");
     stub.className = "tab";
     stub.dataset.gameName = name;
@@ -1315,7 +932,59 @@ function buildLauncher() {
     else tabsMore?.appendChild(stub);
   });
 
+  renderHomeGrid(allGameEntries);
   renderLauncherRows(allGameEntries);
+  homeGameCount.textContent = allGameEntries.length + " games";
+}
+
+function renderHomeGrid(entries) {
+  gameGrid.innerHTML = "";
+  entries.forEach(({ name, data }, i) => {
+    const palette = SWATCH_PALETTES[i % SWATCH_PALETTES.length];
+    const accentColor = palette[1];
+    const card = document.createElement("div");
+    card.className = "game-card";
+    card.dataset.gameName = name;
+    card.style.setProperty("--card-color", accentColor);
+    card.style.animationDelay = Math.min(i * 18, 400) + "ms";
+    if (currentActive === name) card.classList.add("active");
+
+    const glow = document.createElement("div");
+    glow.className = "game-card-glow";
+    card.appendChild(glow);
+
+    const icon = document.createElement("div");
+    icon.className = "game-card-icon";
+    icon.style.background = "linear-gradient(145deg, " + palette[0] + ", color-mix(in srgb, " + palette[0] + " 50%, " + palette[1] + " 50%))";
+    const initEl = document.createElement("span");
+    initEl.textContent = getInitials(name);
+    initEl.style.cssText = "color:" + accentColor + ";text-shadow:0 0 10px " + accentColor + "88;position:relative;z-index:1;font-size:11px;font-weight:900;letter-spacing:-0.5px";
+    icon.appendChild(initEl);
+    card.appendChild(icon);
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "game-card-name";
+    nameEl.textContent = name;
+    card.appendChild(nameEl);
+
+    const players = document.createElement("div");
+    players.className = "game-card-players";
+    players.dataset.playersFor = name;
+    card.appendChild(players);
+
+    if (data.ribbon) {
+      const badge = document.createElement("span");
+      badge.className = "game-card-ribbon";
+      badge.textContent = data.ribbon;
+      badge.style.background = data.ribbonColor || "var(--accent)";
+      card.appendChild(badge);
+    }
+
+    card.onclick = () => loadGame(name, data.url, card);
+    card.setAttribute("tabindex", "0");
+    card.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); loadGame(name, data.url, card); } };
+    gameGrid.appendChild(card);
+  });
 }
 
 function renderLauncherRows(entries) {
@@ -1325,29 +994,27 @@ function renderLauncherRows(entries) {
     const row = document.createElement("div");
     row.className = "game-row";
     row.dataset.gameName = name;
-    row.style.animationDelay = `${Math.min(i * 24, 380)}ms`;
+    row.style.animationDelay = Math.min(i * 22, 360) + "ms";
+    if (currentActive === name) row.classList.add("active");
 
     const swatch = document.createElement("div");
     swatch.className = "game-swatch";
-    swatch.style.background = `linear-gradient(145deg, ${palette[0]}, color-mix(in srgb, ${palette[0]} 50%, ${palette[1]} 50%))`;
-    swatch.style.boxShadow = `0 3px 10px rgba(0,0,0,0.4), inset 0 1px 0 ${palette[1]}44`;
+    swatch.style.background = "linear-gradient(145deg, " + palette[0] + ", color-mix(in srgb, " + palette[0] + " 50%, " + palette[1] + " 50%))";
     const initEl = document.createElement("span");
     initEl.textContent = getInitials(name);
-    initEl.style.cssText = `color:${palette[1]};text-shadow:0 0 12px ${palette[1]}88;font-size:10px;font-weight:900;position:relative;z-index:1`;
+    initEl.style.cssText = "color:" + palette[1] + ";font-size:10px;font-weight:900;position:relative;z-index:1";
     swatch.appendChild(initEl);
 
     const info = document.createElement("div");
     info.className = "game-row-info";
-    const nameEl = document.createElement("div");
-    nameEl.className = "game-row-name";
-    nameEl.textContent = name;
-    const players = document.createElement("div");
-    players.className = "game-row-players";
-    players.dataset.playersFor = name;
-    players.textContent = "";
-    info.appendChild(nameEl);
-    info.appendChild(players);
-
+    const nameEl2 = document.createElement("div");
+    nameEl2.className = "game-row-name";
+    nameEl2.textContent = name;
+    const players2 = document.createElement("div");
+    players2.className = "game-row-players";
+    players2.dataset.playersFor = name;
+    info.appendChild(nameEl2);
+    info.appendChild(players2);
     row.appendChild(swatch);
     row.appendChild(info);
 
@@ -1362,10 +1029,16 @@ function renderLauncherRows(entries) {
     row.onclick = () => loadGame(name, data.url, row);
     row.setAttribute("tabindex", "0");
     row.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); loadGame(name, data.url, row); } };
-
     launcherList.appendChild(row);
   });
 }
+
+homeSearch.addEventListener("input", () => {
+  const q = homeSearch.value.trim().toLowerCase();
+  const filtered = q ? allGameEntries.filter(({ name }) => name.toLowerCase().includes(q)) : allGameEntries;
+  renderHomeGrid(filtered);
+  homeGameCount.textContent = q ? filtered.length + " of " + allGameEntries.length : allGameEntries.length + " games";
+});
 
 launcherSearch.addEventListener("input", () => {
   const q = launcherSearch.value.trim().toLowerCase();
@@ -1373,62 +1046,69 @@ launcherSearch.addEventListener("input", () => {
   renderLauncherRows(allGameEntries.filter(({ name }) => name.toLowerCase().includes(q)));
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && launcher.classList.contains("open")) closeLauncher();
-});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && launcher.classList.contains("open")) closeLauncher(); });
 
-function openLauncher() {
-  launcher.classList.add("open");
-  setTimeout(() => launcherSearch.focus(), 280);
-}
-function closeLauncher() {
-  launcher.classList.remove("open");
-}
-
+function openLauncher() { launcher.classList.add("open"); setTimeout(() => launcherSearch.focus(), 280); }
+function closeLauncher() { launcher.classList.remove("open"); }
 function build() { buildLauncher(); }
 function toggleDropdown() {}
 
 function loadGame(name, url, element) {
   iframe.src = url;
   statusText.textContent = name;
-  document.querySelectorAll(".tab, .game-row").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".game-card,.game-row,.tab").forEach(t => t.classList.remove("active"));
   element.classList.add("active");
-  const stub = tabsMain?.querySelector(`[data-game-name="${CSS.escape(name)}"]`)
-    || tabsMore?.querySelector(`[data-game-name="${CSS.escape(name)}"]`);
+  const cardEl = gameGrid.querySelector('[data-game-name="' + CSS.escape(name) + '"]');
+  if (cardEl && cardEl !== element) cardEl.classList.add("active");
+  const stub = tabsMain?.querySelector('[data-game-name="' + CSS.escape(name) + '"]') || tabsMore?.querySelector('[data-game-name="' + CSS.escape(name) + '"]');
   if (stub) stub.classList.add("active");
-
-  // Activate compact nav
-  navActiveGame.classList.add("visible");
-  navActiveGameName.textContent = name;
-  siteNav.classList.add("game-active");
+  homepage.classList.add("hidden");
   document.body.classList.add("game-active");
+  siteNav.classList.add("game-active");
+  hudGameName.textContent = name;
+  navActiveGameName.textContent = name;
+  navActiveGame.classList.add("visible");
   currentActive = name;
   closeLauncher();
   window.gamePresence?.setActiveGame(name);
 }
 
-// ─── CHAT OPEN / CLOSE ───────────────────────────────────
+hudHomeBtn.addEventListener("click", () => {
+  homepage.classList.remove("hidden");
+  document.body.classList.remove("game-active");
+  siteNav.classList.remove("game-active");
+});
+
 function setChatOpen(isOpen) {
   siteChat.classList.toggle("open", isOpen);
+  floatChatBtn.classList.toggle("open", isOpen);
+  homeChatBtn.classList.toggle("open", isOpen);
   chatToggle.classList.toggle("open", isOpen);
+  hudChatBtn.classList.toggle("open", isOpen);
   chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
-  chatToggle.title = isOpen ? "Close chat" : "Open chat";
   document.dispatchEvent(new CustomEvent("siteChatToggled", { detail: { open: isOpen } }));
   if (isOpen) {
+    floatChatBtn.classList.remove("has-unread");
+    homeChatBtn.classList.remove("has-unread");
     chatToggle.classList.remove("has-unread");
+    hudChatBtn.classList.remove("has-unread");
     updateChatPanelState();
     updateActiveUsersFromBadges();
-    if (hasChatIdentity()) {
-      chatInput.focus();
-    } else {
-      showChatSetup();
-    }
+    if (hasChatIdentity()) { chatInput.focus(); } else { showChatSetup(); }
   }
 }
 
+floatChatBtn.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
+homeChatBtn.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
 chatToggle.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
+const hudChatBtn = document.getElementById("hudChatBtn");
+hudChatBtn.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
 chatCloseBtn.addEventListener("click", () => setChatOpen(false));
 pendingCloseChat?.addEventListener("click", () => setChatOpen(false));
+
+const chatSetupCloseBtn = document.getElementById("chatSetupCloseBtn");
+chatSetupCloseBtn?.addEventListener("click", () => setChatOpen(false));
+chatSetup?.addEventListener("click", (e) => { if (e.target === chatSetup) setChatOpen(false); });
 
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -1437,249 +1117,73 @@ chatForm.addEventListener("submit", (event) => {
   document.dispatchEvent(new CustomEvent("siteChatSubmit"));
 });
 
-// ─── RENAME MODAL ────────────────────────────────────────
 chatRenameBtn?.addEventListener("click", () => {
   renameInput.value = chatAuthState.profile?.name || "";
   renameModalError.textContent = "";
   renameModalBackdrop.classList.add("show");
   setTimeout(() => { renameInput.focus(); renameInput.select(); }, 60);
 });
-
-renameModalCancel.addEventListener("click", () => {
-  renameModalBackdrop.classList.remove("show");
-  renameModalError.textContent = "";
-});
-
+renameModalCancel.addEventListener("click", () => { renameModalBackdrop.classList.remove("show"); renameModalError.textContent = ""; });
 renameModalConfirm.addEventListener("click", () => {
-  const newName = renameInput.value.trim().slice(0, 24);
+  const newName = renameInput.value.trim().slice(0,24);
   if (!newName) { renameModalError.textContent = "Enter a name."; return; }
   renameModalError.textContent = "";
   renameModalConfirm.disabled = true;
   renameModalConfirm.textContent = "Saving...";
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
-    detail: { action: "change-name", name: newName }
-  }));
-  // Result handled by auth status event
-  setTimeout(() => {
-    renameModalConfirm.disabled = false;
-    renameModalConfirm.textContent = "Save Name";
-  }, 2000);
+  document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: "change-name", name: newName } }));
+  setTimeout(() => { renameModalConfirm.disabled = false; renameModalConfirm.textContent = "Save Name"; }, 2000);
 });
-
-renameInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { e.preventDefault(); renameModalConfirm.click(); }
-  if (e.key === "Escape") renameModalCancel.click();
-});
+renameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); renameModalConfirm.click(); } if (e.key === "Escape") renameModalCancel.click(); });
 
 document.addEventListener("siteChatAuthStatus", (event) => {
   const msg = event.detail?.message || "";
   const isError = event.detail?.isError;
   chatSetupError.textContent = msg;
   chatSetupError.classList.toggle("ok", !isError);
-  // If it's a name change response, show in rename modal too
   if (renameModalBackdrop.classList.contains("show")) {
     renameModalError.textContent = msg;
     renameModalError.style.color = isError ? "#fecaca" : "#bbf7d0";
-    if (!isError && msg) {
-      setTimeout(() => renameModalBackdrop.classList.remove("show"), 900);
-    }
+    if (!isError && msg) setTimeout(() => renameModalBackdrop.classList.remove("show"), 900);
   }
 });
 
-// ─── DENY MODAL ──────────────────────────────────────────
-denyModalCancel.addEventListener("click", () => {
-  denyModalBackdrop.classList.remove("show");
-  pendingDenyUid = null;
-  denyReasonInput.value = "";
-});
-
+denyModalCancel.addEventListener("click", () => { denyModalBackdrop.classList.remove("show"); pendingDenyUid = null; denyReasonInput.value = ""; });
 denyModalConfirm.addEventListener("click", () => {
   const reason = denyReasonInput.value.trim();
-  if (!reason) {
-    denyReasonInput.style.borderColor = "rgba(239,68,68,0.8)";
-    denyReasonInput.focus();
-    setTimeout(() => denyReasonInput.style.borderColor = "", 1200);
-    return;
-  }
-  if (!pendingDenyUid) return;
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
-    detail: { action: "deny-request", uid: pendingDenyUid, reason }
-  }));
+  if (!reason) { denyReasonInput.style.borderColor = "rgba(239,68,68,0.8)"; denyReasonInput.focus(); return; }
+  denyReasonInput.style.borderColor = "";
+  document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: "deny", uid: pendingDenyUid, reason } }));
   denyModalBackdrop.classList.remove("show");
   pendingDenyUid = null;
   denyReasonInput.value = "";
 });
 
-// ─── APPROVAL REQUESTS (admin) ────────────────────────────
-document.addEventListener("siteApprovalRequestsChanged", (event) => {
-  const requests = event.detail?.requests || [];
-  const pending = requests.filter(r => r.status === "pending");
-  approvalCount.textContent = pending.length;
-  approvalCount.style.background = pending.length > 0 ? "#f59e0b" : "rgba(148,163,184,0.3)";
-  approvalCount.style.color = pending.length > 0 ? "#000" : "#94a3b8";
-
-  if (pending.length === 0) {
-    approvalList.innerHTML = '<div class="approval-empty">No pending requests.</div>';
-    return;
+document.addEventListener("siteChatNewMessage", () => {
+  if (!siteChat.classList.contains("open")) {
+    floatChatBtn.classList.add("has-unread");
+    homeChatBtn.classList.add("has-unread");
+    chatToggle.classList.add("has-unread");
+    hudChatBtn.classList.add("has-unread");
   }
-
-  approvalList.innerHTML = "";
-  pending.forEach(req => {
-    const card = document.createElement("div");
-    card.className = "approval-request-card";
-    const timeStr = req.submittedAt
-      ? new Intl.DateTimeFormat([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(req.submittedAt))
-      : "Unknown time";
-
-    // Build the card
-    const info = document.createElement("div");
-    info.className = "approval-request-info";
-    info.innerHTML = `
-      <div class="approval-req-email">${escapeHtml(req.email || "")}</div>
-      <div class="approval-req-meta">
-        <span class="approval-req-name">${escapeHtml(req.name || "")}</span>
-        <span class="approval-req-school">${escapeHtml(req.school || "")}</span>
-        <span class="approval-req-time">${timeStr}</span>
-      </div>
-    `;
-
-    // Room override select
-    const roomSelect = document.createElement("select");
-    roomSelect.className = "approval-room-select";
-    roomSelect.setAttribute("aria-label", "Assign to room");
-    [["high","High School"],["middle","Middle School"],["elementary","Elementary School"]].forEach(([val, label]) => {
-      const opt = document.createElement("option");
-      opt.value = val;
-      opt.textContent = label;
-      // Pre-select based on requested school
-      if (
-        (req.school === "High School" && val === "high") ||
-        (req.school === "Middle School" && val === "middle") ||
-        (req.school === "Elementary School" && val === "elementary")
-      ) opt.selected = true;
-      roomSelect.appendChild(opt);
-    });
-
-    const actions = document.createElement("div");
-    actions.className = "approval-actions";
-
-    const approveBtn = document.createElement("button");
-    approveBtn.className = "approval-btn approval-btn-approve";
-    approveBtn.type = "button";
-    approveBtn.dataset.uid = req.uid;
-    approveBtn.textContent = "✓ Approve";
-
-    const denyBtn = document.createElement("button");
-    denyBtn.className = "approval-btn approval-btn-deny";
-    denyBtn.type = "button";
-    denyBtn.dataset.uid = req.uid;
-    denyBtn.textContent = "✗ Deny";
-
-    actions.append(approveBtn, denyBtn);
-    card.append(info, roomSelect, actions);
-
-    approveBtn.addEventListener("click", () => {
-      const roomValToSchool = { high: "High School", middle: "Middle School", elementary: "Elementary School" };
-      const targetSchool = roomValToSchool[roomSelect.value] || req.school;
-      document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
-        detail: { action: "approve-request", uid: req.uid, targetSchool }
-      }));
-    });
-
-    denyBtn.addEventListener("click", () => {
-      pendingDenyUid = req.uid;
-      denyReasonInput.value = "";
-      denyModalBackdrop.classList.add("show");
-      setTimeout(() => denyReasonInput.focus(), 50);
-    });
-
-    approvalList.appendChild(card);
-  });
 });
 
-function escapeHtml(str) {
-  return String(str || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
-
-// ─── REQUEST VERIFY BUTTON ───────────────────────────────
-requestVerifyBtn?.addEventListener("click", () => {
-  const name = cleanChatName(chatAuthState.profile?.name || localStorage.getItem(CHAT_NAME_KEY));
-  const school = chatAuthState.profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "";
-  if (!name || !school) {
-    chatSetupError.textContent = "Your profile is incomplete. Sign out and sign in again.";
-    return;
-  }
-  chatSetupError.textContent = "Submitting request...";
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
-    detail: { action: "request-approval", name, school }
-  }));
-});
-
-// ─── AUTH EVENT LISTENERS ─────────────────────────────────
-document.addEventListener("siteChatNotify", (event) => {
-  if (!siteChat.classList.contains("open")) chatToggle.classList.add("has-unread");
-  showChatToast(event.detail?.name, event.detail?.text, event.detail?.room);
-});
-
-document.addEventListener("siteChatNeedsIdentity", () => {
-  setChatOpen(true);
-  showChatSetup();
-});
-
-document.addEventListener("siteActiveUsersChanged", (event) => {
-  latestFirebaseActiveUsers = event.detail?.total || 0;
-  updateActiveUsers(latestFirebaseActiveUsers);
-});
-
-document.addEventListener("siteChatAuthChanged", (event) => {
-  chatAuthState = {
-    user: event.detail?.user || null,
-    profile: event.detail?.profile || null,
-    isAdmin: Boolean(event.detail?.isAdmin),
-    approvalStatus: event.detail?.approvalStatus || null,
-    denyReason: event.detail?.denyReason || null
-  };
-  syncChatIdentity();
-});
-
-chatSignOut.addEventListener("click", () => {
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: "signout" } }));
-});
-
-// ─── PANEL STATE ─────────────────────────────────────────
 function updateChatPanelState() {
   const profile = chatAuthState.profile;
-  const timeoutUntil = Number(profile?.timeoutUntil || 0);
-  const isTimedOut = timeoutUntil > Date.now();
+  const timeoutUntil = profile?.timeoutUntil;
+  const isTimedOut = timeoutUntil && new Date(timeoutUntil) > new Date();
   const canChat = CHAT_ENABLED && hasChatIdentity() && !profile?.banned && !isTimedOut;
-
   chatInput.disabled = !canChat;
   chatSend.disabled = !canChat;
   chatRoomSelect.disabled = !canChat;
-
-  if (!CHAT_ENABLED && !chatAuthState.isAdmin) {
-    chatInput.placeholder = "Chat Disabled";
-    chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming september (maybe)</div>';
-    return;
-  }
+  if (!CHAT_ENABLED && !chatAuthState.isAdmin) { chatInput.placeholder = "Chat Disabled"; chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming september (maybe)</div>'; return; }
   if (profile?.banned) { chatInput.placeholder = "Banned from chat"; return; }
-  if (isTimedOut) { chatInput.placeholder = `Timed out until ${new Date(timeoutUntil).toLocaleTimeString([], { hour:"numeric", minute:"2-digit" })}`; return; }
+  if (isTimedOut) { chatInput.placeholder = "Timed out until " + new Date(timeoutUntil).toLocaleTimeString([], { hour:"numeric", minute:"2-digit" }); return; }
   if (!hasChatIdentity()) { chatInput.placeholder = "Sign in to chat"; return; }
   chatInput.placeholder = "Message everyone...";
 }
 
-function cleanChatName(value) {
-  return String(value || "").replace(/\s+/g," ").trim().slice(0,24);
-}
-
-function hasChatIdentity() {
-  return Boolean(
-    chatAuthState.user &&
-    chatAuthState.profile?.approved &&
-    cleanChatName(chatAuthState.profile.name) &&
-    chatAuthState.profile.school
-  );
-}
+function cleanChatName(value) { return String(value || "").replace(/\s+/g," ").trim().slice(0,24); }
+function hasChatIdentity() { return Boolean(chatAuthState.user && chatAuthState.profile?.approved && cleanChatName(chatAuthState.profile.name) && chatAuthState.profile.school); }
 
 function syncChatIdentity() {
   const profile = chatAuthState.profile;
@@ -1687,38 +1191,24 @@ function syncChatIdentity() {
   const school = profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "";
   const isAdmin = chatAuthState.isAdmin;
   const isReady = hasChatIdentity();
-
-  chatLockedName.textContent = chatAuthState.user?.email
-    ? `${name || "Not set"} — ${chatAuthState.user.email}`
-    : name || "Not signed in";
+  chatLockedName.textContent = chatAuthState.user?.email ? (name || "Not set") + " \u2014 " + chatAuthState.user.email : name || "Not signed in";
   chatLockedRoom.textContent = roomNameFromSchool(school);
   chatIdentitySummary.classList.toggle("locked", isReady || isAdmin);
   chatAdminBadge.classList.toggle("show", isAdmin);
   siteChat.classList.toggle("admin-mode", isAdmin);
   chatSetup.classList.toggle("show", !isReady && !isAdmin);
   chatSetup.setAttribute("aria-hidden", (isReady || isAdmin) ? "true" : "false");
-
-  // Show rename button only for approved non-admin users
   if (chatRenameBtn) chatRenameBtn.style.display = (isReady && !isAdmin) ? "" : "none";
-
-  if (isAdmin) {
-    adminApprovalSection.style.display = "block";
-  } else {
-    adminApprovalSection.style.display = "none";
-  }
-
-  if (!chatAuthState.user) {
-    setChatAuthScreen("choice");
-  } else if (isAdmin || isReady) {
-    // no setup panel
-  } else {
+  adminApprovalSection.style.display = isAdmin ? "block" : "none";
+  if (!chatAuthState.user) { setChatAuthScreen("choice"); }
+  else if (isAdmin || isReady) {}
+  else {
     const status = chatAuthState.approvalStatus;
     if (status === "pending") setChatAuthScreen("pending");
     else if (status === "denied") { deniedReasonText.textContent = chatAuthState.denyReason || "No reason provided."; setChatAuthScreen("denied"); }
     else if (status === "none") setChatAuthScreen("request-verify");
     else setChatAuthScreen("choice");
   }
-
   if (chatRoomSelect && isAdmin && chatRoomSelect.value === "") chatRoomSelect.value = "high";
   updateChatPanelState();
   document.dispatchEvent(new CustomEvent("siteChatIdentityChanged", { detail: { name, school, isAdmin } }));
@@ -1744,34 +1234,17 @@ function showChatSetup() {
 
 function setChatAuthScreen(screen) {
   chatAuthScreen = screen || "choice";
-  document.querySelectorAll("[data-auth-screen]").forEach((panel) => {
-    panel.classList.toggle("active", panel.dataset.authScreen === chatAuthScreen);
-  });
+  document.querySelectorAll("[data-auth-screen]").forEach((panel) => { panel.classList.toggle("active", panel.dataset.authScreen === chatAuthScreen); });
   chatSetupError.textContent = "";
 }
 
-document.querySelectorAll("[data-auth-mode]").forEach((button) => {
-  button.addEventListener("click", () => setChatAuthScreen(button.dataset.authMode));
-});
-
-document.querySelectorAll("button[type='button'][data-auth-action]").forEach((button) => {
-  button.addEventListener("click", () => {
-    chatSetupError.textContent = "";
-    document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: button.dataset.authAction } }));
-  });
-});
-
-document.querySelectorAll(".school-option").forEach((button) => {
-  button.addEventListener("click", () => setSelectedSchool(button.dataset.school));
-});
+document.querySelectorAll("[data-auth-mode]").forEach((button) => { button.addEventListener("click", () => setChatAuthScreen(button.dataset.authMode)); });
+document.querySelectorAll("button[type='button'][data-auth-action]").forEach((button) => { button.addEventListener("click", () => { chatSetupError.textContent = ""; document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: button.dataset.authAction } })); }); });
+document.querySelectorAll(".school-option").forEach((button) => { button.addEventListener("click", () => setSelectedSchool(button.dataset.school)); });
 
 function setSelectedSchool(school) {
   selectedSchool = school;
-  document.querySelectorAll(".school-option").forEach((option) => {
-    const isSelected = option.dataset.school === school;
-    option.classList.toggle("selected", isSelected);
-    option.setAttribute("aria-pressed", isSelected ? "true" : "false");
-  });
+  document.querySelectorAll(".school-option").forEach((option) => { const isSelected = option.dataset.school === school; option.classList.toggle("selected", isSelected); option.setAttribute("aria-pressed", isSelected ? "true" : "false"); });
 }
 
 chatSetupForm.addEventListener("submit", (event) => {
@@ -1785,12 +1258,9 @@ chatSetupForm.addEventListener("submit", (event) => {
   if (isSignup && !name) { chatSetupError.textContent = "Enter a display name."; return; }
   if (isSignup && !selectedSchool) { chatSetupError.textContent = "Pick your school level."; return; }
   chatSetupError.textContent = isSignup ? "Submitting request..." : "Logging in...";
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", {
-    detail: { action, email, password, name, school: isSignup ? selectedSchool : "" }
-  }));
+  document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action, email, password, name, school: isSignup ? selectedSchool : "" } }));
 });
 
-// ─── TOAST ────────────────────────────────────────────────
 function showChatToast(name, text, room) {
   const stack = document.getElementById("chatToastStack");
   if (!stack || siteChat.classList.contains("open")) return;
@@ -1798,7 +1268,7 @@ function showChatToast(name, text, room) {
   toast.className = "chat-toast";
   const toastName = document.createElement("div");
   toastName.className = "toast-name";
-  toastName.textContent = `${cleanChatName(name) || "Someone"} — ${room || "Chat"}`;
+  toastName.textContent = (cleanChatName(name) || "Someone") + " \u2014 " + (room || "Chat");
   const toastText = document.createElement("div");
   toastText.className = "toast-text";
   toastText.textContent = String(text || "").slice(0,120);
@@ -1808,38 +1278,32 @@ function showChatToast(name, text, room) {
   setTimeout(() => { toast.classList.add("hide"); setTimeout(() => toast.remove(), 220); }, 4200);
 }
 
-// ─── ACTIVE USERS ─────────────────────────────────────────
 function updateActiveUsersFromBadges() {
-  const total = [...document.querySelectorAll("[data-player-count-for]")]
-    .reduce((sum, badge) => sum + (Number.parseInt(badge.textContent,10) || 0), 0);
+  const total = [...document.querySelectorAll("[data-player-count-for]")].reduce((sum, badge) => sum + (Number.parseInt(badge.textContent,10) || 0), 0);
   if (total > 0 || latestFirebaseActiveUsers === null) updateActiveUsers(total);
 }
-
 function updateActiveUsers(total) {
-  chatActiveUsers.textContent = `${total} active`;
-  chatActiveUsers.title = `${total} active user${total===1?"":"s"} across games`;
+  chatActiveUsers.textContent = total + " active";
+  chatActiveUsers.title = total + " active user" + (total===1?"":"s") + " across games";
 }
 
 const activeUsersObserver = new MutationObserver(updateActiveUsersFromBadges);
 activeUsersObserver.observe(tabsMain, { childList:true, subtree:true, characterData:true });
 activeUsersObserver.observe(tabsMore, { childList:true, subtree:true, characterData:true });
 
-// ─── PLAYER COUNT → LAUNCHER ROWS ────────────────────────
 const launcherPlayerObserver = new MutationObserver(() => {
   document.querySelectorAll("[data-player-count-for]").forEach(badge => {
     const n = parseInt(badge.textContent, 10) || 0;
     const gameName = badge.dataset.playerCountFor;
-    const playerEl = launcherList?.querySelector(`[data-players-for="${CSS.escape(gameName)}"]`);
-    if (playerEl) {
-      playerEl.textContent = n > 0 ? `${n} playing` : "";
-      playerEl.classList.toggle("has-players", n > 0);
-    }
+    const cardPlayers = gameGrid?.querySelector('[data-players-for="' + CSS.escape(gameName) + '"]');
+    if (cardPlayers) { cardPlayers.textContent = n > 0 ? n + " playing" : ""; cardPlayers.classList.toggle("has-players", n > 0); }
+    const rowPlayers = launcherList?.querySelector('[data-players-for="' + CSS.escape(gameName) + '"]');
+    if (rowPlayers) { rowPlayers.textContent = n > 0 ? n + " playing" : ""; rowPlayers.classList.toggle("has-players", n > 0); }
   });
 });
-if (tabsMain) launcherPlayerObserver.observe(tabsMain, { subtree: true, characterData: true, childList: true });
-if (tabsMore) launcherPlayerObserver.observe(tabsMore, { subtree: true, characterData: true, childList: true });
+if (tabsMain) launcherPlayerObserver.observe(tabsMain, { subtree:true, characterData:true, childList:true });
+if (tabsMore) launcherPlayerObserver.observe(tabsMore, { subtree:true, characterData:true, childList:true });
 
-/* POPUP LOGIC */
 const emailPopup = document.getElementById("emailPopup");
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
@@ -1851,17 +1315,12 @@ if (!localStorage.getItem("email_prompt_dismissed")) {
     let count = 5;
     const timer = setInterval(() => {
       count--;
-      if (count > 0) { noBtn.textContent = `No (${count})`; }
-      else { noBtn.textContent = "No"; noBtn.disabled = false; clearInterval(timer); }
+      if (count > 0) { noBtn.textContent = "No thanks (" + count + ")"; }
+      else { noBtn.textContent = "No thanks"; noBtn.disabled = false; clearInterval(timer); }
     }, 1000);
   }, 500);
 }
-
-function dismiss() {
-  emailPopup.classList.remove("active");
-  localStorage.setItem("email_prompt_dismissed","true");
-}
-
+function dismiss() { emailPopup.classList.remove("active"); localStorage.setItem("email_prompt_dismissed","true"); }
 yesBtn.onclick = () => { window.open(FORM_LINK,"_blank"); dismiss(); };
 noBtn.onclick = dismiss;
 
