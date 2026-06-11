@@ -16,15 +16,18 @@ window.PAGES = {
   },
   
   "Basket Bros": { 
-    "url": "https://vexacloud-assets.github.io/basket-bros/"
+    "url": "https://vexacloud-assets.github.io/basket-bros/",
+    "cover": "basketbros.png"
   },
 
   "Paper.io": { 
-    "url": "https://script.google.com/macros/s/AKfycbwNxCzUuQVmLRWTwYK2D4yTqpWg2O-qge8BwCkxhLmqWd1DtXynwJXPEDClPt7ERZr-/exec"
+    "url": "https://script.google.com/macros/s/AKfycbwNxCzUuQVmLRWTwYK2D4yTqpWg2O-qge8BwCkxhLmqWd1DtXynwJXPEDClPt7ERZr-/exec",
+    "cover": "paperio.jpg"
   },
 
   "Drift Hunters": { 
     "url": "https://script.google.com/macros/s/AKfycbw8iHPqdVFEzquUYbNxFVAu1Tw4Nri5SWMRLdP_c7a84vCOHVG7YUWuhjSVptg1SVHr/exec",
+    "cover": "drifthunters.png",
     "ribbon": "New",
     "ribbonColor": "#FF77FF"
   },
@@ -42,7 +45,8 @@ window.PAGES = {
   },
   
   "Subway Surfers": { 
-    "url": "https://arcadeclash.github.io/subway-surfers-unblocked/" 
+    "url": "https://arcadeclash.github.io/subway-surfers-unblocked/",
+    "cover": "subwaysurfers.png"
   },
 
   "Slow Roads": { 
@@ -50,11 +54,13 @@ window.PAGES = {
   },
 
   "Fishing.io": { 
-    "url": "https://script.google.com/macros/s/AKfycbzZJhJIeHFv_-I9PXF5xA-MA115srBLxJu4hxtMP4z0hGHSBcMzBNydUT5UxfmhSNQq/exec"
+    "url": "https://script.google.com/macros/s/AKfycbzZJhJIeHFv_-I9PXF5xA-MA115srBLxJu4hxtMP4z0hGHSBcMzBNydUT5UxfmhSNQq/exec",
+    "cover": "fishingio.jpg"
   },
   
   "Moto X3M 2": { 
-    "url": "https://newnewnewnewtab.github.io/Moto-X3M-2/" 
+    "url": "https://newnewnewnewtab.github.io/Moto-X3M-2/",
+    "cover": "motox3m2.png"
   },
 
   "Gunspin": {
@@ -64,6 +70,7 @@ window.PAGES = {
 
   "Dig Out Of Prison": { 
     "url": "https://script.google.com/macros/s/AKfycby-5VSTOBeep9g9GU9un8CLFOo4TvTSmahbVEGqze-hX-iVmuLUtIyx6WAj2wvOYQeb/exec",
+    "cover": "digoutofprison.png",
     "ribbon": "Popular",
     "ribbonColor": "#EFBF04"
   },
