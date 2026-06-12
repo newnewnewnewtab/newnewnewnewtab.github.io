@@ -50,7 +50,8 @@ window.PAGES = {
   },
 
   "Slow Roads": { 
-    "url": "https://script.google.com/macros/s/AKfycbzqDA2SnuVZ3DRelxxbUxSV9Z1RJz_gQfDRx06WUpgppWgrdDEErtZ1Lev9O6j2w9ioBQ/exec"
+    "url": "https://script.google.com/macros/s/AKfycbzqDA2SnuVZ3DRelxxbUxSV9Z1RJz_gQfDRx06WUpgppWgrdDEErtZ1Lev9O6j2w9ioBQ/exec",
+    "cover": "slowroads.jpg"
   },
 
   "Fishing.io": { 
@@ -63,6 +64,13 @@ window.PAGES = {
     "cover": "motox3m2.png"
   },
 
+  "Angry Birds": { 
+    "url": "https://script.google.com/macros/s/AKfycby30nrhMSPeJyfgpPQfLsVVhOxjjyErkIsQtoYAzPkRYenYcSBpVyMcOwXy_flMCjFm/exec",
+    "cover": "angrybirds.png",
+    "ribbon": "New",
+    "ribbonColor": "#7FFFD4"
+  },
+  
   "Gunspin": {
     "url": "https://newnewnewnewtab.github.io/Gunspin/",
     "cover": "gunspin.png"
@@ -81,11 +89,13 @@ window.PAGES = {
   },
 
   "Police Pursuit 2 ": { 
-    "url": "https://vaxtangi1980.github.io/purssssss/"
+    "url": "https://vaxtangi1980.github.io/purssssss/",
+    "cover": "policepursuit2.jpg"
   },
   
   "Rocket League 3D": { 
-    "url": "https://newnewnewnewtab.github.io/RL3D/" 
+    "url": "https://newnewnewnewtab.github.io/RL3D/",
+    "cover": "rocketleague.jpg"
   },
   
   "Slots": { 
@@ -122,7 +132,8 @@ window.PAGES = {
   },
 
   "Five Nights at Epsteins": { 
-    "url": "https://newnewnewnewtab.github.io/FNAE-4-1-26/"
+    "url": "https://newnewnewnewtab.github.io/FNAE-4-1-26/",
+    "cover": "fnae.png"
   }
   
 };
