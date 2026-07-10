@@ -361,83 +361,29 @@ body.game-active .float-btn-chat { display: none; }
 body.game-active #viewer { opacity: 1; pointer-events: all; }
 
 /* === CHAT PANEL === */
-.site-chat { position: fixed; inset: 0 0 0 auto; width: min(34vw,460px); min-width: 330px; max-width: 100vw; background: radial-gradient(circle at 20% 0%,rgba(20,184,166,0.07),transparent 34%), linear-gradient(180deg,rgba(17,24,39,0.99),rgba(2,6,23,0.99)); border-left: 1px solid rgba(125,211,252,0.13); box-shadow: -24px 0 64px rgba(0,0,0,0.5); backdrop-filter: blur(18px); display: grid; grid-template-rows: auto 1fr auto; transform: translateX(100%); transition: transform 0.32s var(--ease-spring); z-index: 1700; }
+.site-chat { position: fixed; inset: 0 0 0 auto; width: min(34vw,460px); min-width: 330px; max-width: 100vw; background: radial-gradient(circle at 12% 0%,rgba(20,184,166,0.1),transparent 30%), radial-gradient(circle at 88% 14%,rgba(56,189,248,0.08),transparent 28%), linear-gradient(180deg,rgba(17,24,39,0.99),rgba(2,6,23,0.99)); border-left: 1px solid rgba(125,211,252,0.15); box-shadow: -24px 0 64px rgba(0,0,0,0.5); backdrop-filter: blur(18px); display: grid; grid-template-rows: auto 1fr auto; transform: translateX(100%); transition: transform 0.32s var(--ease-spring); z-index: 1700; }
 .site-chat.open { transform: translateX(0); }
-.site-chat.admin-mode.open { inset: 0; width: 100vw; min-width: 0; border-left: none; }
-.site-chat.admin-mode { grid-template-rows: auto auto 1fr auto; }
-.chat-header { padding: 18px 18px 14px; border-bottom: 1px solid rgba(148,163,184,0.09); }
+.chat-header { padding: 18px 18px 14px; border-bottom: 1px solid rgba(148,163,184,0.1); }
 .chat-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.chat-title { font-size: 16px; font-weight: 900; letter-spacing: -0.3px; }
+.chat-title { font-size: 17px; font-weight: 900; letter-spacing: 0; }
 .chat-header-actions { display: flex; align-items: center; gap: 8px; }
 .chat-close-btn { width: 28px; height: 28px; border: none; background: rgba(255,255,255,0.07); color: var(--text); font-size: 16px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .chat-close-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
 .active-users { border: 1px solid rgba(74,222,128,0.28); border-radius: 100px; padding: 4px 10px; color: #dcfce7; background: rgba(22,101,52,0.16); font-size: 11px; font-weight: 800; white-space: nowrap; }
-.chat-profile { display: grid; gap: 6px; }
-.identity-summary { display: none; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid rgba(125,211,252,0.13); border-radius: 11px; background: linear-gradient(135deg,rgba(8,47,73,0.22),rgba(15,23,42,0.6)); }
-.identity-summary.locked { display: grid; }
+.chat-room-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; padding: 4px; border: 1px solid rgba(125,211,252,0.12); border-radius: 13px; background: rgba(2,6,23,0.48); }
+.chat-room-tab { min-width: 0; height: 36px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: #94a3b8; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s; }
+.chat-room-tab:hover { color: #e0f2fe; background: rgba(56,189,248,0.08); }
+.chat-room-tab.active { color: #031018; background: linear-gradient(135deg,#67e8f9,#38bdf8); border-color: rgba(255,255,255,0.18); box-shadow: 0 6px 18px rgba(56,189,248,0.18); }
+.chat-profile { margin-top: 10px; }
+.identity-summary { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid rgba(125,211,252,0.13); border-radius: 11px; background: linear-gradient(135deg,rgba(8,47,73,0.24),rgba(15,23,42,0.66)); }
 .identity-main { min-width: 0; }
 .identity-label { color: var(--muted); font-size: 9px; font-weight: 900; text-transform: uppercase; }
-.identity-name { color: #f8fafc; font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.identity-room { border: 1px solid rgba(45,212,191,0.3); border-radius: 100px; padding: 3px 9px; color: #ccfbf1; background: rgba(13,148,136,0.13); font-size: 10px; font-weight: 900; white-space: nowrap; display: inline-block; margin-top: 3px; }
-.identity-actions { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-.admin-badge { display: none; border: 1px solid rgba(250,204,21,0.42); border-radius: 100px; padding: 3px 9px; color: #fef9c3; background: rgba(161,98,7,0.18); font-size: 10px; font-weight: 900; white-space: nowrap; }
-.admin-badge.show { display: inline-flex; }
-.identity-signout { height: 27px; border: 1px solid rgba(148,163,184,0.18); border-radius: 100px; background: rgba(15,23,42,0.7); color: #e2e8f0; cursor: pointer; font: inherit; font-size: 10px; font-weight: 800; padding: 0 10px; transition: all 0.18s; }
-.identity-signout:hover { border-color: rgba(125,211,252,0.42); color: #fff; }
-.identity-rename-btn { height: 27px; border: 1px solid rgba(56,189,248,0.22); border-radius: 100px; background: rgba(8,47,73,0.32); color: #bae6fd; cursor: pointer; font: inherit; font-size: 10px; font-weight: 800; padding: 0 10px; transition: all 0.18s; }
-.identity-rename-btn:hover { border-color: rgba(56,189,248,0.52); color: #e0f9ff; }
-
+.identity-name { color: #f8fafc; font-size: 13px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.identity-room { border: 1px solid rgba(45,212,191,0.3); border-radius: 100px; padding: 3px 9px; color: #ccfbf1; background: rgba(13,148,136,0.13); font-size: 10px; font-weight: 900; white-space: nowrap; }
 .chat-messages { min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: rgba(56,189,248,0.1) transparent; }
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.14); border-radius: 99px; }
-.chat-messages.admin-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; gap: 10px; padding: 12px; }
-.admin-room-panel { min-height: 0; display: grid; grid-template-rows: auto 1fr; border: 1px solid rgba(125,211,252,0.13); border-radius: 11px; overflow: hidden; background: rgba(15,23,42,0.42); }
-.admin-room-title { padding: 9px 11px; border-bottom: 1px solid rgba(148,163,184,0.09); color: #e0f2fe; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
-.admin-room-messages { min-height: 0; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; }
-.admin-room-messages .chat-message { max-width: 100%; }
-
-#adminApprovalSection { padding: 10px 14px 0; flex-shrink: 0; animation: slideDown 0.28s var(--ease-spring); }
-@keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-.admin-approval-panel { border: 1px solid rgba(250,204,21,0.18); border-radius: 12px; background: rgba(10,8,0,0.5); overflow: hidden; }
-.admin-approval-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 13px; border-bottom: 1px solid rgba(250,204,21,0.1); background: rgba(161,98,7,0.07); }
-.admin-approval-title { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.07em; color: #fef3c7; }
-.admin-approval-count { background: #f59e0b; color: #000; font-size: 10px; font-weight: 900; border-radius: 100px; padding: 2px 7px; min-width: 18px; text-align: center; }
-.admin-approval-list { padding: 6px; display: flex; flex-direction: column; gap: 5px; max-height: 220px; overflow-y: auto; scrollbar-width: thin; }
-.approval-request-card { padding: 10px; border: 1px solid rgba(148,163,184,0.1); border-radius: 9px; background: rgba(15,23,42,0.6); animation: cardIn 0.25s var(--ease-spring); }
-@keyframes cardIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-.approval-request-info { display: grid; gap: 2px; margin-bottom: 8px; }
-.approval-req-email { color: #bae6fd; font-size: 12px; font-weight: 700; font-family: 'Space Mono',monospace; }
-.approval-req-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.approval-req-name { color: #f8fafc; font-size: 11px; font-weight: 600; }
-.approval-req-school { font-size: 9px; font-weight: 900; text-transform: uppercase; border-radius: 100px; padding: 2px 7px; border: 1px solid rgba(45,212,191,0.28); color: #ccfbf1; background: rgba(13,148,136,0.13); }
-.approval-req-time { color: var(--muted); font-size: 9px; }
-.approval-room-select { width: 100%; height: 28px; margin-bottom: 7px; border: 1px solid rgba(125,211,252,0.16); border-radius: 7px; background: rgba(2,6,23,0.6); color: var(--text); outline: none; padding: 0 8px; font: inherit; font-size: 11px; font-weight: 700; transition: border-color 0.18s; }
-.approval-room-select:focus { border-color: rgba(56,189,248,0.42); }
-.approval-actions { display: flex; gap: 5px; }
-.approval-btn { flex: 1; height: 29px; border-radius: 7px; border: none; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; transition: transform 0.15s, background 0.15s; }
-.approval-btn:hover { transform: translateY(-1px); }
-.approval-btn-approve { background: #22c55e; color: #052e16; }
-.approval-btn-approve:hover { background: #4ade80; }
-.approval-btn-deny { background: rgba(239,68,68,0.13); border: 1px solid rgba(239,68,68,0.28); color: #fca5a5; }
-.approval-btn-deny:hover { background: rgba(239,68,68,0.25); }
-.approval-empty { padding: 14px; text-align: center; color: var(--muted); font-size: 12px; }
-
-.deny-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2200; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.22s, visibility 0.22s; }
-.deny-modal-backdrop.show { opacity: 1; visibility: visible; }
-.deny-modal { width: min(90vw,380px); border: 1px solid rgba(239,68,68,0.28); border-radius: 16px; background: linear-gradient(180deg,rgba(30,20,20,0.99),rgba(15,5,5,0.99)); padding: 22px; box-shadow: 0 24px 70px rgba(0,0,0,0.6); animation: modalIn 0.26s var(--ease-spring); }
-@keyframes modalIn { from{opacity:0;transform:scale(0.94) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-.deny-modal-title { font-size: 17px; font-weight: 900; margin: 0 0 5px; color: #fca5a5; }
-.deny-modal-sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
-.deny-modal-label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #cbd5e1; display: block; margin-bottom: 7px; }
-.deny-modal-textarea { width: 100%; min-height: 80px; resize: vertical; border: 1px solid rgba(239,68,68,0.26); border-radius: 9px; background: rgba(2,6,23,0.7); color: var(--text); font: inherit; font-size: 12px; padding: 9px 11px; outline: none; margin-bottom: 13px; }
-.deny-modal-textarea:focus { border-color: rgba(239,68,68,0.62); box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
-.deny-modal-actions { display: flex; gap: 9px; }
-.deny-modal-cancel { flex: 1; height: 38px; border: 1px solid rgba(148,163,184,0.18); border-radius: 9px; background: rgba(15,23,42,0.8); color: #e2e8f0; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px; transition: background 0.15s; }
-.deny-modal-cancel:hover { background: rgba(30,41,59,0.9); }
-.deny-modal-confirm { flex: 1; height: 38px; border: none; border-radius: 9px; background: #ef4444; color: #fff; cursor: pointer; font: inherit; font-weight: 800; font-size: 12px; transition: background 0.15s, transform 0.15s; }
-.deny-modal-confirm:hover { background: #f87171; transform: translateY(-1px); }
-
-.chat-empty { color: var(--muted); margin: auto; text-align: center; line-height: 1.5; max-width: 220px; font-size: 13px; }
+.chat-empty { color: var(--muted); margin: auto; text-align: center; line-height: 1.5; max-width: 240px; font-size: 13px; }
 .chat-disabled-notice { margin: auto; max-width: 280px; text-align: center; color: #fecaca; font-size: 24px; font-weight: 900; line-height: 1.12; text-transform: uppercase; }
 .chat-message { display: grid; gap: 5px; max-width: 92%; padding: 9px 12px; border: 1px solid rgba(148,163,184,0.09); border-radius: 13px 13px 13px 5px; background: rgba(30,41,59,0.62); box-shadow: 0 5px 16px rgba(0,0,0,0.1); animation: messageIn 0.22s ease-out; transition: transform 0.2s, box-shadow 0.2s; }
 .chat-message:hover { transform: translateY(-1px); box-shadow: 0 9px 22px rgba(0,0,0,0.16); }
@@ -446,70 +392,9 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 .message-author { display: inline-flex; align-items: center; min-width: 0; gap: 5px; }
 .message-name { color: #bae6fd; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .message-time { color: var(--muted); font-size: 10px; white-space: nowrap; }
-.message-email { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fef9c3; font-weight: 800; font-size: 10px; }
 .message-text { color: #f8fafc; overflow-wrap: anywhere; line-height: 1.4; font-size: 13px; }
-.message-edited { margin-top: -1px; color: rgba(203,213,225,0.52); font-size: 9px; font-weight: 800; }
-.message-admin-controls { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
-.message-admin-controls button { height: 22px; border: 1px solid rgba(125,211,252,0.16); border-radius: 100px; background: rgba(2,6,23,0.5); color: #dff6ff; cursor: pointer; font: inherit; font-size: 10px; font-weight: 900; padding: 0 8px; transition: all 0.15s; }
-.message-admin-controls button:hover { border-color: rgba(56,189,248,0.58); background: rgba(8,145,178,0.22); transform: translateY(-1px); }
 @keyframes messageIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-
-.chat-setup { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 18px; background: rgba(2,6,23,0.7); backdrop-filter: blur(16px); opacity: 0; visibility: hidden; transition: opacity 0.22s, visibility 0.22s; overflow-y: auto; }
-.chat-setup.show { opacity: 1; visibility: visible; }
-.chat-setup-panel { width: min(100%,360px); border: 1px solid rgba(148,163,184,0.18); border-radius: 15px; padding: 18px; background: linear-gradient(180deg,rgba(30,41,59,0.98),rgba(15,23,42,0.98)); box-shadow: 0 22px 66px rgba(0,0,0,0.48); animation: setupIn 0.26s var(--ease-spring); }
-@keyframes setupIn { from{opacity:0;transform:translateY(10px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
-.chat-auth-grid { display: grid; grid-template-columns: 1fr; gap: 9px; }
-.chat-auth-screen { display: none; }
-.chat-auth-screen.active { display: block; }
-.chat-mode-actions { display: grid; gap: 9px; margin-top: 14px; }
-.chat-back-btn { height: 28px; margin: 0 0 9px; border: none; background: transparent; color: #bae6fd; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; padding: 0; text-align: left; }
-.chat-back-btn:hover { color: #fff; }
-.chat-setup-title { margin: 0 0 5px; font-size: 18px; font-weight: 900; }
-.chat-setup-copy { margin: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.45; }
-.chat-setup-label { display: block; margin: 12px 0 6px; color: #cbd5e1; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-.chat-setup-input { width: 100%; height: 40px; border: 1px solid rgba(148,163,184,0.2); border-radius: 9px; background: rgba(2,6,23,0.65); color: var(--text); outline: none; padding: 0 11px; font: inherit; font-size: 13px; transition: border-color 0.18s, box-shadow 0.18s; }
-.chat-setup-input:focus { border-color: rgba(56,189,248,0.58); box-shadow: 0 0 0 3px rgba(56,189,248,0.11); }
-.school-options { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
-.school-option { height: 36px; border: 1px solid rgba(148,163,184,0.16); border-radius: 9px; background: rgba(2,6,23,0.4); color: #cbd5e1; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; transition: transform 0.16s, border-color 0.16s, background 0.16s, color 0.16s; }
-.school-option:hover,.school-option.selected { transform: translateY(-1px); border-color: rgba(56,189,248,0.68); background: rgba(8,145,178,0.22); color: #f8fafc; }
-.chat-setup-submit { width: 100%; height: 40px; margin-top: 14px; border: none; border-radius: 9px; background: var(--accent); color: #031018; cursor: pointer; font: inherit; font-weight: 900; font-size: 13px; transition: transform 0.16s, background 0.16s; }
-.chat-setup-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-.chat-setup-submit.secondary { border: 1px solid rgba(125,211,252,0.25); background: rgba(2,6,23,0.7); color: #e0f2fe; }
-.chat-setup-submit.flush { margin-top: 0; }
-.chat-setup-submit:hover { transform: translateY(-1px); background: #67e8f9; }
-.chat-setup-submit.secondary:hover { background: rgba(8,145,178,0.2); }
-.chat-setup-error { min-height: 16px; margin-top: 7px; color: #fecaca; font-size: 11px; font-weight: 700; }
-.chat-setup-error.ok { color: #bbf7d0; }
-.chat-setup-panel { position: relative; }
-.chat-setup-close-btn { position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border: none; background: rgba(255,255,255,0.07); color: var(--muted-light); font-size: 14px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.18s, color 0.18s; }
-.chat-setup-close-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
-.pending-screen { text-align: center; padding: 8px 0; }
-.pending-anim-wrap { width: 66px; height: 66px; margin: 0 auto 16px; position: relative; }
-.pending-orbit { position: absolute; inset: 0; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--accent); animation: orbit 1.4s linear infinite; }
-.pending-orbit:nth-child(2) { inset: 8px; border-top-color: rgba(56,189,248,0.4); animation-duration: 2s; animation-direction: reverse; }
-.pending-orbit:nth-child(3) { inset: 18px; border-top-color: rgba(56,189,248,0.2); animation-duration: 2.8s; }
-@keyframes orbit { to{transform:rotate(360deg)} }
-.pending-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-.pending-title { font-size: 17px; font-weight: 900; margin-bottom: 7px; }
-.pending-copy { color: var(--muted); font-size: 12px; line-height: 1.5; margin-bottom: 14px; }
-.pending-note { font-size: 10px; color: rgba(148,163,184,0.62); line-height: 1.5; padding: 9px 12px; border: 1px solid rgba(148,163,184,0.1); border-radius: 9px; background: rgba(2,6,23,0.4); margin-bottom: 14px; text-align: left; }
-.pending-note strong { color: #e2e8f0; }
-.pending-actions { display: flex; flex-direction: column; gap: 7px; }
-.pending-close-btn { height: 38px; border: 1px solid rgba(125,211,252,0.14); border-radius: 9px; background: rgba(30,41,59,0.8); color: #e0f2fe; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px; transition: background 0.15s; }
-.pending-close-btn:hover { background: rgba(8,145,178,0.18); }
-.pending-check-btn { height: 38px; border: 1px solid rgba(56,189,248,0.22); border-radius: 9px; background: rgba(56,189,248,0.07); color: #bae6fd; cursor: pointer; font: inherit; font-weight: 700; font-size: 11px; transition: background 0.15s; }
-.pending-check-btn:hover { background: rgba(56,189,248,0.16); }
-.denied-banner { padding: 12px; border: 1px solid rgba(239,68,68,0.25); border-radius: 11px; background: rgba(30,5,5,0.52); margin-bottom: 14px; }
-.denied-reason-label { font-size: 9px; font-weight: 900; text-transform: uppercase; color: #f87171; margin-bottom: 5px; }
-.denied-reason-text { color: #fca5a5; font-size: 12px; line-height: 1.5; }
-.request-verify-screen { text-align: center; }
-.check-icon-wrap { width: 56px; height: 56px; margin: 0 auto 14px; background: rgba(56,189,248,0.09); border: 2px solid rgba(56,189,248,0.22); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; animation: iconPop 0.4s var(--ease-spring); }
-@keyframes iconPop { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
-
-.chat-form { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; padding: 12px 16px 16px; border-top: 1px solid rgba(148,163,184,0.08); background: rgba(2,6,23,0.65); }
-.chat-room-select { display: none; width: 140px; height: 42px; border: 1px solid rgba(125,211,252,0.16); border-radius: 11px; background: rgba(2,6,23,0.65); color: var(--text); outline: none; padding: 0 9px; font: inherit; font-size: 12px; font-weight: 800; transition: border-color 0.18s; }
-.chat-room-select:focus { border-color: rgba(56,189,248,0.42); }
-.site-chat.admin-mode .chat-room-select { display: block; }
+.chat-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px 16px 16px; border-top: 1px solid rgba(148,163,184,0.08); background: rgba(2,6,23,0.65); }
 .chat-input { height: 42px; padding: 0 11px; font-size: 13px; width: 100%; min-width: 0; border: 1px solid rgba(125,211,252,0.18); border-radius: 11px; background: rgba(2,6,23,0.65); color: var(--text); outline: none; font: inherit; transition: border-color 0.18s, box-shadow 0.18s; }
 .chat-input:focus { border-color: rgba(56,189,248,0.55); box-shadow: 0 0 0 3px rgba(56,189,248,0.1); }
 .chat-send { width: 44px; height: 42px; border: none; border-radius: 11px; background: linear-gradient(135deg,#67e8f9,#38bdf8); color: #031018; font-size: 20px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 16px rgba(56,189,248,0.16); transition: transform 0.16s, box-shadow 0.16s; }
@@ -524,31 +409,14 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 @keyframes toastIn { from{opacity:0;transform:translate(14px,7px) scale(0.96)} to{opacity:1;transform:translate(0,0) scale(1)} }
 @keyframes toastOut { to{opacity:0;transform:translate(10px,5px) scale(0.98)} }
 
-.rename-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); z-index: 2300; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.22s, visibility 0.22s; }
-.rename-modal-backdrop.show { opacity: 1; visibility: visible; }
-.rename-modal { width: min(90vw,360px); border: 1px solid rgba(56,189,248,0.25); border-radius: 15px; background: linear-gradient(180deg,rgba(8,20,40,0.99),rgba(2,8,20,0.99)); padding: 20px; box-shadow: 0 22px 60px rgba(0,0,0,0.55); animation: modalIn 0.26s var(--ease-spring); }
-.rename-modal-title { font-size: 16px; font-weight: 900; margin: 0 0 4px; color: #7dd3fc; }
-.rename-modal-sub { font-size: 11px; color: var(--muted); margin: 0 0 12px; }
-.rename-modal-label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #cbd5e1; display: block; margin-bottom: 6px; }
-.rename-modal-input { width: 100%; height: 38px; border: 1px solid rgba(56,189,248,0.2); border-radius: 9px; background: rgba(2,6,23,0.65); color: var(--text); font: inherit; font-size: 13px; padding: 0 11px; outline: none; margin-bottom: 12px; transition: border-color 0.18s, box-shadow 0.18s; }
-.rename-modal-input:focus { border-color: rgba(56,189,248,0.55); box-shadow: 0 0 0 3px rgba(56,189,248,0.1); }
-.rename-modal-error { min-height: 14px; color: #fecaca; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
-.rename-modal-actions { display: flex; gap: 8px; }
-.rename-modal-cancel { flex: 1; height: 36px; border: 1px solid rgba(148,163,184,0.16); border-radius: 8px; background: rgba(15,23,42,0.8); color: #e2e8f0; cursor: pointer; font: inherit; font-weight: 700; font-size: 12px; transition: background 0.15s; }
-.rename-modal-cancel:hover { background: rgba(30,41,59,0.9); }
-.rename-modal-confirm { flex: 1; height: 36px; border: none; border-radius: 8px; background: var(--accent); color: #031018; cursor: pointer; font: inherit; font-weight: 900; font-size: 12px; transition: background 0.15s, transform 0.15s; }
-.rename-modal-confirm:hover { background: #67e8f9; transform: translateY(-1px); }
-
 @media (max-width: 760px) {
   .homepage-inner { padding: 44px 18px 60px; }
   .home-header { margin-bottom: 28px; }
   .game-grid { grid-template-columns: repeat(auto-fill,minmax(148px,1fr)); gap: 8px; }
   .site-chat { width: min(94vw,420px); min-width: 0; }
-  .school-options { grid-template-columns: 1fr; }
   .identity-summary { grid-template-columns: 1fr; }
-  .chat-messages.admin-grid { grid-template-columns: 1fr; }
+  .chat-room-tabs { grid-template-columns: 1fr; }
   .chat-form { grid-template-columns: 1fr auto; }
-  .site-chat.admin-mode .chat-room-select { grid-column: 1/-1; width: 100%; }
   #gameHud { top: 10px; left: 10px; }
   #floatActions { bottom: 14px; right: 14px; }
 }
@@ -689,35 +557,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   </button>
 </div>
 
-<!-- RENAME MODAL -->
-<div id="renameModalBackdrop" class="rename-modal-backdrop" role="dialog" aria-modal="true">
-  <div class="rename-modal">
-    <h3 class="rename-modal-title">Change Display Name</h3>
-    <p class="rename-modal-sub">You can change your name once every 24 hours.</p>
-    <label class="rename-modal-label" for="renameInput">New name</label>
-    <input id="renameInput" class="rename-modal-input" type="text" maxlength="24" placeholder="Your display name..." autocomplete="off" />
-    <div id="renameModalError" class="rename-modal-error"></div>
-    <div class="rename-modal-actions">
-      <button class="rename-modal-cancel" type="button" id="renameModalCancel">Cancel</button>
-      <button class="rename-modal-confirm" type="button" id="renameModalConfirm">Save Name</button>
-    </div>
-  </div>
-</div>
-
-<!-- DENY MODAL -->
-<div id="denyModalBackdrop" class="deny-modal-backdrop" role="dialog" aria-modal="true">
-  <div class="deny-modal">
-    <h3 class="deny-modal-title">Deny Request</h3>
-    <p class="deny-modal-sub">Leave a note explaining why this account was denied.</p>
-    <label class="deny-modal-label" for="denyReasonInput">Reason (required)</label>
-    <textarea id="denyReasonInput" class="deny-modal-textarea" placeholder="e.g. Unrecognized email address..." maxlength="300"></textarea>
-    <div class="deny-modal-actions">
-      <button class="deny-modal-cancel" type="button" id="denyModalCancel">Cancel</button>
-      <button class="deny-modal-confirm" type="button" id="denyModalConfirm">Deny Account</button>
-    </div>
-  </div>
-</div>
-
 <!-- CHAT PANEL -->
 <aside id="siteChat" class="site-chat" aria-label="Site chat">
   <header class="chat-header">
@@ -728,115 +567,28 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
         <button id="chatCloseBtn" class="chat-close-btn" type="button" aria-label="Close chat">&#x2715;</button>
       </div>
     </div>
+    <div id="chatRoomTabs" class="chat-room-tabs" role="tablist" aria-label="Chat room">
+      <button class="chat-room-tab" type="button" data-chat-room="elementary" role="tab">Elementary</button>
+      <button class="chat-room-tab" type="button" data-chat-room="middle" role="tab">Middle</button>
+      <button class="chat-room-tab" type="button" data-chat-room="high" role="tab">High</button>
+    </div>
     <div class="chat-profile">
-      <div id="chatIdentitySummary" class="identity-summary">
+      <div class="identity-summary">
         <div class="identity-main">
-          <div class="identity-label">Logged in as</div>
-          <div id="chatLockedName" class="identity-name">Guest</div>
-          <div id="chatLockedRoom" class="identity-room" style="display:inline-block;margin-top:4px">Room</div>
+          <div class="identity-label">Your random username</div>
+          <div id="chatLockedName" class="identity-name">Loading...</div>
         </div>
-        <div class="identity-actions">
-          <span id="chatAdminBadge" class="admin-badge">Admin</span>
-          <button id="chatRenameBtn" class="identity-rename-btn" type="button">&#x270F;&#xFE0F; Rename</button>
-          <button id="chatSignOut" class="identity-signout" type="button">Sign out</button>
-        </div>
+        <div id="chatLockedRoom" class="identity-room">Elementary School</div>
       </div>
     </div>
   </header>
-  <div id="adminApprovalSection" style="display:none">
-    <div class="admin-approval-panel">
-      <div class="admin-approval-header">
-        <div class="admin-approval-title">&#x26A1; Account Requests</div>
-        <div id="approvalCount" class="admin-approval-count">0</div>
-      </div>
-      <div id="approvalList" class="admin-approval-list">
-        <div class="approval-empty">No pending requests.</div>
-      </div>
-    </div>
-  </div>
   <div id="chatMessages" class="chat-messages">
     <div class="chat-empty">Open chat to load the latest messages.</div>
   </div>
   <form id="chatForm" class="chat-form">
-    <select id="chatRoomSelect" class="chat-room-select" aria-label="Room">
-      <option value="high">High School</option>
-      <option value="middle">Middle School</option>
-      <option value="elementary">Elementary</option>
-    </select>
     <input id="chatInput" class="chat-input" maxlength="240" autocomplete="off" placeholder="Message everyone..." />
     <button id="chatSend" class="chat-send" type="submit" aria-label="Send">&#x203A;</button>
   </form>
-  <div id="chatSetup" class="chat-setup" aria-hidden="true">
-    <form id="chatSetupForm" class="chat-setup-panel">
-      <button id="chatSetupCloseBtn" class="chat-setup-close-btn" type="button" aria-label="Close">&#x2715;</button>
-      <div class="chat-auth-screen active" data-auth-screen="choice">
-        <h2 class="chat-setup-title">Join chat</h2>
-        <p class="chat-setup-copy">Create an account or log in. Your account needs admin approval before you can chat.</p>
-        <div class="chat-mode-actions">
-          <button class="chat-setup-submit flush" type="button" data-auth-mode="signup">Create account</button>
-          <button class="chat-setup-submit secondary flush" type="button" data-auth-mode="signin">Log in</button>
-        </div>
-      </div>
-      <div class="chat-auth-screen" data-auth-screen="signin">
-        <button class="chat-back-btn" type="button" data-auth-mode="choice">&#x2190; Back</button>
-        <h2 class="chat-setup-title">Log in</h2>
-        <p class="chat-setup-copy">Enter the email and password for your account.</p>
-        <div class="chat-auth-grid">
-          <div><label class="chat-setup-label" for="chatSetupEmail">Email</label><input id="chatSetupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@rsu71.org" /></div>
-          <div><label class="chat-setup-label" for="chatSetupPassword">Password</label><input id="chatSetupPassword" class="chat-setup-input" type="password" autocomplete="current-password" placeholder="Password" /></div>
-        </div>
-        <button class="chat-setup-submit" type="submit" data-auth-action="signin">Log in</button>
-      </div>
-      <div class="chat-auth-screen" data-auth-screen="signup">
-        <button class="chat-back-btn" type="button" data-auth-mode="choice">&#x2190; Back</button>
-        <h2 class="chat-setup-title">Create account</h2>
-        <p class="chat-setup-copy">Your account will be sent for admin review before chat opens.</p>
-        <div class="chat-auth-grid">
-          <div><label class="chat-setup-label" for="chatSignupEmail">Email</label><input id="chatSignupEmail" class="chat-setup-input" type="email" autocomplete="email" placeholder="you@rsu71.org" /></div>
-          <div><label class="chat-setup-label" for="chatSignupPassword">Password</label><input id="chatSignupPassword" class="chat-setup-input" type="password" autocomplete="new-password" placeholder="At least 6 characters" /></div>
-        </div>
-        <label class="chat-setup-label" for="chatSetupName">Display name</label>
-        <input id="chatSetupName" class="chat-setup-input" maxlength="24" autocomplete="nickname" placeholder="Your name (up to 24 chars)" />
-        <div class="chat-setup-label">Your school</div>
-        <div class="school-options" role="group" aria-label="School level">
-          <button class="school-option" type="button" data-school="High School">High</button>
-          <button class="school-option" type="button" data-school="Middle School">Middle</button>
-          <button class="school-option" type="button" data-school="Elementary School">Elementary</button>
-        </div>
-        <button class="chat-setup-submit" type="submit" data-auth-action="signup">Submit request</button>
-      </div>
-      <div class="chat-auth-screen" data-auth-screen="pending">
-        <div class="pending-screen">
-          <div class="pending-anim-wrap"><div class="pending-orbit"></div><div class="pending-orbit"></div><div class="pending-orbit"></div><div class="pending-icon">&#x23F3;</div></div>
-          <h2 class="chat-setup-title pending-title">Request Sent!</h2>
-          <p class="pending-copy">Your account request has been sent to an admin for review.</p>
-          <div class="pending-note"><strong>Note:</strong> A request was sent to New Tab 2. It may take a few hours. Make sure you entered a valid school email.</div>
-          <div class="pending-actions">
-            <button type="button" class="pending-close-btn" id="pendingCloseChat">Close chat &amp; wait</button>
-            <button type="button" class="pending-check-btn" data-auth-action="check-approval">Already approved? Check status</button>
-          </div>
-        </div>
-      </div>
-      <div class="chat-auth-screen" data-auth-screen="denied">
-        <h2 class="chat-setup-title" style="color:#fca5a5">Request Denied</h2>
-        <p class="chat-setup-copy">Unfortunately your account request was not approved.</p>
-        <div class="denied-banner"><div class="denied-reason-label">Admin note</div><div id="deniedReasonText" class="denied-reason-text">No reason provided.</div></div>
-        <p style="color:var(--muted);font-size:11px;line-height:1.5">If you believe this was a mistake, sign out and try again with a valid school email, or contact an admin directly.</p>
-        <button class="chat-setup-submit secondary" type="button" data-auth-action="signout">Sign out</button>
-      </div>
-      <div class="chat-auth-screen" data-auth-screen="request-verify">
-        <div class="request-verify-screen">
-          <div class="check-icon-wrap">&#x1F511;</div>
-          <h2 class="chat-setup-title">Request Chat Access</h2>
-          <p class="chat-setup-copy">Your account needs admin approval to use chat.</p>
-          <div class="pending-note" style="text-align:left"><strong>Note:</strong> A request will be sent to New Tab 2 admins. It may take a few hours.</div>
-          <button class="chat-setup-submit" type="button" id="requestVerifyBtn">Request account verification</button>
-          <button class="chat-back-btn" type="button" data-auth-action="signout" style="margin-top:12px;display:block">Sign out</button>
-        </div>
-      </div>
-      <div id="chatSetupError" class="chat-setup-error" aria-live="polite"></div>
-    </form>
-  </div>
 </aside>
 
 <div id="chatToastStack" class="chat-toast-stack" aria-live="polite"></div>
@@ -862,36 +614,9 @@ const chatForm = document.getElementById("chatForm");
 const chatMessages = document.getElementById("chatMessages");
 const chatSend = document.getElementById("chatSend");
 const chatActiveUsers = document.getElementById("chatActiveUsers");
-const chatSetup = document.getElementById("chatSetup");
-const chatSetupForm = document.getElementById("chatSetupForm");
-const chatSetupEmail = document.getElementById("chatSetupEmail");
-const chatSetupPassword = document.getElementById("chatSetupPassword");
-const chatSignupEmail = document.getElementById("chatSignupEmail");
-const chatSignupPassword = document.getElementById("chatSignupPassword");
-const chatSetupName = document.getElementById("chatSetupName");
-const chatSetupError = document.getElementById("chatSetupError");
-const chatIdentitySummary = document.getElementById("chatIdentitySummary");
 const chatLockedName = document.getElementById("chatLockedName");
 const chatLockedRoom = document.getElementById("chatLockedRoom");
-const chatAdminBadge = document.getElementById("chatAdminBadge");
-const chatSignOut = document.getElementById("chatSignOut");
-const chatRenameBtn = document.getElementById("chatRenameBtn");
-const chatRoomSelect = document.getElementById("chatRoomSelect");
-const adminApprovalSection = document.getElementById("adminApprovalSection");
-const approvalList = document.getElementById("approvalList");
-const approvalCount = document.getElementById("approvalCount");
-const deniedReasonText = document.getElementById("deniedReasonText");
-const denyModalBackdrop = document.getElementById("denyModalBackdrop");
-const denyReasonInput = document.getElementById("denyReasonInput");
-const denyModalCancel = document.getElementById("denyModalCancel");
-const denyModalConfirm = document.getElementById("denyModalConfirm");
-const pendingCloseChat = document.getElementById("pendingCloseChat");
-const requestVerifyBtn = document.getElementById("requestVerifyBtn");
-const renameModalBackdrop = document.getElementById("renameModalBackdrop");
-const renameInput = document.getElementById("renameInput");
-const renameModalError = document.getElementById("renameModalError");
-const renameModalCancel = document.getElementById("renameModalCancel");
-const renameModalConfirm = document.getElementById("renameModalConfirm");
+const chatRoomTabs = [...document.querySelectorAll("[data-chat-room]")];
 const navActiveGame = document.getElementById("navActiveGame");
 const navActiveGameName = document.getElementById("navActiveGameName");
 const homepage = document.getElementById("homepage");
@@ -904,14 +629,18 @@ const floatChatBtn = document.getElementById("floatChatBtn");
 const homeChatBtn = document.getElementById("homeChatBtn");
 
 const MAX_VISIBLE = 10;
-const CHAT_NAME_KEY = "site_chat_name";
-const CHAT_SCHOOL_KEY = "site_chat_school";
+const CHAT_NAME_KEY = "site_chat_random_name";
+const CHAT_ROOM_KEY = "site_chat_room";
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
 let latestFirebaseActiveUsers = null;
-let selectedSchool = "";
-let chatAuthScreen = "choice";
-let chatAuthState = { user: null, profile: null, isAdmin: false, approvalStatus: null };
-let pendingDenyUid = null;
+let currentChatName = localStorage.getItem(CHAT_NAME_KEY) || "Loading...";
+let currentChatRoomId = localStorage.getItem(CHAT_ROOM_KEY) || "elementary";
+
+const CHAT_ROOMS = {
+  elementary: "Elementary School",
+  middle: "Middle School",
+  high: "High School"
+};
 
 const SWATCH_PALETTES = [
   ["#1e3a5f","#38bdf8"],["#1a3326","#34d399"],["#2d1b4e","#a78bfa"],
@@ -1158,7 +887,7 @@ function setChatOpen(isOpen) {
     hudChatBtn.classList.remove("has-unread");
     updateChatPanelState();
     updateActiveUsersFromBadges();
-    if (hasChatIdentity()) { chatInput.focus(); } else { showChatSetup(); }
+    chatInput.focus();
   }
 }
 
@@ -1168,58 +897,15 @@ chatToggle.addEventListener("click", () => setChatOpen(!siteChat.classList.conta
 const hudChatBtn = document.getElementById("hudChatBtn");
 hudChatBtn.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
 chatCloseBtn.addEventListener("click", () => setChatOpen(false));
-pendingCloseChat?.addEventListener("click", () => setChatOpen(false));
-
-const chatSetupCloseBtn = document.getElementById("chatSetupCloseBtn");
-chatSetupCloseBtn?.addEventListener("click", () => setChatOpen(false));
-chatSetup?.addEventListener("click", (e) => { if (e.target === chatSetup) setChatOpen(false); });
 
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (!CHAT_ENABLED) { updateChatPanelState(); return; }
-  if (!hasChatIdentity()) { showChatSetup(); return; }
   document.dispatchEvent(new CustomEvent("siteChatSubmit"));
 });
 
-chatRenameBtn?.addEventListener("click", () => {
-  renameInput.value = chatAuthState.profile?.name || "";
-  renameModalError.textContent = "";
-  renameModalBackdrop.classList.add("show");
-  setTimeout(() => { renameInput.focus(); renameInput.select(); }, 60);
-});
-renameModalCancel.addEventListener("click", () => { renameModalBackdrop.classList.remove("show"); renameModalError.textContent = ""; });
-renameModalConfirm.addEventListener("click", () => {
-  const newName = renameInput.value.trim().slice(0,24);
-  if (!newName) { renameModalError.textContent = "Enter a name."; return; }
-  renameModalError.textContent = "";
-  renameModalConfirm.disabled = true;
-  renameModalConfirm.textContent = "Saving...";
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: "change-name", name: newName } }));
-  setTimeout(() => { renameModalConfirm.disabled = false; renameModalConfirm.textContent = "Save Name"; }, 2000);
-});
-renameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); renameModalConfirm.click(); } if (e.key === "Escape") renameModalCancel.click(); });
-
-document.addEventListener("siteChatAuthStatus", (event) => {
-  const msg = event.detail?.message || "";
-  const isError = event.detail?.isError;
-  chatSetupError.textContent = msg;
-  chatSetupError.classList.toggle("ok", !isError);
-  if (renameModalBackdrop.classList.contains("show")) {
-    renameModalError.textContent = msg;
-    renameModalError.style.color = isError ? "#fecaca" : "#bbf7d0";
-    if (!isError && msg) setTimeout(() => renameModalBackdrop.classList.remove("show"), 900);
-  }
-});
-
-denyModalCancel.addEventListener("click", () => { denyModalBackdrop.classList.remove("show"); pendingDenyUid = null; denyReasonInput.value = ""; });
-denyModalConfirm.addEventListener("click", () => {
-  const reason = denyReasonInput.value.trim();
-  if (!reason) { denyReasonInput.style.borderColor = "rgba(239,68,68,0.8)"; denyReasonInput.focus(); return; }
-  denyReasonInput.style.borderColor = "";
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: "deny", uid: pendingDenyUid, reason } }));
-  denyModalBackdrop.classList.remove("show");
-  pendingDenyUid = null;
-  denyReasonInput.value = "";
+chatRoomTabs.forEach((button) => {
+  button.addEventListener("click", () => setChatRoom(button.dataset.chatRoom));
 });
 
 document.addEventListener("siteChatNewMessage", () => {
@@ -1231,99 +917,54 @@ document.addEventListener("siteChatNewMessage", () => {
   }
 });
 
+document.addEventListener("siteChatIdentityChanged", (event) => {
+  currentChatName = cleanChatName(event.detail?.name) || currentChatName;
+  currentChatRoomId = event.detail?.roomId || currentChatRoomId;
+  renderChatChrome();
+});
+
+document.addEventListener("siteChatRoomSynced", (event) => {
+  currentChatRoomId = event.detail?.roomId || currentChatRoomId;
+  renderChatChrome();
+});
+
+document.addEventListener("siteChatNotify", (event) => {
+  showChatToast(event.detail?.name, event.detail?.text, event.detail?.room);
+});
+
 function updateChatPanelState() {
-  const profile = chatAuthState.profile;
-  const timeoutUntil = profile?.timeoutUntil;
-  const isTimedOut = timeoutUntil && new Date(timeoutUntil) > new Date();
-  const canChat = CHAT_ENABLED && hasChatIdentity() && !profile?.banned && !isTimedOut;
-  chatInput.disabled = !canChat;
-  chatSend.disabled = !canChat;
-  chatRoomSelect.disabled = !canChat;
-  if (!CHAT_ENABLED && !chatAuthState.isAdmin) { chatInput.placeholder = "Chat Disabled"; chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming september (maybe)</div>'; return; }
-  if (profile?.banned) { chatInput.placeholder = "Banned from chat"; return; }
-  if (isTimedOut) { chatInput.placeholder = "Timed out until " + new Date(timeoutUntil).toLocaleTimeString([], { hour:"numeric", minute:"2-digit" }); return; }
-  if (!hasChatIdentity()) { chatInput.placeholder = "Sign in to chat"; return; }
-  chatInput.placeholder = "Message everyone...";
+  chatInput.disabled = !CHAT_ENABLED;
+  chatSend.disabled = !CHAT_ENABLED;
+  if (!CHAT_ENABLED) {
+    chatInput.placeholder = "Chat Disabled";
+    chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming september (maybe)</div>';
+    return;
+  }
+  chatInput.placeholder = "Message " + roomNameFromId(currentChatRoomId) + "...";
 }
 
 function cleanChatName(value) { return String(value || "").replace(/\s+/g," ").trim().slice(0,24); }
-function hasChatIdentity() { return Boolean(chatAuthState.user && chatAuthState.profile?.approved && cleanChatName(chatAuthState.profile.name) && chatAuthState.profile.school); }
 
-function syncChatIdentity() {
-  const profile = chatAuthState.profile;
-  const name = cleanChatName(profile?.name || localStorage.getItem(CHAT_NAME_KEY));
-  const school = profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "";
-  const isAdmin = chatAuthState.isAdmin;
-  const isReady = hasChatIdentity();
-  chatLockedName.textContent = chatAuthState.user?.email ? (name || "Not set") + " \u2014 " + chatAuthState.user.email : name || "Not signed in";
-  chatLockedRoom.textContent = roomNameFromSchool(school);
-  chatIdentitySummary.classList.toggle("locked", isReady || isAdmin);
-  chatAdminBadge.classList.toggle("show", isAdmin);
-  siteChat.classList.toggle("admin-mode", isAdmin);
-  chatSetup.classList.toggle("show", !isReady && !isAdmin);
-  chatSetup.setAttribute("aria-hidden", (isReady || isAdmin) ? "true" : "false");
-  if (chatRenameBtn) chatRenameBtn.style.display = (isReady && !isAdmin) ? "" : "none";
-  adminApprovalSection.style.display = isAdmin ? "block" : "none";
-  if (!chatAuthState.user) { setChatAuthScreen("choice"); }
-  else if (isAdmin || isReady) {}
-  else {
-    const status = chatAuthState.approvalStatus;
-    if (status === "pending") setChatAuthScreen("pending");
-    else if (status === "denied") { deniedReasonText.textContent = chatAuthState.denyReason || "No reason provided."; setChatAuthScreen("denied"); }
-    else if (status === "none") setChatAuthScreen("request-verify");
-    else setChatAuthScreen("choice");
-  }
-  if (chatRoomSelect && isAdmin && chatRoomSelect.value === "") chatRoomSelect.value = "high";
+function renderChatChrome() {
+  chatLockedName.textContent = currentChatName || "Guest";
+  chatLockedRoom.textContent = roomNameFromId(currentChatRoomId);
+  chatRoomTabs.forEach((button) => {
+    const active = button.dataset.chatRoom === currentChatRoomId;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+  });
   updateChatPanelState();
-  document.dispatchEvent(new CustomEvent("siteChatIdentityChanged", { detail: { name, school, isAdmin } }));
 }
 
-function roomNameFromSchool(school) {
-  if (school === "High School") return "High School";
-  if (school === "Middle School") return "Middle School";
-  if (school === "Elementary School") return "Elementary";
-  return "Chat";
+function setChatRoom(roomId) {
+  if (!CHAT_ROOMS[roomId]) return;
+  currentChatRoomId = roomId;
+  localStorage.setItem(CHAT_ROOM_KEY, roomId);
+  renderChatChrome();
+  document.dispatchEvent(new CustomEvent("siteChatRoomChanged", { detail: { roomId, room: roomNameFromId(roomId) } }));
 }
 
-function showChatSetup() {
-  chatSetup.classList.add("show");
-  chatSetup.setAttribute("aria-hidden", "false");
-  chatSetupEmail.value = chatAuthState.user?.email || chatSetupEmail.value;
-  chatSignupEmail.value = chatAuthState.user?.email || chatSignupEmail.value;
-  chatSetupPassword.value = "";
-  chatSignupPassword.value = "";
-  setSelectedSchool(chatAuthState.profile?.school || localStorage.getItem(CHAT_SCHOOL_KEY) || "");
-  chatSetupError.textContent = "";
-}
-
-function setChatAuthScreen(screen) {
-  chatAuthScreen = screen || "choice";
-  document.querySelectorAll("[data-auth-screen]").forEach((panel) => { panel.classList.toggle("active", panel.dataset.authScreen === chatAuthScreen); });
-  chatSetupError.textContent = "";
-}
-
-document.querySelectorAll("[data-auth-mode]").forEach((button) => { button.addEventListener("click", () => setChatAuthScreen(button.dataset.authMode)); });
-document.querySelectorAll("button[type='button'][data-auth-action]").forEach((button) => { button.addEventListener("click", () => { chatSetupError.textContent = ""; document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action: button.dataset.authAction } })); }); });
-document.querySelectorAll(".school-option").forEach((button) => { button.addEventListener("click", () => setSelectedSchool(button.dataset.school)); });
-
-function setSelectedSchool(school) {
-  selectedSchool = school;
-  document.querySelectorAll(".school-option").forEach((option) => { const isSelected = option.dataset.school === school; option.classList.toggle("selected", isSelected); option.setAttribute("aria-pressed", isSelected ? "true" : "false"); });
-}
-
-chatSetupForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const action = event.submitter?.dataset.authAction || "signin";
-  const isSignup = action === "signup";
-  const email = String((isSignup ? chatSignupEmail.value : chatSetupEmail.value) || "").trim().toLowerCase();
-  const password = String((isSignup ? chatSignupPassword.value : chatSetupPassword.value) || "");
-  const name = isSignup ? cleanChatName(chatSetupName.value) : "";
-  if (!email || !password) { chatSetupError.textContent = "Enter your email and password."; return; }
-  if (isSignup && !name) { chatSetupError.textContent = "Enter a display name."; return; }
-  if (isSignup && !selectedSchool) { chatSetupError.textContent = "Pick your school level."; return; }
-  chatSetupError.textContent = isSignup ? "Submitting request..." : "Logging in...";
-  document.dispatchEvent(new CustomEvent("siteChatAuthAction", { detail: { action, email, password, name, school: isSignup ? selectedSchool : "" } }));
-});
+function roomNameFromId(roomId) { return CHAT_ROOMS[roomId] || "Chat"; }
 
 function showChatToast(name, text, room) {
   const stack = document.getElementById("chatToastStack");
@@ -1388,7 +1029,7 @@ function dismiss() { emailPopup.classList.remove("active"); localStorage.setItem
 yesBtn.onclick = () => { window.open(FORM_LINK,"_blank"); dismiss(); };
 noBtn.onclick = dismiss;
 
-syncChatIdentity();
+renderChatChrome();
 build();
 </script>
 </body>
