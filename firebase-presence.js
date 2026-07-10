@@ -26,13 +26,34 @@ const firebaseConfig = {
   appId: "1:347559506222:web:e854997d9048686b988abf"
 };
 
-// Change these names whenever you want different random usernames.
 const RANDOM_USERNAMES = [
-  "PixelPilot",
-  "StudySpark",
-  "NovaNote",
-  "QuizRunner",
-  "EchoByte"
+  "PixelPilot", "StudySpark", "NovaNote", "QuizRunner", "EchoByte", "ShadowVortex", "LunarQuest", "CrimsonFox", "SilentStorm", "FrostNova",
+  "BlazeHunter", "CyberRaven", "IronFalcon", "MysticWolf", "RapidBolt", "NeonKnight", "SolarStrike", "CosmicDrift", "GhostArrow", "ThunderPulse",
+  "NightGlider", "CrystalEdge", "WildComet", "SkyBreaker", "QuantumLeaf", "AquaPhantom", "StealthFlame", "PixelWizard", "RocketBloom", "StormCrafter",
+  "IceRanger", "TurboFalcon", "NovaBlitz", "ShadowPixel", "LavaDrifter", "CloudSeeker", "BrightComet", "FireNimbus", "SteelVoyager", "GoldenFrost",
+  "EchoRider", "StarPhantom", "SwiftJaguar", "VoltCrusher", "TurboViper", "FrostTiger", "NightSpark", "CrystalRogue", "SkyVortex", "RapidNova",
+  "BlazeDrift", "CyberStorm", "SolarRunner", "IronShadow", "PixelStorm", "StormRaven", "FlameVortex", "NeonDrifter", "EchoKnight", "ShadowRider",
+  "QuantumWolf", "SilverPhoenix", "BlueMeteor", "GhostFalcon", "BrightTiger", "WildNova", "SwiftOrbit", "SkyHunter", "MysticBlade", "CrystalFox",
+  "LunarBolt", "ThunderWolf", "NovaSpark", "FrozenEcho", "TurboBlaze", "PixelOrbit", "RapidFox", "GoldenStorm", "AquaKnight", "SilentNova",
+  "RocketWolf", "SteelArrow", "CosmicTiger", "FireRogue", "ShadowOrbit", "StormBlade", "CyberGlider", "EchoStorm", "VoltRider", "LavaHunter",
+  "NightWolf", "CrystalBolt", "IronComet", "SolarTiger", "SwiftBlaze", "NovaFalcon", "GhostRunner", "BlueVortex", "NeonFox", "WildArrow",
+  "QuantumSpark", "BrightKnight", "PixelTiger", "FrostVoyager", "ShadowComet", "RapidKnight", "EchoGlider", "SteelVortex", "ThunderRogue", "NightFalcon",
+  "MysticSpark", "LunarTiger", "RocketStorm", "GoldenWolf", "BlazeRider", "StormOrbit", "IcePhoenix", "SwiftPhantom", "CyberKnight", "CrystalMeteor",
+  "VoltNova", "SkyFox", "SilentArrow", "PixelCrusher", "SolarWolf", "GhostSpark", "WildBlade", "NovaGlider", "RapidMeteor", "EchoFalcon",
+  "SteelBlaze", "QuantumRider", "BrightOrbit", "ShadowPhoenix", "FrostComet", "NightBolt", "TurboTiger", "BlueKnight", "StormHunter", "LavaWolf",
+  "IronNova", "CrystalRunner", "NeonStorm", "GhostBlade", "SwiftFox", "RocketKnight", "MysticOrbit", "ThunderTiger", "GoldenArrow", "CyberMeteor",
+  "SolarRider", "PixelNova", "RapidVortex", "EchoWolf", "NightRogue", "FrostRunner", "ShadowBlaze", "VoltFalcon", "SkyNova", "WildPhantom",
+  "SteelSpark", "CrystalHunter", "TurboOrbit", "BlueFox", "NovaPhoenix", "GhostTiger", "IronStorm", "LunarRider", "BrightBlade", "SilentFalcon",
+  "RocketSpark", "QuantumKnight", "StormMeteor", "BlazeOrbit", "CyberWolf", "EchoPhoenix", "RapidArrow", "PixelFalcon", "NightMeteor", "SolarComet",
+  "ShadowTiger", "VoltOrbit", "WildKnight", "FrozenBlade", "GoldenNova", "SteelFox", "MysticRunner", "ThunderFalcon", "CrystalStorm", "NeonPhoenix",
+  "SwiftSpark", "GhostOrbit", "LavaKnight", "SkyTiger", "RocketNova", "EchoBlade", "QuantumFalcon", "RapidStorm", "BlueWolf", "PixelMeteor",
+  "NightPhoenix", "ShadowRunner", "FrostKnight", "VoltTiger", "IronOrbit", "CrystalPhoenix", "SolarFox", "TurboStorm", "WildSpark", "GoldenFalcon",
+  "CyberNova", "BlazeMeteor", "SilentTiger", "RocketFalcon", "BrightWolf", "EchoComet", "MysticNova", "ThunderOrbit", "PixelPhoenix", "RapidSpark",
+  "StormFox", "GhostNova", "QuantumMeteor", "CrystalKnight", "SkyPhoenix", "LunarStorm", "FrozenFalcon", "SteelNova", "NightOrbit", "NeonMeteor",
+  "SwiftWolf", "GoldenSpark", "ShadowMeteor", "TurboKnight", "BlueStorm", "SolarPhoenix", "WildFalcon", "EchoNova", "IronTiger", "VoltPhoenix",
+  "RocketMeteor", "PixelWolf", "GhostStorm", "BrightNova", "CyberFalcon", "CrystalOrbit", "NightSparkle", "QuantumPhoenix", "StormNova", "FrozenWolf",
+  "SkyMeteor", "RapidFalcon", "MysticStorm", "LunarPhoenix", "SteelTiger", "ThunderNova", "ShadowWolf", "GoldenMeteor", "NeonOrbit", "SwiftNova",
+  "PixelComet", "EchoTiger", "GhostPhoenix", "BlueNova", "RocketOrbit"
 ];
 
 const CHAT_ROOMS = {
