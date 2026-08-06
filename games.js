@@ -1,3 +1,6 @@
+
+//https://newnewnewnewtab.github.io/Embed-Failed/
+
 window.PAGES = {
   
   "Drive Mad": { 
