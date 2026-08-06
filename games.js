@@ -16,7 +16,7 @@ window.PAGES = {
   },
   
   "Basket Bros": { 
-    "url": "https://vexacloud-assets.github.io/basket-bros/",
+    "url": "https://newnewnewnewtab.github.io/Embed-Failed/",
     "cover": "basketbros.png"
   },
 
