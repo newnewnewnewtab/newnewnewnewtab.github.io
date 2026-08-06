@@ -81,6 +81,7 @@ const CHAT_USER_ID = getPersistentId();
 const CHAT_NAME = getSavedChatName();
 
 let activeGameId = null;
+let currentGameName = null;
 let activePresenceRef = null;
 let activeDisconnectRef = null;
 let unsubscribeCounts = null;
@@ -158,6 +159,7 @@ function setActiveGame(name) {
   clearActivePresence({ cancelDisconnect: true });
   connectDatabase();
   activeGameId = gameId;
+  currentGameName = name;
   activePresenceRef = ref(database, `gamePresence/${gameId}/players/${SESSION_ID}`);
   activeDisconnectRef = onDisconnect(activePresenceRef);
   activeDisconnectRef.remove().catch(console.error);
@@ -353,6 +355,18 @@ function renderMessage(key, message) {
   text.textContent = cleanMessageText(message.text);
 
   author.append(name);
+  const gameName = cleanName(message.game);
+  if (gameName) {
+    const gameTag = document.createElement("button");
+    gameTag.type = "button";
+    gameTag.className = "message-game-tag";
+    gameTag.textContent = gameName;
+    gameTag.title = "Switch to " + gameName;
+    gameTag.addEventListener("click", () => {
+      if (typeof window.switchToGame === "function") window.switchToGame(gameName);
+    });
+    author.append(gameTag);
+  }
   meta.append(author, time);
   item.append(meta, text);
   chatMessages.appendChild(item);
@@ -373,7 +387,8 @@ function sendChatMessage() {
     name: CHAT_NAME,
     text,
     room: roomId,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    ...(currentGameName ? { game: currentGameName } : {})
   }).catch((error) => {
     console.warn("Firebase chat write failed:", error);
     showChatStatus("Message was not sent. Check the Firebase database rules for this room.");
