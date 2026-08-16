@@ -15,7 +15,8 @@ window.PAGES = {
 
   "NewTab.Ai": { 
     "url": "https://newnewnewnewtab.github.io/NewTab.Ai/",
-    "cover": "newtabai.PNG"
+    "ribbon": "AI",
+    "ribbonColor": "#00ffff"
   },
   
   "Snow Rider": { 
