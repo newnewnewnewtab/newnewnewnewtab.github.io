@@ -214,6 +214,8 @@ function cleanupStalePresence() {
   }).catch(console.error);
 }
 
+let latestCountsByGameId = {};
+
 function watchGameCounts() {
   if (unsubscribeCounts) return;
   connectDatabase();
@@ -232,17 +234,36 @@ function watchGameCounts() {
       counts[gameSnapshot.key] = playerCount;
       totalPlayers += playerCount;
     });
+    latestCountsByGameId = counts;
     updateActiveUsers(totalPlayers);
-    document.querySelectorAll("[data-player-count-for]").forEach((badge) => {
-      const gameId = gameIdFromName(badge.dataset.playerCountFor);
-      const playerCount = counts[gameId] || 0;
-      badge.textContent = playerCount > 0 ? playerCount : "";
-      badge.classList.toggle("has-players", playerCount > 0);
-      badge.title = playerCount > 0 ? `${playerCount} player${playerCount === 1 ? "" : "s"} online` : "No players online";
-    });
+    applyPlayerCounts();
   }, (error) => {
     console.warn("Firebase player counts failed:", error);
     updateActiveUsers(0);
+  });
+}
+
+// Applies the most recently known counts to every counter element currently
+// in the DOM. Safe to call any time (e.g. after the page re-renders game
+// cards/rows for a search filter) since it never waits on a new Firebase
+// event -- it just re-paints from latestCountsByGameId.
+function applyPlayerCounts() {
+  const countFor = (name) => latestCountsByGameId[gameIdFromName(name)] || 0;
+
+  document.querySelectorAll("[data-player-count-for]").forEach((badge) => {
+    const gameName = badge.dataset.playerCountFor;
+    if (!gameName) { badge.textContent = ""; badge.classList.remove("has-players"); badge.title = ""; return; }
+    const playerCount = countFor(gameName);
+    badge.textContent = playerCount > 0 ? playerCount : "";
+    badge.classList.toggle("has-players", playerCount > 0);
+    badge.title = playerCount > 0 ? `${playerCount} player${playerCount === 1 ? "" : "s"} online` : "No players online";
+  });
+
+  document.querySelectorAll("[data-players-for]").forEach((el) => {
+    const gameName = el.dataset.playersFor;
+    const playerCount = countFor(gameName);
+    el.textContent = playerCount > 0 ? `${playerCount} playing` : "";
+    el.classList.toggle("has-players", playerCount > 0);
   });
 }
 
@@ -350,6 +371,7 @@ function renderMessage(key, message) {
   const time = document.createElement("span");
   time.className = "message-time";
   time.textContent = formatMessageTime(message.createdAt);
+  time.title = formatMessageTimeFull(message.createdAt);
   const text = document.createElement("div");
   text.className = "message-text";
   text.textContent = cleanMessageText(message.text);
@@ -433,12 +455,28 @@ function cleanName(value) {
 
 function formatMessageTime(timestamp) {
   if (!timestamp) return "now";
-  return new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" }).format(new Date(timestamp));
+  const date = new Date(timestamp);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+  const time = new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" }).format(date);
+  if (isToday) return time;
+  if (isYesterday) return "Yesterday " + time;
+  const sameYear = date.getFullYear() === now.getFullYear();
+  const day = new Intl.DateTimeFormat([], sameYear ? { month: "short", day: "numeric" } : { month: "short", day: "numeric", year: "numeric" }).format(date);
+  return day + ", " + time;
+}
+
+function formatMessageTimeFull(timestamp) {
+  if (!timestamp) return "";
+  return new Intl.DateTimeFormat([], { dateStyle: "full", timeStyle: "short" }).format(new Date(timestamp));
 }
 
 window.addEventListener("beforeunload", () => clearActivePresence());
 
-window.gamePresence = { setActiveGame, disconnect: disconnectDatabase };
+window.gamePresence = { setActiveGame, disconnect: disconnectDatabase, refreshCounts: applyPlayerCounts };
 
 watchGameCounts();
 setupChat();
