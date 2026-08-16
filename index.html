@@ -845,12 +845,14 @@ homeSearch.addEventListener("input", () => {
   const filtered = q ? allGameEntries.filter(({ name }) => name.toLowerCase().includes(q)) : allGameEntries;
   renderHomeGrid(filtered);
   homeGameCount.textContent = q ? filtered.length + " of " + allGameEntries.length : allGameEntries.length + " games";
+  window.gamePresence?.refreshCounts?.();
 });
 
 launcherSearch.addEventListener("input", () => {
   const q = launcherSearch.value.trim().toLowerCase();
-  if (!q) { renderLauncherRows(allGameEntries); return; }
+  if (!q) { renderLauncherRows(allGameEntries); window.gamePresence?.refreshCounts?.(); return; }
   renderLauncherRows(allGameEntries.filter(({ name }) => name.toLowerCase().includes(q)));
+  window.gamePresence?.refreshCounts?.();
 });
 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && launcher.classList.contains("open")) closeLauncher(); });
@@ -892,6 +894,7 @@ function loadGame(name, url, element) {
   currentActive = name;
   closeLauncher();
   window.gamePresence?.setActiveGame(name);
+  window.gamePresence?.refreshCounts?.();
 }
 
 hudHomeBtn.addEventListener("click", () => {
@@ -1059,6 +1062,7 @@ noBtn.onclick = dismiss;
 
 renderChatChrome();
 build();
+window.gamePresence?.refreshCounts?.();
 </script>
 </body>
 </html>
