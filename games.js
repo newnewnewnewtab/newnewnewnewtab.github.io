@@ -121,7 +121,7 @@ window.PAGES = {
   },
   
   "Basket Random": { 
-    "url": "https://unblocked-games-786.github.io/Basket-Random/",
+    "url": "https://newnewnewnewtab.github.io/Embed-Failed/",
     "cover": "basketrandom.jpeg"
   },
   
