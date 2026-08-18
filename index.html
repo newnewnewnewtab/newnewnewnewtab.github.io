@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 <script>(function(s){s.dataset.zone='11589870',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-<script>(function(s){s.dataset.zone='11590681',s.src='https://zovidree.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 <script async src="https://googletagmanager.com"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -321,6 +320,120 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
 /* Keep old stubs working, just invisible */
 .hud-brand,.hud-sep { display: none; }
 
+/* === PLAYTIME WIDGET === */
+/* Homepage: floated away from all edges/corners, near the top-center */
+#playtimeWidget {
+  position: fixed; top: 16px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  display: flex; align-items: center; gap: 0;
+  background: rgba(5, 10, 22, 0.82);
+  border: 1px solid var(--border-accent);
+  border-radius: 14px;
+  backdrop-filter: blur(20px) saturate(1.6);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  overflow: hidden;
+  height: 38px;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+/* In-game: move to the left, stacked under the game HUD buttons */
+body.game-active #playtimeWidget {
+  top: 62px; left: 16px; right: auto;
+  transform: none;
+}
+#playtimeWidget.low-time { border-color: rgba(248,113,113,0.5); box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(248,113,113,0.15); }
+#playtimeWidget.low-time .playtime-clock { color: #f87171; animation: playtimePulse 1s ease-in-out infinite; }
+@keyframes playtimePulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
+
+.playtime-clock-wrap {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 12px; height: 100%;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  white-space: nowrap;
+}
+.playtime-clock-wrap svg { width: 14px; height: 14px; color: var(--accent); flex-shrink: 0; }
+.playtime-clock { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; color: #f8fafc; letter-spacing: 0.02em; min-width: 44px; }
+.playtime-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+.playtime-add-btn {
+  display: flex; align-items: center; gap: 6px;
+  height: 100%; padding: 0 14px;
+  border: none; background: linear-gradient(135deg, rgba(56,189,248,0.14), rgba(167,139,250,0.1));
+  color: #7dd3fc; font: inherit; font-size: 11.5px; font-weight: 800;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.18s, color 0.18s;
+}
+.playtime-add-btn:hover:not(:disabled) { background: linear-gradient(135deg, rgba(56,189,248,0.24), rgba(167,139,250,0.18)); color: #e0f9ff; }
+.playtime-add-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
+.playtime-add-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* === PLAYTIME MODAL === */
+#playtimeModal {
+  position: fixed; inset: 0; z-index: 9998;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(10px);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.25s ease;
+  padding: 20px;
+}
+#playtimeModal.active { opacity: 1; visibility: visible; }
+.playtime-modal-card {
+  width: 100%; max-width: 380px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: 18px;
+  padding: 30px 28px 26px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transform: translateY(8px) scale(0.98);
+  transition: transform 0.3s var(--ease-spring);
+}
+#playtimeModal.active .playtime-modal-card { transform: translateY(0) scale(1); }
+.playtime-modal-card h2 { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 10px; }
+.playtime-modal-card p { font-size: 0.85rem; color: var(--muted-light); line-height: 1.55; margin-bottom: 22px; }
+.playtime-modal-card p .ixl-link-text { color: var(--accent); font-weight: 700; }
+.playtime-modal-actions { display: flex; flex-direction: column; gap: 10px; }
+.playtime-go-btn {
+  display: inline-block; text-decoration: none;
+  background: var(--accent); color: #031018; padding: 13px 20px;
+  font-size: 0.9rem; font-weight: 900; border-radius: 100px; border: none;
+  cursor: pointer; font-family: inherit; transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.playtime-go-btn:hover { transform: scale(1.03); box-shadow: 0 0 28px rgba(56,189,248,0.4); }
+.playtime-go-btn.visited { background: rgba(255,255,255,0.08); color: var(--muted-light); box-shadow: none; }
+.playtime-cancel-btn {
+  background: transparent; color: var(--muted); padding: 8px 16px;
+  font-size: 0.82rem; font-weight: 600; border: none; cursor: pointer; font-family: inherit;
+  transition: color 0.2s;
+}
+.playtime-cancel-btn:hover { color: var(--muted-light); }
+
+/* Reward toast */
+#playtimeToast {
+  position: fixed; top: 62px; right: 16px; z-index: 1200;
+  background: linear-gradient(135deg, rgba(34,197,94,0.16), rgba(15,23,42,0.94));
+  border: 1px solid rgba(74,222,128,0.4);
+  border-radius: 12px; padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12.5px; font-weight: 800; color: #bbf7d0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  opacity: 0; transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+#playtimeToast.showing { opacity: 1; transform: translateY(0); }
+#playtimeToast svg { width: 16px; height: 16px; color: #4ade80; flex-shrink: 0; }
+
+@media (max-width: 520px) {
+  #playtimeWidget { top: 10px; height: 34px; }
+  body.game-active #playtimeWidget { top: 54px; left: 10px; }
+  .playtime-clock-wrap { padding: 0 9px; }
+  .playtime-add-btn { padding: 0 10px; font-size: 10.5px; }
+  #playtimeToast { top: 52px; right: 10px; }
+}
+
 /* === FLOAT ACTION BUTTONS (bottom-right, homepage only) === */
 #floatActions { position: fixed; bottom: 20px; right: 20px; display: flex; align-items: center; gap: 8px; z-index: 1100; }
 .float-btn { display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px; border-radius: 100px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; backdrop-filter: blur(12px); border: 1px solid; }
@@ -556,6 +669,46 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   <!-- keep legacy spans for JS compat -->
   <span class="hud-brand" style="display:none">New Tab 2</span>
   <span class="hud-sep" style="display:none">&middot;</span>
+</div>
+
+<!-- PLAYTIME WIDGET (always visible, top-right) -->
+<div id="playtimeWidget">
+  <div class="playtime-clock-wrap" title="Playtime remaining">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+      <path d="M12 7V12L15.5 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <div id="playtimeClock" class="playtime-clock">15:00</div>
+    </div>
+  </div>
+  <button id="playtimeAddBtn" class="playtime-add-btn" type="button">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <span id="playtimeAddBtnLabel">Add Time</span>
+  </button>
+</div>
+
+<!-- PLAYTIME MODAL -->
+<div id="playtimeModal">
+  <div class="playtime-modal-card">
+    <h2>Earn 2:30 More Minutes</h2>
+    <p>Just visit <span class="ixl-link-text">the linked ad</span> and you'll get <strong>+2:30</strong> of playtime added right away.</p>
+    <div class="playtime-modal-actions">
+      <a id="playtimeGoBtn" class="playtime-go-btn" href="https://omg10.com/4/11589934" target="_blank" rel="noopener">OPEN AD</a>
+      <button id="playtimeCancelBtn" class="playtime-cancel-btn" type="button">Maybe later</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- PLAYTIME REWARD TOAST -->
+<div id="playtimeToast">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span id="playtimeToastText">+2:30 added!</span>
 </div>
 
 <!-- FLOAT ACTION BUTTONS (bottom-right) -->
@@ -877,6 +1030,11 @@ function switchToGame(name) {
 window.switchToGame = switchToGame;
 
 function loadGame(name, url, element) {
+  if (!window.Playtime || !window.Playtime.hasTime()) {
+    window.Playtime?.openModal();
+    window.Playtime?.flashWidget();
+    return;
+  }
   iframe.src = url;
   statusText.textContent = name;
   document.querySelectorAll(".game-card,.game-row,.tab").forEach(t => t.classList.remove("active"));
@@ -1060,6 +1218,136 @@ if (!localStorage.getItem("email_prompt_dismissed")) {
 function dismiss() { emailPopup.classList.remove("active"); localStorage.setItem("email_prompt_dismissed","true"); }
 yesBtn.onclick = () => { window.open(FORM_LINK,"_blank"); dismiss(); };
 noBtn.onclick = dismiss;
+
+/* === PLAYTIME SYSTEM ===
+   Kids need playtime to play games. Playtime only ticks down while a game
+   is active. It's stored in localStorage so it persists between visits.
+   Clicking "Add Time" sends them to ixl.com to do some math — when they
+   come back to this tab, +5 minutes gets added automatically. */
+const Playtime = (function () {
+  const STORAGE_KEY = "playtime_seconds_remaining";
+  const START_SECONDS = 0;         // playtime a new visitor starts with
+  const GRANT_SECONDS = 2 * 60 + 30; // time earned per IXL visit (2:30)
+  const COOLDOWN_MS = 3000;        // cooldown on the Add Time button
+  const IXL_URL = "https://www.ixl.com";
+
+  const widget = document.getElementById("playtimeWidget");
+  const clockEl = document.getElementById("playtimeClock");
+  const addBtn = document.getElementById("playtimeAddBtn");
+  const addBtnLabel = document.getElementById("playtimeAddBtnLabel");
+  const modal = document.getElementById("playtimeModal");
+  const goBtn = document.getElementById("playtimeGoBtn");
+  const cancelBtn = document.getElementById("playtimeCancelBtn");
+  const toast = document.getElementById("playtimeToast");
+  const toastText = document.getElementById("playtimeToastText");
+
+  let seconds = readStored();
+  let cooldownTimer = null;
+  let toastTimer = null;
+
+  function readStored() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw === null) return START_SECONDS;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n >= 0 ? n : START_SECONDS;
+  }
+  function writeStored() { localStorage.setItem(STORAGE_KEY, String(Math.max(0, Math.floor(seconds)))); }
+  function formatTime(s) {
+    s = Math.max(0, Math.floor(s));
+    const m = Math.floor(s / 60), sec = s % 60;
+    return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+  }
+  function render() {
+    clockEl.textContent = formatTime(seconds);
+    widget.classList.toggle("low-time", seconds > 0 && seconds <= 60);
+  }
+  function hasTime() { return seconds > 0; }
+
+  function tick() {
+    if (!document.body.classList.contains("game-active") || seconds <= 0) return;
+    seconds -= 1;
+    writeStored();
+    render();
+    if (seconds <= 0) onTimeUp();
+  }
+
+  function onTimeUp() {
+    document.getElementById("hudHomeBtn")?.click();
+    flashWidget();
+    openModal();
+  }
+
+  function flashWidget() {
+    widget.classList.add("low-time");
+    try {
+      widget.animate(
+        [{ transform: "scale(1)" }, { transform: "scale(1.07)" }, { transform: "scale(1)" }],
+        { duration: 380, easing: "ease-out" }
+      );
+    } catch (e) {}
+  }
+
+  function openModal() {
+    modal.classList.add("active");
+  }
+  function closeModal() { modal.classList.remove("active"); }
+
+  function startCooldown() {
+    addBtn.disabled = true;
+    let remaining = Math.ceil(COOLDOWN_MS / 1000);
+    addBtnLabel.textContent = "Wait " + remaining + "s";
+    clearInterval(cooldownTimer);
+    cooldownTimer = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(cooldownTimer);
+        addBtn.disabled = false;
+        addBtnLabel.textContent = "Add Time";
+      } else {
+        addBtnLabel.textContent = "Wait " + remaining + "s";
+      }
+    }, 1000);
+  }
+
+  // Fires when the actual IXL link is clicked (real <a> element, real
+  // click event) — the click itself is the source of truth that they
+  // were sent to IXL, so the reward is awarded right away instead of
+  // waiting for them to come back to this tab.
+  function handleIxlLinkClicked() {
+    grantTime();
+    closeModal();
+  }
+
+  function grantTime() {
+    seconds += GRANT_SECONDS;
+    writeStored();
+    render();
+    showToast("+" + formatTime(GRANT_SECONDS) + " added! Nice work.");
+  }
+
+  function showToast(text) {
+    toastText.textContent = text;
+    toast.classList.add("showing");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("showing"), 3200);
+  }
+
+  addBtn.addEventListener("click", () => {
+    if (addBtn.disabled) return;
+    startCooldown();
+    openModal();
+  });
+  goBtn.addEventListener("click", handleIxlLinkClicked);
+  cancelBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modal.classList.contains("active")) closeModal(); });
+
+  render();
+  setInterval(tick, 1000);
+
+  return { hasTime, openModal, closeModal, flashWidget };
+})();
+window.Playtime = Playtime;
 
 renderChatChrome();
 build();
