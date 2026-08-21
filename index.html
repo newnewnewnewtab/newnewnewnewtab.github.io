@@ -2,11 +2,12 @@
 <html lang="en">
 <head>
 <script>(function(s){s.dataset.zone='11589870',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-<script async src="https://googletagmanager.com"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1XQJN7ZWG6"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
+
   gtag('config', 'G-1XQJN7ZWG6');
 </script>
 <meta charset="UTF-8" />
@@ -26,7 +27,7 @@
   --text: #f8fafc;
   --muted: #64748b;
   --muted-light: #94a3b8;
-  /* Two-color theme, kept faint everywhere it's used */
+  
   --accent: #38bdf8;
   --accent-soft: rgba(56,189,248,0.12);
   --accent2: #a78bfa;
@@ -46,7 +47,6 @@ body {
   width: 100vw;
 }
 
-/* === OVERLAY (email prompt) === */
 .overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.92);
   display: flex; align-items: center; justify-content: center;
@@ -64,12 +64,10 @@ body {
 .btn-no:hover:not(:disabled) { color: var(--muted-light); }
 .btn-no:disabled { opacity: 0.3; cursor: not-allowed; }
 
-/* === HIDDEN JS STUBS === */
 .tabs-wrapper, .tab, .ribbon { display: none !important; }
 .nav-active-game, .nav-active-game-dot, .nav-active-game-name { display: none !important; }
 .chat-button, .chat-button-icon, .chat-button-text, .chat-unread-dot { display: none !important; }
 
-/* === HOMEPAGE === */
 #homepage {
   position: fixed; inset: 0;
   overflow-y: auto; overflow-x: hidden;
@@ -96,7 +94,6 @@ body {
   padding: 64px 32px 80px;
 }
 
-/* === HOME HEADER === */
 .home-header {
   display: flex; align-items: flex-end; justify-content: space-between;
   margin-bottom: 44px; gap: 24px; flex-wrap: wrap;
@@ -127,7 +124,6 @@ body {
 .home-chat-unread { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; border: 2px solid var(--bg); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
 .home-chat-btn.has-unread .home-chat-unread { opacity: 1; transform: scale(1); }
 
-/* === SEARCH ROW === */
 .home-search-row { margin-bottom: 24px; display: flex; align-items: center; gap: 14px; }
 .home-search-wrap { position: relative; flex: 1; max-width: 360px; }
 .home-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
@@ -136,7 +132,6 @@ body {
 .home-search::placeholder { color: var(--muted); }
 .home-game-count { font-size: 11px; font-weight: 700; color: var(--muted); white-space: nowrap; padding: 0 4px; }
 
-/* === GAME GRID === */
 .game-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
@@ -167,7 +162,6 @@ body {
 .game-card-icon::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,0.18) 0%,transparent 60%); }
 .game-card-name { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
 
-/* === COVER IMAGE CARDS === */
 .game-card.has-cover {
   padding: 0;
   background: #000;
@@ -206,7 +200,6 @@ body {
 @keyframes playerPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
 .game-card-ribbon { position: absolute; top: 10px; right: 10px; font-size: 8px; font-weight: 900; color: #fff; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; letter-spacing: 0.04em; }
 
-/* === TOP-LEFT GAME HUD === */
 #gameHud {
   position: fixed; top: 16px; left: 16px;
   display: flex; align-items: center; gap: 0;
@@ -217,7 +210,6 @@ body {
 }
 body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
 
-/* The outer glass card */
 .hud-shell {
   display: flex; align-items: center;
   background: rgba(5, 10, 22, 0.82);
@@ -229,7 +221,6 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
   height: 38px;
 }
 
-/* NT2 logo section — text only, no mark */
 .hud-logo {
   display: flex; align-items: center;
   padding: 0 12px;
@@ -245,7 +236,6 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
 }
 .hud-logo-text span { color: var(--accent); }
 
-/* Live player count for the active game */
 .hud-player-count {
   display: none; align-items: center; gap: 5px;
   margin-left: 8px; padding: 2px 8px;
@@ -258,7 +248,6 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
 .hud-player-count.has-players { display: inline-flex; }
 .hud-player-count::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; animation: playerPulse 2s ease-in-out infinite; }
 
-/* Home icon button */
 .hud-home-btn {
   display: flex; align-items: center; justify-content: center;
   width: 38px; height: 100%;
@@ -272,7 +261,6 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
 .hud-home-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
 .hud-home-btn svg { width: 14px; height: 14px; }
 
-/* Divider for game name area */
 .hud-game-pill {
   display: flex; align-items: center; gap: 7px;
   padding: 0 12px 0 10px;
@@ -293,7 +281,6 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
   overflow: hidden; text-overflow: ellipsis;
 }
 
-/* Chat icon button */
 .hud-chat-btn {
   display: flex; align-items: center; justify-content: center;
   width: 38px; height: 100%;
@@ -317,11 +304,8 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
 .hud-chat-btn.has-unread .hud-chat-unread { opacity: 1; transform: scale(1); animation: unreadPulse 1.8s ease-out infinite; }
 @keyframes unreadPulse { 0%{box-shadow:0 0 0 0 rgba(34,197,94,0.45)} 100%{box-shadow:0 0 0 7px rgba(34,197,94,0)} }
 
-/* Keep old stubs working, just invisible */
 .hud-brand,.hud-sep { display: none; }
 
-/* === PLAYTIME WIDGET === */
-/* Homepage: floated away from all edges/corners, near the top-center */
 #playtimeWidget {
   position: fixed; top: 16px; left: 50%;
   transform: translateX(-50%);
@@ -336,7 +320,7 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
   height: 38px;
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
-/* In-game: move to the left, stacked under the game HUD buttons */
+
 body.game-active #playtimeWidget {
   top: 62px; left: 16px; right: auto;
   transform: none;
@@ -367,7 +351,6 @@ body.game-active #playtimeWidget {
 .playtime-add-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
 .playtime-add-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-/* === PLAYTIME MODAL === */
 #playtimeModal {
   position: fixed; inset: 0; z-index: 9998;
   display: flex; align-items: center; justify-content: center;
@@ -410,7 +393,6 @@ body.game-active #playtimeWidget {
 }
 .playtime-cancel-btn:hover { color: var(--muted-light); }
 
-/* Reward toast */
 #playtimeToast {
   position: fixed; top: 62px; right: 16px; z-index: 1200;
   background: linear-gradient(135deg, rgba(34,197,94,0.16), rgba(15,23,42,0.94));
@@ -434,7 +416,6 @@ body.game-active #playtimeWidget {
   #playtimeToast { top: 52px; right: 10px; }
 }
 
-/* === FLOAT ACTION BUTTONS (bottom-right, homepage only) === */
 #floatActions { position: fixed; bottom: 20px; right: 20px; display: flex; align-items: center; gap: 8px; z-index: 1100; }
 .float-btn { display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px; border-radius: 100px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; backdrop-filter: blur(12px); border: 1px solid; }
 .float-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
@@ -446,7 +427,6 @@ body.game-active .float-btn-chat { display: none; }
 .float-chat-unread { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; border: 2px solid var(--bg); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
 .float-btn-chat.has-unread .float-chat-unread { opacity: 1; transform: scale(1); }
 
-/* === GAME LAUNCHER (slide-in panel for in-game switching) === */
 #gameLauncher { position: fixed; left: 0; top: 0; bottom: 0; z-index: 900; display: flex; pointer-events: none; }
 #launcherTab { display: none; }
 #launcherPanel { width: 256px; height: 100%; background: linear-gradient(180deg,rgba(8,14,30,0.98),rgba(6,10,22,0.99)); border-right: 1px solid rgba(56,189,248,0.14); box-shadow: 8px 0 48px rgba(0,0,0,0.6); backdrop-filter: blur(24px); transform: translateX(-100%); transition: transform 0.38s var(--ease-spring); pointer-events: all; display: flex; flex-direction: column; overflow: hidden; }
@@ -479,11 +459,9 @@ body.game-active .float-btn-chat { display: none; }
 .launcher-backdrop { display: none; position: fixed; inset: 0; z-index: 890; pointer-events: none; transition: background 0.3s ease; }
 #gameLauncher.open ~ .launcher-backdrop { display: block; pointer-events: all; background: rgba(0,0,0,0.4); }
 
-/* === IFRAME VIEWER === */
 #viewer { position: fixed; inset: 0; width: 100%; height: 100%; border: none; background: #000; opacity: 0; pointer-events: none; z-index: 5; }
 body.game-active #viewer { opacity: 1; pointer-events: all; }
 
-/* === CHAT PANEL === */
 .site-chat { position: fixed; inset: 0 0 0 auto; width: min(34vw,460px); min-width: 330px; max-width: 100vw; background: radial-gradient(circle at 12% 0%,rgba(167,139,250,0.08),transparent 30%), radial-gradient(circle at 88% 14%,rgba(56,189,248,0.07),transparent 28%), linear-gradient(180deg,rgba(17,24,39,0.99),rgba(2,6,23,0.99)); border-left: 1px solid rgba(125,211,252,0.13); box-shadow: -20px 0 56px rgba(0,0,0,0.45); backdrop-filter: blur(18px); display: grid; grid-template-rows: auto 1fr auto; transform: translateX(100%); transition: transform 0.32s var(--ease-spring); z-index: 1700; }
 .site-chat.open { transform: translateX(0); }
 .chat-header { padding: 18px 18px 14px; border-bottom: 1px solid rgba(148,163,184,0.1); }
@@ -562,7 +540,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 </head>
 <body>
 
-<!-- EMAIL POPUP -->
 <div id="emailPopup" class="overlay">
   <div class="overlay-content">
     <h1>Want the new URL when this site gets blocked?</h1>
@@ -573,7 +550,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   </div>
 </div>
 
-<!-- HOMEPAGE -->
 <div id="homepage">
   <div class="homepage-inner">
     <header class="home-header">
@@ -601,7 +577,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   </div>
 </div>
 
-<!-- HIDDEN NAV STUBS (JS compatibility) -->
 <nav id="siteNav" style="display:none" aria-hidden="true">
   <div class="brand"><div class="title">New Tab 2</div><div id="status" class="status">Idle</div></div>
   <div id="navActiveGame" class="nav-active-game"><span class="nav-active-game-dot"></span><span id="navActiveGameName" class="nav-active-game-name">—</span></div>
@@ -619,7 +594,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   </button>
 </nav>
 
-<!-- GAME LAUNCHER (in-game switcher) -->
 <div id="gameLauncher">
   <div id="launcherTab"></div>
   <div id="launcherPanel">
@@ -635,30 +609,28 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 </div>
 <div class="launcher-backdrop" onclick="closeLauncher()"></div>
 
-<!-- IFRAME -->
 <iframe id="viewer"></iframe>
 
-<!-- TOP-LEFT GAME HUD -->
 <div id="gameHud">
   <div class="hud-shell">
-    <!-- NT2 logo — fancy text only -->
+    
     <div class="hud-logo" title="New Tab 2">
       <span class="hud-logo-text">NT<span>2</span></span>
     </div>
-    <!-- Home button — house icon -->
+    
     <button class="hud-home-btn" id="hudHomeBtn" type="button" title="Go home">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M3 12L12 4L21 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M5 10V20C5 20.55 5.45 21 6 21H10V16H14V21H18C18.55 21 19 20.55 19 20V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-    <!-- Current game pill — click to switch -->
+    
     <div class="hud-game-pill" onclick="openLauncher()" title="Switch game">
       <span class="hud-dot"></span>
       <span id="hudGameName" class="hud-game-name">&#8212;</span>
       <span id="hudPlayerCount" class="hud-player-count" data-player-count-for="" title="Players in this game"></span>
     </div>
-    <!-- Chat icon button -->
+    
     <button class="hud-chat-btn" id="hudChatBtn" type="button" title="Open chat">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
@@ -666,12 +638,11 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
       <span class="hud-chat-unread"></span>
     </button>
   </div>
-  <!-- keep legacy spans for JS compat -->
+
   <span class="hud-brand" style="display:none">New Tab 2</span>
   <span class="hud-sep" style="display:none">&middot;</span>
 </div>
 
-<!-- PLAYTIME WIDGET (always visible, top-right) -->
 <div id="playtimeWidget">
   <div class="playtime-clock-wrap" title="Playtime remaining">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -690,7 +661,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   </button>
 </div>
 
-<!-- PLAYTIME MODAL -->
 <div id="playtimeModal">
   <div class="playtime-modal-card">
     <h2>Earn 2:30 More Minutes</h2>
@@ -703,7 +673,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 </div>
 
 
-<!-- PLAYTIME REWARD TOAST -->
 <div id="playtimeToast">
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -711,7 +680,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   <span id="playtimeToastText">+2:30 added!</span>
 </div>
 
-<!-- FLOAT ACTION BUTTONS (bottom-right) -->
 <div id="floatActions">
   <button class="float-btn float-btn-games" type="button" onclick="openLauncher()">
     <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/></svg>
@@ -724,7 +692,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   </button>
 </div>
 
-<!-- CHAT PANEL -->
 <aside id="siteChat" class="site-chat" aria-label="Site chat">
   <header class="chat-header">
     <div class="chat-title-row">
@@ -765,7 +732,7 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 <script type="module" src="firebase-presence.js"></script>
 
 <script>
-// DOM REFS
+
 const tabsMain = document.getElementById("tabsMain");
 const tabsMore = document.getElementById("tabsMore");
 const moreDropdown = document.getElementById("moreDropdown");
@@ -883,7 +850,6 @@ function renderHomeGrid(entries) {
     const hasCover = Boolean(data.cover);
 
     if (hasCover) {
-      // === COVER IMAGE CARD ===
       card.classList.add("has-cover");
 
       const img = document.createElement("img");
@@ -908,7 +874,6 @@ function renderHomeGrid(entries) {
       card.appendChild(label);
 
     } else {
-      // === DEFAULT (initials) CARD ===
       const glow = document.createElement("div");
       glow.className = "game-card-glow";
       card.appendChild(glow);
@@ -1016,7 +981,6 @@ function closeLauncher() { launcher.classList.remove("open"); }
 function build() { buildLauncher(); }
 function toggleDropdown() {}
 
-// Called from chat when someone clicks a "playing X" tag next to a message
 function switchToGame(name) {
   if (typeof PAGES === "undefined" || !PAGES[name]) return;
   const data = getGameData(PAGES[name]);
@@ -1219,17 +1183,11 @@ function dismiss() { emailPopup.classList.remove("active"); localStorage.setItem
 yesBtn.onclick = () => { window.open(FORM_LINK,"_blank"); dismiss(); };
 noBtn.onclick = dismiss;
 
-/* === PLAYTIME SYSTEM ===
-   Kids need playtime to play games. Playtime only ticks down while a game
-   is active. It's stored in localStorage so it persists between visits.
-   Clicking "Add Time" sends them to ixl.com to do some math — when they
-   come back to this tab, +5 minutes gets added automatically. */
 const Playtime = (function () {
   const STORAGE_KEY = "playtime_seconds_remaining";
-  const START_SECONDS = 0;         // playtime a new visitor starts with
-  const GRANT_SECONDS = 2 * 60 + 30; // time earned per IXL visit (2:30)
-  const COOLDOWN_MS = 3000;        // cooldown on the Add Time button
-  const IXL_URL = "https://www.ixl.com";
+  const START_SECONDS = 0;
+  const GRANT_SECONDS = 2 * 60 + 30;
+  const COOLDOWN_MS = 3000;
 
   const widget = document.getElementById("playtimeWidget");
   const clockEl = document.getElementById("playtimeClock");
@@ -1309,10 +1267,6 @@ const Playtime = (function () {
     }, 1000);
   }
 
-  // Fires when the actual IXL link is clicked (real <a> element, real
-  // click event) — the click itself is the source of truth that they
-  // were sent to IXL, so the reward is awarded right away instead of
-  // waiting for them to come back to this tab.
   function handleIxlLinkClicked() {
     grantTime();
     closeModal();
