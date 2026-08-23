@@ -12,12 +12,6 @@ window.PAGES = {
     "url": "https://newnewnewnewtab.github.io/Polytrack/",
     "cover": "polytrack.png"
   },
-
-  "NewTab.Ai": { 
-    "url": "https://newnewnewnewtab.github.io/NewTab.Ai/",
-    "ribbon": "AI",
-    "ribbonColor": "#00ffff"
-  },
   
   "Snow Rider": { 
     "url": "https://jigar1234nob.github.io/snowrider3d/",
