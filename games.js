@@ -44,7 +44,8 @@ window.PAGES = {
   "There is No Game": { 
     "url": "https://script.google.com/a/macros/rsu71.org/s/AKfycbwfUFXy27bYwMfp4xHUVbpN9PSWWzB7bKs-qA01ZYJ7hgeZbvFZgkdjydsAYWrYGPQb/exec",
     "ribbon": "New",
-    "ribbonColor": "#FF77FF"
+    "ribbonColor": "#FF77FF",
+    "cover": "ting.jpg"
   },
   
   "Subway Surfers": { 
@@ -131,7 +132,7 @@ window.PAGES = {
   
   "Retro Bowl": { 
     "url": "https://newnewnewnewtab.github.io/rb/",
-    "cover": "retrobowl.png"
+    "cover": "retrobowl.jpg"
   },
 
   "Five Nights at Epsteins": { 
