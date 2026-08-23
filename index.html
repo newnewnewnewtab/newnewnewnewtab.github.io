@@ -758,7 +758,7 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 <div id="aiChatModal" aria-hidden="true">
   <div class="ai-chat-panel">
     <button class="ai-chat-close" id="aiChatCloseBtn" type="button" aria-label="Close AI chat">&#x2715;</button>
-    <iframe id="aiChatFrame" title="AI Chat" src="" loading="lazy"></iframe>
+    <iframe id="aiChatFrame" title="AI Chat" loading="lazy"></iframe>
   </div>
 </div>
 
@@ -1127,8 +1127,9 @@ const aiChatModal = document.getElementById("aiChatModal");
 const aiChatFrame = document.getElementById("aiChatFrame");
 const AI_CHAT_SRC = "newtabai.html";
 
+let aiChatLoaded = false;
 function openAiChat() {
-  if (!aiChatFrame.src) aiChatFrame.src = AI_CHAT_SRC; // lazy-load on first open
+  if (!aiChatLoaded) { aiChatFrame.src = AI_CHAT_SRC; aiChatLoaded = true; } // lazy-load on first open
   aiChatModal.classList.add("active");
   aiChatModal.setAttribute("aria-hidden", "false");
 }
