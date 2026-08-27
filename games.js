@@ -19,8 +19,10 @@ window.PAGES = {
   },
   
   "Basket Bros": { 
-    "url": "https://newnewnewnewtab.github.io/Embed-Failed/",
-    "cover": "basketbros.png"
+    "url": "https://newnewnewnewtab.github.io/basketbros/",
+    "cover": "basketbros.png",
+    "ribbon": "Fixed",
+    "ribbonColor": "#FF77FF"
   },
 
   "Paper.io": { 
