@@ -69,13 +69,6 @@ window.PAGES = {
     "url": "https://newnewnewnewtab.github.io/Moto-X3M-2/",
     "cover": "motox3m2.png"
   },
-
-  "Angry Birds": { 
-    "url": "https://script.google.com/macros/s/AKfycby30nrhMSPeJyfgpPQfLsVVhOxjjyErkIsQtoYAzPkRYenYcSBpVyMcOwXy_flMCjFm/exec",
-    "cover": "angrybirds.png",
-    "ribbon": "New",
-    "ribbonColor": "#7FFFD4"
-  },
   
   "Gunspin": {
     "url": "https://newnewnewnewtab.github.io/Gunspin/",
