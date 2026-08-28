@@ -111,8 +111,10 @@ window.PAGES = {
   },
   
   "Basket Random": { 
-    "url": "https://newnewnewnewtab.github.io/Embed-Failed/",
-    "cover": "basketrandom.jpeg"
+    "url": "https://newnewnewnewtab.github.io/basket-random/",
+    "cover": "basketrandom.jpeg",
+    "ribbon": "Fixed",
+    "ribbonColor": "#FF69B4"
   },
   
   "Eggy Car": { 
