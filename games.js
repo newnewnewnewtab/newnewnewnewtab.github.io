@@ -83,8 +83,10 @@ window.PAGES = {
   },
 
   "Minecraft": { 
-    "url": "https://glennfb83.github.io/ec/",
-    "cover": "minecraft.jpg"
+    "url": "https://newnewnewnewtab.github.io/MC1.12.2/",
+    "cover": "minecraft.jpg",
+    "ribbon": "Now 1.21.2",
+    "ribbonColor": "#00FFFF"
   },
 
   "Police Pursuit 2 ": { 
