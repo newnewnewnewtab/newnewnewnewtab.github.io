@@ -181,34 +181,6 @@
     letter-spacing: 0.1em;
   }
 
-  .earn-btn{
-    margin-top: 8px;
-    padding: 6px 10px;
-    font-size: 10.5px;
-    font-family: var(--font-mono);
-    font-weight: 500;
-    background: transparent;
-    color: var(--pink-soft);
-    border: 1px solid var(--pink-dim);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
-    letter-spacing: 0.02em;
-  }
-
-  .earn-btn:hover:not(:disabled){
-    background: var(--pink);
-    color: #1a0512;
-    border-color: var(--pink);
-  }
-
-  .earn-btn:disabled{
-    opacity: 0.4;
-    cursor: not-allowed;
-    color: var(--ink-faint);
-    border-color: var(--line-soft);
-  }
-
   /* ---------- model picker ---------- */
   .model-row{
     display: flex;
@@ -269,6 +241,16 @@
   select#modelSelect option{
     background: #0d0b16;
     color: var(--ink);
+  }
+
+  select#modelSelect option:disabled{
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  select#modelSelect:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   /* ---------- feed ---------- */
@@ -452,6 +434,11 @@
     background: rgba(255,63,160,0.05);
   }
 
+  input#input:disabled{
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
   .send-btn{
     width: 46px;
     height: 46px;
@@ -469,8 +456,14 @@
 
   .send-btn svg{ width: 18px; height: 18px; }
 
-  .send-btn:hover{ filter: brightness(1.1); }
-  .send-btn:active{ transform: scale(0.94); }
+  .send-btn:hover:not(:disabled){ filter: brightness(1.1); }
+  .send-btn:active:not(:disabled){ transform: scale(0.94); }
+
+  .send-btn:disabled{
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: none;
+  }
 
   button:focus-visible, input:focus-visible, select:focus-visible{
     outline: 2px solid var(--pink);
@@ -558,9 +551,8 @@
         <h1>NewTab.Ai</h1>
       </div>
       <div class="signal">
-        <div class="count" id="tokenCount">0</div>
-        <div class="label">credits</div>
-        <button class="earn-btn" id="earnBtn" onclick="earnCredit()">Earn Credit</button>
+        <div class="count" id="modelStatusCount">–</div>
+        <div class="label" id="modelStatusLabel">checking models</div>
       </div>
     </div>
 
@@ -586,7 +578,7 @@
       placeholder="Type a message…"
       onkeydown="if(event.key === 'Enter') sendMessage()"
     >
-    <button class="send-btn" onclick="sendMessage()" aria-label="Send">
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M4 12L20 4L14 20L11 13L4 12Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
       </svg>
@@ -721,57 +713,114 @@
 
   const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"; // best-performing free model on OpenRouter right now
   const MODEL_STORAGE_KEY = "newtabai_model";
-
-  const CREDIT_LINK = "https://omg10.com/4/11589934";
-  const EARN_COOLDOWN_SECONDS = 5;
-  const CREDIT_COST_PER_MESSAGE = 1;
-  const CREDITS_STORAGE_KEY = "newtabai_credits";
+  const MODEL_TEST_TIMEOUT_MS = 12000;
 
   const messages = [];
-  let credits = loadCredits();
-  let cooldownActive = false;
+  let isSending = false; // true while waiting on a response — blocks sending another message
+  let workingModels = new Set(MODELS.map(m => m.id)); // optimistic until tested
+  let modelsTested = false;
 
-  function loadCredits(){
-    const stored = localStorage.getItem(CREDITS_STORAGE_KEY);
-    const parsed = parseInt(stored, 10);
-    return Number.isFinite(parsed) ? parsed : 0;
+  function setComposerDisabled(disabled){
+    document.getElementById("input").disabled = disabled;
+    document.getElementById("sendBtn").disabled = disabled;
   }
 
-  function saveCredits(){
-    localStorage.setItem(CREDITS_STORAGE_KEY, String(credits));
+  // ---------- chatbot self-test ----------
+  async function testModel(modelId){
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), MODEL_TEST_TIMEOUT_MS);
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [{ role: "user", content: "Hi" }],
+          max_tokens: 5
+        }),
+        signal: controller.signal
+      });
+
+      if (!response.ok) return false;
+
+      const data = await response.json();
+      return !!(data.choices && data.choices[0] && data.choices[0].message);
+    } catch (error) {
+      return false;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
-  function updateCreditMeter(){
-    document.getElementById("tokenCount").textContent = credits;
-    saveCredits();
+  function refreshModelOptionStates(){
+    const select = document.getElementById("modelSelect");
+    Array.from(select.options).forEach(opt => {
+      const model = MODELS.find(m => m.id === opt.value);
+      if (!model) return;
+      const ok = workingModels.has(opt.value);
+      opt.disabled = !ok;
+      opt.textContent = ok ? model.label : `${model.label} (unavailable)`;
+    });
+
+    const countEl = document.getElementById("modelStatusCount");
+    const labelEl = document.getElementById("modelStatusLabel");
+    if (countEl) countEl.textContent = workingModels.size;
+    if (labelEl) labelEl.textContent = workingModels.size === 1 ? "model online" : "models online";
   }
 
-  function earnCredit(){
-    if (cooldownActive) return;
+  // Switches away from a model that isn't working. Returns the fallback label used, or null.
+  function switchAwayFromModel(modelId){
+    const select = document.getElementById("modelSelect");
+    if (select.value !== modelId) return null;
 
-    window.open(CREDIT_LINK, "_blank");
+    const fallback = MODELS.find(m => workingModels.has(m.id));
+    if (!fallback) return null;
 
-    credits += 1;
-    updateCreditMeter();
+    select.value = fallback.id;
+    localStorage.setItem(MODEL_STORAGE_KEY, fallback.id);
+    return fallback.label;
+  }
 
-    cooldownActive = true;
-    const btn = document.getElementById("earnBtn");
-    btn.disabled = true;
+  async function testAllModels(){
+    setComposerDisabled(true);
+    const countEl = document.getElementById("modelStatusCount");
+    const labelEl = document.getElementById("modelStatusLabel");
+    if (countEl) countEl.textContent = "…";
+    if (labelEl) labelEl.textContent = "checking models";
 
-    let remaining = EARN_COOLDOWN_SECONDS;
-    btn.textContent = `Wait ${remaining}s`;
+    const select = document.getElementById("modelSelect");
+    const previouslySelected = select.value;
+    const previousLabel = MODELS.find(m => m.id === previouslySelected)?.label || previouslySelected;
 
-    const interval = setInterval(() => {
-      remaining -= 1;
-      if (remaining <= 0) {
-        clearInterval(interval);
-        btn.disabled = false;
-        btn.textContent = "Earn Credit";
-        cooldownActive = false;
+    const results = await Promise.all(
+      MODELS.map(async m => ({ id: m.id, ok: await testModel(m.id) }))
+    );
+
+    workingModels = new Set(results.filter(r => r.ok).map(r => r.id));
+    modelsTested = true;
+    refreshModelOptionStates();
+
+    if (!workingModels.has(previouslySelected)) {
+      const fallbackLabel = switchAwayFromModel(previouslySelected);
+      if (fallbackLabel) {
+        showToast(`${previousLabel} isn't responding — switched to ${fallbackLabel}.`);
       } else {
-        btn.textContent = `Wait ${remaining}s`;
+        showToast("None of the chatbots are responding right now. Try again shortly.");
       }
-    }, 1000);
+    }
+
+    setComposerDisabled(false);
+  }
+
+  // Called when a live message fails against the currently selected model.
+  function handleModelFailure(modelId){
+    if (!workingModels.has(modelId)) return null;
+    workingModels.delete(modelId);
+    refreshModelOptionStates();
+    return switchAwayFromModel(modelId);
   }
 
   // ---------- model picker ----------
@@ -830,22 +879,26 @@
   }
 
   async function sendMessage() {
+    if (isSending) return; // cooldown: block until the in-flight message has finished loading
+
     const input = document.getElementById("input");
     const text = input.value.trim();
 
     if (!text) return;
 
-    if (credits < CREDIT_COST_PER_MESSAGE) {
-      showToast("You're out of credits. Open the credit link to earn more.");
+    const model = currentModel();
+
+    if (modelsTested && !workingModels.has(model)) {
+      showToast("That chatbot isn't responding right now. Pick another from the list.");
       return;
     }
+
+    isSending = true;
+    setComposerDisabled(true);
 
     document.getElementById("emptyState")?.remove();
 
     input.value = "";
-
-    credits -= CREDIT_COST_PER_MESSAGE;
-    updateCreditMeter();
 
     addMessage(text, "user");
 
@@ -854,7 +907,6 @@
       content: text
     });
 
-    const model = currentModel();
     const thinkingRow = addLoadingEntry();
 
     try {
@@ -890,9 +942,18 @@
     } catch (error) {
       thinkingRow.remove();
 
-      showToast(`Request failed: ${error.message || "unknown error"}`);
+      const fallbackLabel = handleModelFailure(model);
+      if (fallbackLabel) {
+        showToast(`Request failed: ${error.message || "unknown error"} — switched to ${fallbackLabel}.`);
+      } else {
+        showToast(`Request failed: ${error.message || "unknown error"}`);
+      }
 
       console.error(error);
+    } finally {
+      isSending = false;
+      setComposerDisabled(false);
+      input.focus();
     }
   }
 
@@ -964,7 +1025,7 @@
 
   // ---------- init ----------
   populateModelSelect();
-  document.getElementById("tokenCount").textContent = credits;
+  testAllModels();
 </script>
 
 </body>
