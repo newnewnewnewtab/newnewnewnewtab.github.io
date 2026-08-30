@@ -196,12 +196,7 @@ body {
 .game-card.has-cover .game-card-cover-label .game-card-name { color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); margin-bottom: 0; }
 .game-card.has-cover .game-card-glow { display: none; }
 .game-card.has-cover .game-card-icon { display: none; }
-.game-card.has-cover .game-card-players { position: relative; z-index: 2; padding: 0 12px 8px; margin-top: -4px; }
-.game-card-players { display: none; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; color: #22c55e; }
-.game-card-players.has-players { display: flex; }
-.game-card-players::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #22c55e; flex-shrink: 0; animation: playerPulse 2s ease-in-out infinite; }
-@keyframes playerPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
-.game-card-ribbon { position: absolute; top: 10px; right: 10px; font-size: 8px; font-weight: 900; color: #fff; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; letter-spacing: 0.04em; }
+.game-card-ribbon { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; padding: 5px 11px; border-radius: 7px; letter-spacing: 0.05em; box-shadow: 0 4px 14px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.18) inset; text-shadow: 0 1px 2px rgba(0,0,0,0.35); z-index: 3; }
 
 #gameHud {
   position: fixed; top: 16px; left: 16px;
@@ -238,18 +233,6 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
   line-height: 1;
 }
 .hud-logo-text span { color: var(--accent); }
-
-.hud-player-count {
-  display: none; align-items: center; gap: 5px;
-  margin-left: 8px; padding: 2px 8px;
-  border-radius: 100px;
-  background: var(--accent2-soft);
-  color: #d8ccfc;
-  font-size: 10px; font-weight: 800;
-  white-space: nowrap;
-}
-.hud-player-count.has-players { display: inline-flex; }
-.hud-player-count::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; animation: playerPulse 2s ease-in-out infinite; }
 
 .hud-home-btn {
   display: flex; align-items: center; justify-content: center;
@@ -354,6 +337,11 @@ body.game-active #playtimeWidget {
 .playtime-add-btn:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.6; }
 .playtime-add-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
+.playtime-clock-sublabel { font-size: 8px; font-weight: 900; letter-spacing: 0.12em; color: #fde68a; margin-top: 1px; }
+#playtimeWidget.ad-free { border-color: rgba(250,204,21,0.5); box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(250,204,21,0.16); }
+#playtimeWidget.ad-free .playtime-clock { color: #fde68a; }
+#playtimeWidget.ad-free .playtime-clock-wrap svg { color: #facc15; }
+
 #playtimeModal {
   position: fixed; inset: 0; z-index: 9998;
   display: flex; align-items: center; justify-content: center;
@@ -365,34 +353,72 @@ body.game-active #playtimeWidget {
 }
 #playtimeModal.active { opacity: 1; visibility: visible; }
 .playtime-modal-card {
-  width: 100%; max-width: 380px;
+  width: 100%; max-width: 420px;
   background: var(--bg-card);
   border: 1px solid var(--border-accent);
   border-radius: 18px;
-  padding: 30px 28px 26px;
+  padding: 28px 26px 22px;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   transform: translateY(8px) scale(0.98);
   transition: transform 0.3s var(--ease-spring);
 }
 #playtimeModal.active .playtime-modal-card { transform: translateY(0) scale(1); }
-.playtime-modal-card h2 { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 10px; }
-.playtime-modal-card p { font-size: 0.85rem; color: var(--muted-light); line-height: 1.55; margin-bottom: 22px; }
-.playtime-modal-card p .ixl-link-text { color: var(--accent); font-weight: 700; }
-.playtime-modal-actions { display: flex; flex-direction: column; gap: 10px; }
+.playtime-modal-card h2 { font-size: 1.15rem; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 6px; }
+.playtime-modal-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 18px; }
+
+.playtime-option {
+  text-align: left;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 16px 14px;
+}
+.playtime-option-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.playtime-option-title { font-size: 0.92rem; font-weight: 900; color: var(--text); }
+.playtime-option-badge { font-size: 10px; font-weight: 900; letter-spacing: 0.04em; color: #031018; background: var(--accent); padding: 3px 9px; border-radius: 100px; }
+.playtime-option-badge.gold { background: linear-gradient(135deg,#facc15,#fbbf24); }
+.playtime-option-desc { font-size: 0.8rem; color: var(--muted-light); line-height: 1.5; margin-bottom: 14px; }
+.playtime-option-desc strong { color: var(--text); }
+
 .playtime-go-btn {
-  display: inline-block; text-decoration: none;
-  background: var(--accent); color: #031018; padding: 13px 20px;
-  font-size: 0.9rem; font-weight: 900; border-radius: 100px; border: none;
+  display: block; text-align: center; text-decoration: none;
+  background: var(--accent); color: #031018; padding: 12px 20px;
+  font-size: 0.85rem; font-weight: 900; border-radius: 100px; border: none;
   cursor: pointer; font-family: inherit; transition: transform 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
   text-transform: uppercase; letter-spacing: 0.04em;
 }
-.playtime-go-btn:hover { transform: scale(1.03); box-shadow: 0 0 28px rgba(56,189,248,0.4); }
-.playtime-go-btn.visited { background: rgba(255,255,255,0.08); color: var(--muted-light); box-shadow: none; }
+.playtime-go-btn:hover { transform: scale(1.02); box-shadow: 0 0 24px rgba(56,189,248,0.35); }
+
+.playtime-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+.playtime-divider::before, .playtime-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+
+.playtime-option-adfree { border-color: rgba(250,204,21,0.22); background: rgba(250,204,21,0.035); }
+
+.adfree-progress-wrap { margin-bottom: 14px; }
+.adfree-progress-track { height: 8px; border-radius: 100px; background: rgba(255,255,255,0.07); overflow: hidden; }
+.adfree-progress-fill { height: 100%; width: 0%; border-radius: 100px; background: linear-gradient(90deg,#facc15,#fb923c); transition: width 0.35s var(--ease-spring); }
+.adfree-progress-label { margin-top: 7px; font-size: 11px; font-weight: 800; color: var(--muted-light); text-align: center; }
+
+.adfree-active-wrap { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 14px; border-radius: 12px; background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); }
+.adfree-active-icon { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; background: rgba(74,222,128,0.22); color: #4ade80; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; }
+.adfree-active-title { font-size: 0.82rem; font-weight: 900; color: #bbf7d0; }
+.adfree-active-sub { font-size: 0.74rem; color: #86efac; margin-top: 1px; }
+
+.adfree-watch-btn {
+  display: block; text-align: center; text-decoration: none;
+  background: linear-gradient(135deg,#facc15,#fb923c); color: #1a0f00; padding: 12px 20px;
+  font-size: 0.85rem; font-weight: 900; border-radius: 100px; border: none;
+  cursor: pointer; font-family: inherit; transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.adfree-watch-btn:hover { transform: scale(1.02); box-shadow: 0 0 24px rgba(250,204,21,0.35); }
+.adfree-watch-btn.disabled { pointer-events: none; opacity: 0.45; box-shadow: none; transform: none; }
+
 .playtime-cancel-btn {
-  background: transparent; color: var(--muted); padding: 8px 16px;
+  background: transparent; color: var(--muted); padding: 14px 16px 2px;
   font-size: 0.82rem; font-weight: 600; border: none; cursor: pointer; font-family: inherit;
-  transition: color 0.2s;
+  transition: color 0.2s; width: 100%;
 }
 .playtime-cancel-btn:hover { color: var(--muted-light); }
 
@@ -410,6 +436,8 @@ body.game-active #playtimeWidget {
 }
 #playtimeToast.showing { opacity: 1; transform: translateY(0); }
 #playtimeToast svg { width: 16px; height: 16px; color: #4ade80; flex-shrink: 0; }
+#playtimeToast.gold { background: linear-gradient(135deg, rgba(250,204,21,0.18), rgba(15,23,42,0.94)); border-color: rgba(250,204,21,0.45); color: #fef3c7; }
+#playtimeToast.gold svg { color: #facc15; }
 
 @media (max-width: 520px) {
   #playtimeWidget { top: 10px; height: 34px; }
@@ -417,6 +445,7 @@ body.game-active #playtimeWidget {
   .playtime-clock-wrap { padding: 0 9px; }
   .playtime-add-btn { padding: 0 10px; font-size: 10.5px; }
   #playtimeToast { top: 52px; right: 10px; }
+  .playtime-modal-card { padding: 24px 18px 18px; }
 }
 
 #floatActions { position: fixed; bottom: 20px; right: 20px; display: flex; align-items: center; gap: 8px; z-index: 1100; }
@@ -443,6 +472,21 @@ body.game-active .float-btn-chat { display: none; }
 }
 .home-ai-btn:hover { background: rgba(167,139,250,0.18); border-color: rgba(167,139,250,0.55); color: #f1ebff; }
 .home-ai-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+.home-whatsnew-btn {
+  display: flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 18px;
+  background: rgba(250,204,21,0.08);
+  border: 1px solid rgba(250,204,21,0.28);
+  border-radius: 100px;
+  color: #fde68a; font: inherit; font-size: 13px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; position: relative;
+  transition: all 0.2s ease;
+}
+.home-whatsnew-btn:hover { background: rgba(250,204,21,0.16); border-color: rgba(250,204,21,0.55); color: #fff7d6; }
+.home-whatsnew-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.home-whatsnew-dot { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #facc15; border: 2px solid var(--bg); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
+.home-whatsnew-dot.show { opacity: 1; transform: scale(1); animation: unreadPulse 1.8s ease-out infinite; }
 
 .float-btn-ai { background: linear-gradient(135deg,rgba(167,139,250,0.28),rgba(15,23,42,0.9)); border-color: rgba(216,204,252,0.32); color: #f1ebff; }
 .float-btn-ai:hover { background: linear-gradient(135deg,rgba(167,139,250,0.42),rgba(15,23,42,0.92)); border-color: rgba(216,204,252,0.6); color: #fff; }
@@ -485,6 +529,75 @@ body.game-active .float-btn-ai { display: none; }
   .ai-chat-panel { height: 92vh; border-radius: 16px; }
 }
 
+/* ---------- What's New ---------- */
+#whatsNewModal {
+  position: fixed; inset: 0; z-index: 9600;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(2,4,10,0.78);
+  backdrop-filter: blur(10px);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.25s ease;
+  padding: 20px;
+}
+#whatsNewModal.active { opacity: 1; visibility: visible; }
+.whatsnew-panel {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(82vh, 760px);
+  background: linear-gradient(180deg, var(--bg-card), #0a1120);
+  border: 1px solid rgba(250,204,21,0.22);
+  border-radius: 20px;
+  box-shadow: 0 50px 100px -30px rgba(0,0,0,0.75);
+  transform: scale(0.97) translateY(10px);
+  transition: transform 0.3s var(--ease-spring);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+#whatsNewModal.active .whatsnew-panel { transform: scale(1) translateY(0); }
+.whatsnew-header {
+  padding: 22px 26px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-shrink: 0;
+  background: radial-gradient(ellipse at top left, rgba(250,204,21,0.09), transparent 60%);
+}
+.whatsnew-header-text .home-eyebrow { color: #facc15; }
+.whatsnew-header-text .home-eyebrow::before { background: #facc15; }
+.whatsnew-title { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.5px; margin-top: 4px; }
+.whatsnew-close {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  color: #f8fafc; cursor: pointer; font-size: 14px; line-height: 1;
+  transition: background 0.18s, color 0.18s;
+}
+.whatsnew-close:hover { background: rgba(255,90,110,0.85); border-color: transparent; }
+.whatsnew-body { overflow-y: auto; padding: 22px 26px 28px; scrollbar-width: thin; scrollbar-color: rgba(250,204,21,0.2) transparent; }
+.whatsnew-body::-webkit-scrollbar { width: 5px; }
+.whatsnew-body::-webkit-scrollbar-thumb { background: rgba(250,204,21,0.22); border-radius: 99px; }
+.whatsnew-entry { position: relative; padding-left: 22px; padding-bottom: 26px; border-left: 2px solid rgba(255,255,255,0.08); }
+.whatsnew-entry:last-child { padding-bottom: 2px; }
+.whatsnew-entry::before { content: ''; position: absolute; left: -6px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(56,189,248,0.14); }
+.whatsnew-entry:first-child::before { background: #facc15; box-shadow: 0 0 0 4px rgba(250,204,21,0.16); }
+.whatsnew-entry-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.whatsnew-date { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.whatsnew-entry-title { font-size: 1rem; font-weight: 800; color: var(--text); }
+.whatsnew-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.whatsnew-tag { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 9px; border-radius: 100px; }
+.whatsnew-tag.new { background: rgba(74,222,128,0.14); color: #86efac; border: 1px solid rgba(74,222,128,0.3); }
+.whatsnew-tag.improved { background: rgba(56,189,248,0.14); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.3); }
+.whatsnew-tag.fixed { background: rgba(248,113,113,0.14); color: #fca5a5; border: 1px solid rgba(248,113,113,0.3); }
+.whatsnew-tag.removed { background: rgba(148,163,184,0.14); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.3); }
+.whatsnew-items { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.whatsnew-items li { font-size: 0.85rem; color: var(--muted-light); line-height: 1.5; padding-left: 16px; position: relative; }
+.whatsnew-items li::before { content: '–'; position: absolute; left: 0; color: var(--muted); }
+.whatsnew-empty { text-align: center; color: var(--muted); padding: 40px 10px; font-size: 0.9rem; }
+@media (max-width: 600px) {
+  .whatsnew-panel { max-height: 88vh; }
+  .whatsnew-header { padding: 18px 18px 14px; }
+  .whatsnew-body { padding: 18px 18px 22px; }
+}
+
 #gameLauncher { position: fixed; left: 0; top: 0; bottom: 0; z-index: 900; display: flex; pointer-events: none; }
 #launcherTab { display: none; }
 #launcherPanel { width: 256px; height: 100%; background: linear-gradient(180deg,rgba(8,14,30,0.98),rgba(6,10,22,0.99)); border-right: 1px solid rgba(56,189,248,0.14); box-shadow: 8px 0 48px rgba(0,0,0,0.6); backdrop-filter: blur(24px); transform: translateX(-100%); transition: transform 0.38s var(--ease-spring); pointer-events: all; display: flex; flex-direction: column; overflow: hidden; }
@@ -510,10 +623,7 @@ body.game-active .float-btn-ai { display: none; }
 .game-swatch::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,0.18) 0%,transparent 60%); }
 .game-row-info { flex: 1; min-width: 0; }
 .game-row-name { font-size: 12px; font-weight: 600; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.game-row-players { display: none; align-items: center; gap: 4px; font-size: 9px; font-weight: 800; color: #22c55e; margin-top: 1px; }
-.game-row-players.has-players { display: flex; }
-.game-row-players::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: #22c55e; flex-shrink: 0; animation: playerPulse 2s ease-in-out infinite; }
-.game-row-ribbon { font-size: 8px; font-weight: 900; color: #fff; text-transform: uppercase; padding: 2px 5px; border-radius: 5px; letter-spacing: 0.04em; flex-shrink: 0; }
+.game-row-ribbon { font-size: 10px; font-weight: 900; color: #fff; text-transform: uppercase; padding: 4px 9px; border-radius: 6px; letter-spacing: 0.05em; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.16) inset; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
 .launcher-backdrop { display: none; position: fixed; inset: 0; z-index: 890; pointer-events: none; transition: background 0.3s ease; }
 #gameLauncher.open ~ .launcher-backdrop { display: block; pointer-events: all; background: rgba(0,0,0,0.4); }
 
@@ -528,7 +638,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 .chat-header-actions { display: flex; align-items: center; gap: 8px; }
 .chat-close-btn { width: 28px; height: 28px; border: none; background: rgba(255,255,255,0.07); color: var(--text); font-size: 16px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .chat-close-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
-.active-users { border: 1px solid rgba(74,222,128,0.28); border-radius: 100px; padding: 4px 10px; color: #dcfce7; background: rgba(22,101,52,0.16); font-size: 11px; font-weight: 800; white-space: nowrap; }
 .chat-room-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; padding: 4px; border: 1px solid rgba(125,211,252,0.12); border-radius: 13px; background: rgba(2,6,23,0.48); }
 .chat-room-tab { min-width: 0; height: 36px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: #94a3b8; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s; }
 .chat-room-tab:hover { color: #e0f2fe; background: rgba(56,189,248,0.08); }
@@ -626,6 +735,11 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.8"/></svg>
           AI Chat
         </button>
+        <button class="home-whatsnew-btn" id="homeWhatsNewBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5l1.9 4.6 4.9.5-3.7 3.4 1 4.9-4.1-2.5-4.1 2.5 1-4.9-3.7-3.4 4.9-.5L12 2.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          What's New
+          <span class="home-whatsnew-dot" id="homeWhatsNewDot"></span>
+        </button>
       </div>
     </header>
     <div class="home-search-row">
@@ -690,7 +804,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
     <div class="hud-game-pill" onclick="openLauncher()" title="Switch game">
       <span class="hud-dot"></span>
       <span id="hudGameName" class="hud-game-name">&#8212;</span>
-      <span id="hudPlayerCount" class="hud-player-count" data-player-count-for="" title="Players in this game"></span>
     </div>
     
     <button class="hud-chat-btn" id="hudChatBtn" type="button" title="Open chat">
@@ -706,13 +819,14 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 </div>
 
 <div id="playtimeWidget">
-  <div class="playtime-clock-wrap" title="Playtime remaining">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <div class="playtime-clock-wrap" id="playtimeClockWrap" title="Playtime remaining">
+    <svg id="playtimeClockIcon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
       <path d="M12 7V12L15.5 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <div>
       <div id="playtimeClock" class="playtime-clock">15:00</div>
+      <div id="playtimeClockSubLabel" class="playtime-clock-sublabel" style="display:none">AD-FREE</div>
     </div>
   </div>
   <button id="playtimeAddBtn" class="playtime-add-btn" type="button">
@@ -725,12 +839,44 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 
 <div id="playtimeModal">
   <div class="playtime-modal-card">
-    <h2>Earn 2:30 More Minutes</h2>
-    <p>Just visit <span class="ixl-link-text">the linked ad</span> and you'll get <strong>+2:30</strong> of playtime added right away.</p>
-    <div class="playtime-modal-actions">
-      <a id="playtimeGoBtn" class="playtime-go-btn" href="https://www.profitableratecpmnetwork.com/e84eb2qre?key=bbc790f8113012c88a2b7e56921fa100" target="_blank" rel="noopener">OPEN AD</a>
-      <button id="playtimeCancelBtn" class="playtime-cancel-btn" type="button">Maybe later</button>
+    <h2>Need More Time?</h2>
+    <p class="playtime-modal-sub">Pick one of the options below to keep playing.</p>
+
+    <div class="playtime-option">
+      <div class="playtime-option-head">
+        <span class="playtime-option-title">Quick Boost</span>
+        <span class="playtime-option-badge">+2:30</span>
+      </div>
+      <p class="playtime-option-desc">Open one ad and get <strong>2:30</strong> of playtime added right away.</p>
+      <a id="playtimeGoBtn" class="playtime-go-btn" href="https://www.profitableratecpmnetwork.com/e84eb2qre?key=bbc790f8113012c88a2b7e56921fa100" target="_blank" rel="noopener">Open Ad</a>
     </div>
+
+    <div class="playtime-divider"><span>or</span></div>
+
+    <div class="playtime-option playtime-option-adfree">
+      <div class="playtime-option-head">
+        <span class="playtime-option-title">Ad-Free Pass</span>
+        <span class="playtime-option-badge gold">12 HRS</span>
+      </div>
+      <p class="playtime-option-desc">Open 20 ads to unlock <strong>12 hours</strong> of ad-free play, your timer won't count down while it's active.</p>
+
+      <div id="adFreeProgressWrap" class="adfree-progress-wrap">
+        <div class="adfree-progress-track"><div id="adFreeProgressFill" class="adfree-progress-fill"></div></div>
+        <div class="adfree-progress-label" id="adFreeProgressText">0 / 20 ads watched</div>
+      </div>
+
+      <div id="adFreeActiveWrap" class="adfree-active-wrap" style="display:none">
+        <div class="adfree-active-icon">&#10003;</div>
+        <div>
+          <div class="adfree-active-title">Ad-Free is active</div>
+          <div class="adfree-active-sub" id="adFreeActiveUntilText">Ends at —</div>
+        </div>
+      </div>
+
+      <a id="adFreeWatchBtn" class="adfree-watch-btn" href="https://www.profitableratecpmnetwork.com/e84eb2qre?key=bbc790f8113012c88a2b7e56921fa100" target="_blank" rel="noopener">Watch Ad</a>
+    </div>
+
+    <button id="playtimeCancelBtn" class="playtime-cancel-btn" type="button">Maybe later</button>
   </div>
 </div>
 
@@ -765,12 +911,24 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   </div>
 </div>
 
+<div id="whatsNewModal" aria-hidden="true">
+  <div class="whatsnew-panel">
+    <div class="whatsnew-header">
+      <div class="whatsnew-header-text">
+        <div class="home-eyebrow">Changelog</div>
+        <div class="whatsnew-title">What's New</div>
+      </div>
+      <button class="whatsnew-close" id="whatsNewCloseBtn" type="button" aria-label="Close What's New">&#x2715;</button>
+    </div>
+    <div id="whatsNewBody" class="whatsnew-body"></div>
+  </div>
+</div>
+
 <aside id="siteChat" class="site-chat" aria-label="Site chat">
   <header class="chat-header">
     <div class="chat-title-row">
       <div class="chat-title">Live Chat</div>
       <div class="chat-header-actions">
-        <div id="chatActiveUsers" class="active-users">0 active</div>
         <button id="chatCloseBtn" class="chat-close-btn" type="button" aria-label="Close chat">&#x2715;</button>
       </div>
     </div>
@@ -801,6 +959,7 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 <div id="chatToastStack" class="chat-toast-stack" aria-live="polite"></div>
 
 <script src="games.js"></script>
+<script src="whats-new.js"></script>
 <script>window.CHAT_ENABLED = true;</script>
 <script type="module" src="firebase-presence.js"></script>
 
@@ -820,7 +979,6 @@ const chatInput = document.getElementById("chatInput");
 const chatForm = document.getElementById("chatForm");
 const chatMessages = document.getElementById("chatMessages");
 const chatSend = document.getElementById("chatSend");
-const chatActiveUsers = document.getElementById("chatActiveUsers");
 const chatLockedName = document.getElementById("chatLockedName");
 const chatLockedRoom = document.getElementById("chatLockedRoom");
 const chatRoomTabs = [...document.querySelectorAll("[data-chat-room]")];
@@ -831,7 +989,6 @@ const gameGrid = document.getElementById("gameGrid");
 const homeSearch = document.getElementById("homeSearch");
 const homeGameCount = document.getElementById("homeGameCount");
 const hudGameName = document.getElementById("hudGameName");
-const hudPlayerCount = document.getElementById("hudPlayerCount");
 const hudHomeBtn = document.getElementById("hudHomeBtn");
 const floatChatBtn = document.getElementById("floatChatBtn");
 const homeChatBtn = document.getElementById("homeChatBtn");
@@ -840,7 +997,6 @@ const MAX_VISIBLE = 10;
 const CHAT_NAME_KEY = "site_chat_random_name";
 const CHAT_ROOM_KEY = "site_chat_room";
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
-let latestFirebaseActiveUsers = null;
 let currentChatName = localStorage.getItem(CHAT_NAME_KEY) || "Loading...";
 let currentChatRoomId = localStorage.getItem(CHAT_ROOM_KEY) || "elementary";
 
@@ -894,11 +1050,6 @@ function buildLauncher() {
     stub.setAttribute("role", "none");
     stub.setAttribute("aria-hidden", "true");
     stub.style.cssText = "display:none!important";
-    const pc = document.createElement("span");
-    pc.className = "tab-player-count";
-    pc.dataset.playerCountFor = name;
-    pc.setAttribute("aria-hidden", "true");
-    stub.appendChild(pc);
     if (index < MAX_VISIBLE) tabsMain?.appendChild(stub);
     else tabsMore?.appendChild(stub);
   });
@@ -939,11 +1090,6 @@ function renderHomeGrid(entries) {
       nameEl.className = "game-card-name";
       nameEl.textContent = name;
       label.appendChild(nameEl);
-
-      const players = document.createElement("div");
-      players.className = "game-card-players";
-      players.dataset.playersFor = name;
-      label.appendChild(players);
       card.appendChild(label);
 
     } else {
@@ -964,11 +1110,6 @@ function renderHomeGrid(entries) {
       nameEl.className = "game-card-name";
       nameEl.textContent = name;
       card.appendChild(nameEl);
-
-      const players = document.createElement("div");
-      players.className = "game-card-players";
-      players.dataset.playersFor = name;
-      card.appendChild(players);
     }
 
     if (data.ribbon) {
@@ -1009,11 +1150,7 @@ function renderLauncherRows(entries) {
     const nameEl2 = document.createElement("div");
     nameEl2.className = "game-row-name";
     nameEl2.textContent = name;
-    const players2 = document.createElement("div");
-    players2.className = "game-row-players";
-    players2.dataset.playersFor = name;
     info.appendChild(nameEl2);
-    info.appendChild(players2);
     row.appendChild(swatch);
     row.appendChild(info);
 
@@ -1037,14 +1174,12 @@ homeSearch.addEventListener("input", () => {
   const filtered = q ? allGameEntries.filter(({ name }) => name.toLowerCase().includes(q)) : allGameEntries;
   renderHomeGrid(filtered);
   homeGameCount.textContent = q ? filtered.length + " of " + allGameEntries.length : allGameEntries.length + " games";
-  window.gamePresence?.refreshCounts?.();
 });
 
 launcherSearch.addEventListener("input", () => {
   const q = launcherSearch.value.trim().toLowerCase();
-  if (!q) { renderLauncherRows(allGameEntries); window.gamePresence?.refreshCounts?.(); return; }
+  if (!q) { renderLauncherRows(allGameEntries); return; }
   renderLauncherRows(allGameEntries.filter(({ name }) => name.toLowerCase().includes(q)));
-  window.gamePresence?.refreshCounts?.();
 });
 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && launcher.classList.contains("open")) closeLauncher(); });
@@ -1084,13 +1219,11 @@ function loadGame(name, url, element) {
   document.body.classList.add("game-active");
   siteNav.classList.add("game-active");
   hudGameName.textContent = name;
-  hudPlayerCount.dataset.playerCountFor = name;
   navActiveGameName.textContent = name;
   navActiveGame.classList.add("visible");
   currentActive = name;
   closeLauncher();
   window.gamePresence?.setActiveGame(name);
-  window.gamePresence?.refreshCounts?.();
 }
 
 hudHomeBtn.addEventListener("click", () => {
@@ -1113,7 +1246,6 @@ function setChatOpen(isOpen) {
     chatToggle.classList.remove("has-unread");
     hudChatBtn.classList.remove("has-unread");
     updateChatPanelState();
-    updateActiveUsersFromBadges();
     chatInput.focus();
   }
 }
@@ -1146,6 +1278,96 @@ document.getElementById("floatAiBtn")?.addEventListener("click", openAiChat);
 document.getElementById("aiChatCloseBtn")?.addEventListener("click", closeAiChat);
 aiChatModal.addEventListener("click", (e) => { if (e.target === aiChatModal) closeAiChat(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && aiChatModal.classList.contains("active")) closeAiChat(); });
+
+// ---------- What's New ----------
+const WHATS_NEW_SEEN_KEY = "whatsnew_last_seen_date";
+const whatsNewModal = document.getElementById("whatsNewModal");
+const whatsNewBody = document.getElementById("whatsNewBody");
+const whatsNewDot = document.getElementById("homeWhatsNewDot");
+const TAG_LABELS = { new: "New", improved: "Improved", fixed: "Fixed", removed: "Removed" };
+
+function renderWhatsNew() {
+  const entries = Array.isArray(window.WHATS_NEW) ? window.WHATS_NEW : [];
+  whatsNewBody.innerHTML = "";
+
+  if (!entries.length) {
+    whatsNewBody.innerHTML = '<div class="whatsnew-empty">Nothing new to report yet — check back soon.</div>';
+    return;
+  }
+
+  entries.forEach((entry) => {
+    const item = document.createElement("div");
+    item.className = "whatsnew-entry";
+
+    const top = document.createElement("div");
+    top.className = "whatsnew-entry-top";
+    const title = document.createElement("div");
+    title.className = "whatsnew-entry-title";
+    title.textContent = entry.title || "Update";
+    const date = document.createElement("div");
+    date.className = "whatsnew-date";
+    date.textContent = entry.date || "";
+    top.append(title, date);
+    item.appendChild(top);
+
+    if (Array.isArray(entry.tags) && entry.tags.length) {
+      const tagRow = document.createElement("div");
+      tagRow.className = "whatsnew-tags";
+      entry.tags.forEach((tagKey) => {
+        const tag = document.createElement("span");
+        const known = TAG_LABELS[tagKey] ? tagKey : "improved";
+        tag.className = "whatsnew-tag " + known;
+        tag.textContent = TAG_LABELS[tagKey] || tagKey;
+        tagRow.appendChild(tag);
+      });
+      item.appendChild(tagRow);
+    }
+
+    if (Array.isArray(entry.items) && entry.items.length) {
+      const list = document.createElement("ul");
+      list.className = "whatsnew-items";
+      entry.items.forEach((line) => {
+        const li = document.createElement("li");
+        li.textContent = line;
+        list.appendChild(li);
+      });
+      item.appendChild(list);
+    }
+
+    whatsNewBody.appendChild(item);
+  });
+}
+
+function latestWhatsNewDate() {
+  const entries = Array.isArray(window.WHATS_NEW) ? window.WHATS_NEW : [];
+  return entries.length ? String(entries[0].date || "") : "";
+}
+
+function refreshWhatsNewDot() {
+  if (!whatsNewDot) return;
+  const latest = latestWhatsNewDate();
+  const seen = localStorage.getItem(WHATS_NEW_SEEN_KEY);
+  whatsNewDot.classList.toggle("show", Boolean(latest) && latest !== seen);
+}
+
+function openWhatsNew() {
+  renderWhatsNew();
+  whatsNewModal.classList.add("active");
+  whatsNewModal.setAttribute("aria-hidden", "false");
+  const latest = latestWhatsNewDate();
+  if (latest) localStorage.setItem(WHATS_NEW_SEEN_KEY, latest);
+  refreshWhatsNewDot();
+}
+function closeWhatsNew() {
+  whatsNewModal.classList.remove("active");
+  whatsNewModal.setAttribute("aria-hidden", "true");
+}
+
+document.getElementById("homeWhatsNewBtn")?.addEventListener("click", openWhatsNew);
+document.getElementById("whatsNewCloseBtn")?.addEventListener("click", closeWhatsNew);
+whatsNewModal.addEventListener("click", (e) => { if (e.target === whatsNewModal) closeWhatsNew(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && whatsNewModal.classList.contains("active")) closeWhatsNew(); });
+refreshWhatsNewDot();
 
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -1232,32 +1454,6 @@ function showChatToast(name, text, room) {
   setTimeout(() => { toast.classList.add("hide"); setTimeout(() => toast.remove(), 220); }, 4200);
 }
 
-function updateActiveUsersFromBadges() {
-  const total = [...document.querySelectorAll("[data-player-count-for]")].reduce((sum, badge) => sum + (Number.parseInt(badge.textContent,10) || 0), 0);
-  if (total > 0 || latestFirebaseActiveUsers === null) updateActiveUsers(total);
-}
-function updateActiveUsers(total) {
-  chatActiveUsers.textContent = total + " active";
-  chatActiveUsers.title = total + " active user" + (total===1?"":"s") + " across games";
-}
-
-const activeUsersObserver = new MutationObserver(updateActiveUsersFromBadges);
-activeUsersObserver.observe(tabsMain, { childList:true, subtree:true, characterData:true });
-activeUsersObserver.observe(tabsMore, { childList:true, subtree:true, characterData:true });
-
-const launcherPlayerObserver = new MutationObserver(() => {
-  document.querySelectorAll("[data-player-count-for]").forEach(badge => {
-    const n = parseInt(badge.textContent, 10) || 0;
-    const gameName = badge.dataset.playerCountFor;
-    const cardPlayers = gameGrid?.querySelector('[data-players-for="' + CSS.escape(gameName) + '"]');
-    if (cardPlayers) { cardPlayers.textContent = n > 0 ? n + " playing" : ""; cardPlayers.classList.toggle("has-players", n > 0); }
-    const rowPlayers = launcherList?.querySelector('[data-players-for="' + CSS.escape(gameName) + '"]');
-    if (rowPlayers) { rowPlayers.textContent = n > 0 ? n + " playing" : ""; rowPlayers.classList.toggle("has-players", n > 0); }
-  });
-});
-if (tabsMain) launcherPlayerObserver.observe(tabsMain, { subtree:true, characterData:true, childList:true });
-if (tabsMore) launcherPlayerObserver.observe(tabsMore, { subtree:true, characterData:true, childList:true });
-
 const emailPopup = document.getElementById("emailPopup");
 const yesBtn = document.getElementById("yesBtn");
 const noBtn = document.getElementById("noBtn");
@@ -1277,6 +1473,144 @@ if (!localStorage.getItem("email_prompt_dismissed")) {
 function dismiss() { emailPopup.classList.remove("active"); localStorage.setItem("email_prompt_dismissed","true"); }
 yesBtn.onclick = () => { window.open(FORM_LINK,"_blank"); dismiss(); };
 noBtn.onclick = dismiss;
+
+const AdFree = (function () {
+  const PROGRESS_KEY = "adfree_ads_watched";
+  const ACTIVE_UNTIL_KEY = "adfree_active_until";
+  const ADS_REQUIRED = 20;
+  const ADFREE_DURATION_MS = 12 * 60 * 60 * 1000;
+  const WATCH_COOLDOWN_MS = 2500;
+
+  const progressWrap = document.getElementById("adFreeProgressWrap");
+  const progressFill = document.getElementById("adFreeProgressFill");
+  const progressText = document.getElementById("adFreeProgressText");
+  const activeWrap = document.getElementById("adFreeActiveWrap");
+  const activeUntilText = document.getElementById("adFreeActiveUntilText");
+  const watchBtn = document.getElementById("adFreeWatchBtn");
+  const widget = document.getElementById("playtimeWidget");
+  const clockSubLabel = document.getElementById("playtimeClockSubLabel");
+  const toast = document.getElementById("playtimeToast");
+  const toastText = document.getElementById("playtimeToastText");
+
+  let watched = readWatched();
+  let activeUntil = readActiveUntil();
+  let cooldownTimer = null;
+  let expiryTimer = null;
+  let toastTimer = null;
+
+  function readWatched() {
+    const n = parseInt(localStorage.getItem(PROGRESS_KEY), 10);
+    return Number.isFinite(n) && n >= 0 && n <= ADS_REQUIRED ? n : 0;
+  }
+  function writeWatched() { localStorage.setItem(PROGRESS_KEY, String(watched)); }
+
+  function readActiveUntil() {
+    const n = parseInt(localStorage.getItem(ACTIVE_UNTIL_KEY), 10);
+    return Number.isFinite(n) && n > Date.now() ? n : null;
+  }
+  function writeActiveUntil() {
+    if (activeUntil) localStorage.setItem(ACTIVE_UNTIL_KEY, String(activeUntil));
+    else localStorage.removeItem(ACTIVE_UNTIL_KEY);
+  }
+
+  function isActive() { return Boolean(activeUntil) && Date.now() < activeUntil; }
+
+  function formatCountdown(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    return h + "h " + String(m).padStart(2, "0") + "m left";
+  }
+  function formatClockTime(ts) {
+    return new Date(ts).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }
+
+  function render() {
+    if (!progressWrap || !activeWrap || !watchBtn) return;
+    if (isActive()) {
+      progressWrap.style.display = "none";
+      activeWrap.style.display = "flex";
+      watchBtn.style.display = "none";
+      activeUntilText.textContent = "Ends " + formatClockTime(activeUntil) + " \u00b7 " + formatCountdown(activeUntil - Date.now());
+    } else {
+      progressWrap.style.display = "block";
+      activeWrap.style.display = "none";
+      watchBtn.style.display = "block";
+      progressFill.style.width = Math.round((watched / ADS_REQUIRED) * 100) + "%";
+      progressText.textContent = watched + " / " + ADS_REQUIRED + " ads watched";
+    }
+    syncWidgetBadge();
+  }
+
+  function syncWidgetBadge() {
+    if (!widget || !clockSubLabel) return;
+    widget.classList.toggle("ad-free", isActive());
+    clockSubLabel.style.display = isActive() ? "block" : "none";
+  }
+
+  function startCooldown() {
+    watchBtn.classList.add("disabled");
+    let remaining = Math.ceil(WATCH_COOLDOWN_MS / 1000);
+    watchBtn.textContent = "Wait " + remaining + "s";
+    clearInterval(cooldownTimer);
+    cooldownTimer = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(cooldownTimer);
+        watchBtn.classList.remove("disabled");
+        watchBtn.textContent = "Watch Ad";
+      } else {
+        watchBtn.textContent = "Wait " + remaining + "s";
+      }
+    }, 1000);
+  }
+
+  function scheduleExpiry() {
+    clearTimeout(expiryTimer);
+    if (!activeUntil) return;
+    const delay = Math.max(0, activeUntil - Date.now()) + 500;
+    expiryTimer = setTimeout(() => {
+      activeUntil = null;
+      writeActiveUntil();
+      render();
+    }, delay);
+  }
+
+  function showToast(text) {
+    if (!toast || !toastText) return;
+    toastText.textContent = text;
+    toast.classList.add("showing", "gold");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("showing", "gold"), 4200);
+  }
+
+  function handleWatchClicked() {
+    if (watchBtn.classList.contains("disabled") || isActive()) return;
+    startCooldown();
+    watched = Math.min(ADS_REQUIRED, watched + 1);
+    writeWatched();
+
+    if (watched >= ADS_REQUIRED) {
+      activeUntil = Date.now() + ADFREE_DURATION_MS;
+      writeActiveUntil();
+      watched = 0;
+      writeWatched();
+      scheduleExpiry();
+      showToast("Ad-Free unlocked! Your timer won't drop for the next 12 hours.");
+    }
+    render();
+  }
+
+  watchBtn?.addEventListener("click", handleWatchClicked);
+
+  scheduleExpiry();
+  render();
+  // Keep the "ends at / time left" text fresh while the modal is open or the widget is visible.
+  setInterval(render, 30000);
+
+  return { isActive, render };
+})();
+window.AdFree = AdFree;
 
 const Playtime = (function () {
   const STORAGE_KEY = "playtime_seconds_remaining";
@@ -1312,12 +1646,16 @@ const Playtime = (function () {
   }
   function render() {
     clockEl.textContent = formatTime(seconds);
-    widget.classList.toggle("low-time", seconds > 0 && seconds <= 60);
+    const adFreeActive = window.AdFree?.isActive?.();
+    widget.classList.toggle("low-time", !adFreeActive && seconds > 0 && seconds <= 60);
+    window.AdFree?.render?.();
   }
-  function hasTime() { return seconds > 0; }
+  function hasTime() { return seconds > 0 || Boolean(window.AdFree?.isActive?.()); }
 
   function tick() {
-    if (!document.body.classList.contains("game-active") || seconds <= 0) return;
+    if (!document.body.classList.contains("game-active")) return;
+    if (window.AdFree?.isActive?.()) { render(); return; } // ad-free: don't spend the timer
+    if (seconds <= 0) return;
     seconds -= 1;
     writeStored();
     render();
@@ -1342,6 +1680,7 @@ const Playtime = (function () {
 
   function openModal() {
     modal.classList.add("active");
+    window.AdFree?.render?.();
   }
   function closeModal() { modal.classList.remove("active"); }
 
@@ -1376,6 +1715,7 @@ const Playtime = (function () {
 
   function showToast(text) {
     toastText.textContent = text;
+    toast.classList.remove("gold");
     toast.classList.add("showing");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove("showing"), 3200);
@@ -1400,7 +1740,6 @@ window.Playtime = Playtime;
 
 renderChatChrome();
 build();
-window.gamePresence?.refreshCounts?.();
 </script>
 </body>
 </html>
