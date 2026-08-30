@@ -3,17 +3,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/fireba
 import {
   getDatabase,
   ref,
-  get,
   onValue,
-  onDisconnect,
   push,
   query,
   limitToLast,
   orderByChild,
-  goOnline,
-  set,
-  update,
-  remove
+  goOnline
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
 const firebaseConfig = {
@@ -69,9 +64,6 @@ const CHAT_ROOM_KEY = "site_chat_room";
 const CHAT_MESSAGE_LIMIT = 40;
 const MAX_MESSAGE_LENGTH = 180;
 const MAX_NAME_LENGTH = 24;
-const PRESENCE_HEARTBEAT_MS = 30 * 1000;
-const PRESENCE_STALE_MS = 2 * 60 * 1000;
-const PRESENCE_CLEANUP_INTERVAL_MS = 60 * 1000;
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
@@ -80,23 +72,14 @@ const SESSION_ID = getSessionId();
 const CHAT_USER_ID = getPersistentId();
 const CHAT_NAME = getSavedChatName();
 
-let activeGameId = null;
 let currentGameName = null;
-let activePresenceRef = null;
-let activeDisconnectRef = null;
-let unsubscribeCounts = null;
 let unsubscribeChat = null;
 let isOnline = false;
 let isChatOpen = false;
 let hasLoadedChat = false;
 let activeChatRoomId = getSavedRoomId();
-let presenceHeartbeatTimer = null;
-let presenceCleanupTimer = null;
-let lastPresenceCleanupAt = 0;
 const seenChatMessages = new Set();
 
-const chatToggle = document.getElementById("chatToggle");
-const chatActiveUsers = document.getElementById("chatActiveUsers");
 const chatMessages = document.getElementById("chatMessages");
 const chatForm = document.getElementById("chatForm");
 const chatInput = document.getElementById("chatInput");
@@ -138,155 +121,29 @@ function getSavedRoomId() {
   return CHAT_ROOMS[roomId] ? roomId : "elementary";
 }
 
-function gameIdFromName(name) {
-  return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "game";
-}
-
 function connectDatabase() {
   if (isOnline) return;
   goOnline(database);
   isOnline = true;
 }
 
-function disconnectDatabase() {
-  clearActivePresence();
-}
-
+// Tracks which game the player currently has open so outgoing chat messages
+// can be tagged with it. This is purely local state now -- it no longer
+// writes anything to Firebase (the old live player-count/presence system
+// has been removed).
 function setActiveGame(name) {
-  if (!database) return;
-  const gameId = gameIdFromName(name);
-  if (gameId === activeGameId) return;
-  clearActivePresence({ cancelDisconnect: true });
-  connectDatabase();
-  activeGameId = gameId;
-  currentGameName = name;
-  activePresenceRef = ref(database, `gamePresence/${gameId}/players/${SESSION_ID}`);
-  activeDisconnectRef = onDisconnect(activePresenceRef);
-  activeDisconnectRef.remove().catch(console.error);
-  const now = Date.now();
-  set(activePresenceRef, { game: name, joinedAt: now, lastSeenAt: now })
-    .then(() => startPresenceHeartbeat())
-    .catch(console.error);
-}
-
-function startPresenceHeartbeat() {
-  stopPresenceHeartbeat();
-  presenceHeartbeatTimer = setInterval(() => {
-    if (!activePresenceRef) return;
-    update(activePresenceRef, { lastSeenAt: Date.now() }).catch(console.error);
-  }, PRESENCE_HEARTBEAT_MS);
-}
-
-function stopPresenceHeartbeat() {
-  if (!presenceHeartbeatTimer) return;
-  clearInterval(presenceHeartbeatTimer);
-  presenceHeartbeatTimer = null;
-}
-
-function clearActivePresence({ cancelDisconnect = false } = {}) {
-  stopPresenceHeartbeat();
-  if (activeDisconnectRef && cancelDisconnect) activeDisconnectRef.cancel().catch(console.error);
-  if (activePresenceRef) {
-    remove(activePresenceRef).catch(console.error);
-    activePresenceRef = null;
-  }
-  activeDisconnectRef = null;
-  activeGameId = null;
-}
-
-function cleanupStalePresence() {
-  const now = Date.now();
-  if (now - lastPresenceCleanupAt < PRESENCE_CLEANUP_INTERVAL_MS) return;
-  lastPresenceCleanupAt = now;
-  get(ref(database, "gamePresence")).then((snapshot) => {
-    if (!snapshot.exists()) return;
-    const cutoff = Date.now() - PRESENCE_STALE_MS;
-    const removals = [];
-    snapshot.forEach((gameSnapshot) => {
-      gameSnapshot.child("players").forEach((playerSnapshot) => {
-        const player = playerSnapshot.val();
-        if (player && Number(player.lastSeenAt || 0) < cutoff) {
-          removals.push(remove(playerSnapshot.ref).catch(console.error));
-        }
-      });
-    });
-    return Promise.all(removals);
-  }).catch(console.error);
-}
-
-let latestCountsByGameId = {};
-
-function watchGameCounts() {
-  if (unsubscribeCounts) return;
-  connectDatabase();
-  startPresenceCleanupTimer();
-  unsubscribeCounts = onValue(ref(database, "gamePresence"), (snapshot) => {
-    const counts = {};
-    let totalPlayers = 0;
-    cleanupStalePresence();
-    snapshot.forEach((gameSnapshot) => {
-      let playerCount = 0;
-      gameSnapshot.child("players").forEach((playerSnapshot) => {
-        const data = playerSnapshot.val();
-        const cutoff = Date.now() - PRESENCE_STALE_MS;
-        if (data && Number(data.lastSeenAt || 0) >= cutoff) playerCount++;
-      });
-      counts[gameSnapshot.key] = playerCount;
-      totalPlayers += playerCount;
-    });
-    latestCountsByGameId = counts;
-    updateActiveUsers(totalPlayers);
-    applyPlayerCounts();
-  }, (error) => {
-    console.warn("Firebase player counts failed:", error);
-    updateActiveUsers(0);
-  });
-}
-
-// Applies the most recently known counts to every counter element currently
-// in the DOM. Safe to call any time (e.g. after the page re-renders game
-// cards/rows for a search filter) since it never waits on a new Firebase
-// event -- it just re-paints from latestCountsByGameId.
-function applyPlayerCounts() {
-  const countFor = (name) => latestCountsByGameId[gameIdFromName(name)] || 0;
-
-  document.querySelectorAll("[data-player-count-for]").forEach((badge) => {
-    const gameName = badge.dataset.playerCountFor;
-    if (!gameName) { badge.textContent = ""; badge.classList.remove("has-players"); badge.title = ""; return; }
-    const playerCount = countFor(gameName);
-    badge.textContent = playerCount > 0 ? playerCount : "";
-    badge.classList.toggle("has-players", playerCount > 0);
-    badge.title = playerCount > 0 ? `${playerCount} player${playerCount === 1 ? "" : "s"} online` : "No players online";
-  });
-
-  document.querySelectorAll("[data-players-for]").forEach((el) => {
-    const gameName = el.dataset.playersFor;
-    const playerCount = countFor(gameName);
-    el.textContent = playerCount > 0 ? `${playerCount} playing` : "";
-    el.classList.toggle("has-players", playerCount > 0);
-  });
-}
-
-function startPresenceCleanupTimer() {
-  if (presenceCleanupTimer) return;
-  presenceCleanupTimer = setInterval(cleanupStalePresence, PRESENCE_CLEANUP_INTERVAL_MS);
-}
-
-function updateActiveUsers(totalPlayers) {
-  if (!chatActiveUsers) return;
-  chatActiveUsers.textContent = `${totalPlayers} active`;
-  chatActiveUsers.title = `${totalPlayers} active user${totalPlayers === 1 ? "" : "s"} across games`;
-  document.dispatchEvent(new CustomEvent("siteActiveUsersChanged", { detail: { total: totalPlayers } }));
+  currentGameName = name || null;
 }
 
 function setupChat() {
   if (!chatForm || !chatInput) return;
+  connectDatabase();
   announceIdentity();
   watchChatMessages(activeChatRoomId);
 
   document.addEventListener("siteChatToggled", (event) => {
     isChatOpen = Boolean(event.detail?.open);
-    if (isChatOpen) chatToggle?.classList.remove("has-unread");
+    if (isChatOpen) document.getElementById("chatToggle")?.classList.remove("has-unread");
   });
 
   document.addEventListener("siteChatRoomChanged", (event) => {
@@ -474,9 +331,6 @@ function formatMessageTimeFull(timestamp) {
   return new Intl.DateTimeFormat([], { dateStyle: "full", timeStyle: "short" }).format(new Date(timestamp));
 }
 
-window.addEventListener("beforeunload", () => clearActivePresence());
+window.gamePresence = { setActiveGame };
 
-window.gamePresence = { setActiveGame, disconnect: disconnectDatabase, refreshCounts: applyPlayerCounts };
-
-watchGameCounts();
 setupChat();
