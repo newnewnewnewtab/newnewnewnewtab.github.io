@@ -32,9 +32,7 @@ window.PAGES = {
 
   "Drift Hunters": { 
     "url": "https://script.google.com/macros/s/AKfycbw8iHPqdVFEzquUYbNxFVAu1Tw4Nri5SWMRLdP_c7a84vCOHVG7YUWuhjSVptg1SVHr/exec",
-    "cover": "drifthunters.png",
-    "ribbon": "New",
-    "ribbonColor": "#FF77FF"
+    "cover": "drifthunters.png"
   },
 
   "Skyblock 2D": { 
@@ -45,8 +43,6 @@ window.PAGES = {
 
   "There is No Game": { 
     "url": "https://script.google.com/a/macros/rsu71.org/s/AKfycbwfUFXy27bYwMfp4xHUVbpN9PSWWzB7bKs-qA01ZYJ7hgeZbvFZgkdjydsAYWrYGPQb/exec",
-    "ribbon": "New",
-    "ribbonColor": "#FF77FF",
     "cover": "ting.jpg"
   },
   
@@ -85,7 +81,7 @@ window.PAGES = {
   "Minecraft": { 
     "url": "https://newnewnewnewtab.github.io/MC1.12.2/",
     "cover": "minecraft.jpg",
-    "ribbon": "Now 1.21.2",
+    "ribbon": "Now 1.12.2",
     "ribbonColor": "#00FFFF"
   },
 
