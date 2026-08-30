@@ -20,6 +20,7 @@ const WHATS_NEW = [
     title: "Ad-Free Pass & FREE AI",
     tags: ["new", "improved","removed"],
     items: [
+      "NewTab AI is now 100% FREE",
       "You can now open 20 ads to earn 12 hours of ad-free play",
       "Added Whats New page",
       "Better ribbons",
@@ -28,10 +29,10 @@ const WHATS_NEW = [
   },
   {
     date: "Aug 28, 2026",
-    title: "Game changes",
+    title: "Game Changes",
     tags: ["improved","fixed","removed"],
     items: [
-      "Changed minecraft from 1.8.8 to 1.21.2",
+      "Changed minecraft from 1.8.8 to 1.12.2",
       "Removed Angry Birds",
       "Fixed Basket Random",
       "Fixed Basket Bros"
