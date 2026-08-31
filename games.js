@@ -79,9 +79,9 @@ window.PAGES = {
   },
 
   "Minecraft": { 
-    "url": "https://newnewnewnewtab.github.io/MC1.12.2/",
+    "url": "https://glennfb83.github.io/ec/",
     "cover": "minecraft.jpg",
-    "ribbon": "Now 1.12.2",
+    "ribbon": "1.8.8 Again",
     "ribbonColor": "#00FFFF"
   },
 
