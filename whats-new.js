@@ -16,9 +16,19 @@
 
 const WHATS_NEW = [
   {
+    date: "Sep 1, 2026",
+    title: "OJ Simpson Simulator Unblocked",
+    tags: ["new"],
+    items: [
+      "Added OJ Simpson Simulator",
+      "Added Escape Road 2",
+      "Added cover for Slope 2"
+    ]
+  },
+  {
     date: "Aug 29, 2026",
     title: "Ad-Free Pass & FREE AI",
-    tags: ["new", "improved","removed"],
+    tags: ["new", "improved", "removed"],
     items: [
       "NewTab AI is now 100% FREE",
       "You can now open 20 ads to earn 12 hours of ad-free play",
@@ -30,7 +40,7 @@ const WHATS_NEW = [
   {
     date: "Aug 28, 2026",
     title: "Game Changes",
-    tags: ["improved","fixed","removed"],
+    tags: ["improved", "fixed", "removed"],
     items: [
       "Changed minecraft from 1.8.8 to 1.12.2",
       "Removed Angry Birds",
