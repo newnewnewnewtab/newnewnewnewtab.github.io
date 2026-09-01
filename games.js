@@ -18,6 +18,13 @@ window.PAGES = {
     "cover": "snowrider.PNG"
   },
   
+  "OJ Simpson Simulator": { 
+    "url": "https://fdfdsfadf.github.io/All-escape-road-games/escape-road/index.html",
+    "cover": "escaperoad.jpeg",
+    "ribbon": "New",
+    "ribbonColor": "#00FF00"
+  },
+  
   "Basket Bros": { 
     "url": "https://newnewnewnewtab.github.io/basketbros/",
     "cover": "basketbros.png",
@@ -44,6 +51,13 @@ window.PAGES = {
   "There is No Game": { 
     "url": "https://script.google.com/a/macros/rsu71.org/s/AKfycbwfUFXy27bYwMfp4xHUVbpN9PSWWzB7bKs-qA01ZYJ7hgeZbvFZgkdjydsAYWrYGPQb/exec",
     "cover": "ting.jpg"
+  },
+
+  "Escape Road 2": { 
+    "url": "https://fdfdsfadf.github.io/All-escape-road-games/escape-road-2/index.html",
+    "cover": "escaperoad2.jpeg",
+    "ribbon": "New",
+    "ribbonColor": "#00FF00"
   },
   
   "Subway Surfers": { 
@@ -100,7 +114,8 @@ window.PAGES = {
   },
     
   "Slope 2": { 
-    "url": "https://newnewnewnewtab.github.io/Slope2/"
+    "url": "https://newnewnewnewtab.github.io/Slope2/",
+    "cover": "slope2.jpeg"
   },
   
   "Geometry Dash": { 
