@@ -16,6 +16,15 @@
 
 const WHATS_NEW = [
   {
+    date: "Sep 3, 2026",
+    title: "All ads removed",
+    tags: ["removed"],
+    items: [
+      "Removed all ads",
+      "Added partial backend scripts for future update"
+    ]
+  },
+  {
     date: "Sep 1, 2026",
     title: "OJ Simpson Simulator Unblocked",
     tags: ["new"],
