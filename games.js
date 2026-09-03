@@ -56,8 +56,8 @@ window.PAGES = {
   "Escape Road 2": { 
     "url": "https://fdfdsfadf.github.io/All-escape-road-games/escape-road-2/index.html",
     "cover": "escaperoad2.jpeg",
-    "ribbon": "New",
-    "ribbonColor": "#00FF00"
+    "ribbon": "Popular",
+    "ribbonColor": "#EFBF04"
   },
   
   "Subway Surfers": { 
@@ -87,16 +87,12 @@ window.PAGES = {
 
   "Dig Out Of Prison": { 
     "url": "https://script.google.com/macros/s/AKfycby-5VSTOBeep9g9GU9un8CLFOo4TvTSmahbVEGqze-hX-iVmuLUtIyx6WAj2wvOYQeb/exec",
-    "cover": "digoutofprison.png",
-    "ribbon": "Popular",
-    "ribbonColor": "#EFBF04"
+    "cover": "digoutofprison.png"
   },
 
   "Minecraft": { 
     "url": "https://glennfb83.github.io/ec/",
-    "cover": "minecraft.jpg",
-    "ribbon": "1.8.8 Again",
-    "ribbonColor": "#00FFFF"
+    "cover": "minecraft.jpg"
   },
 
   "Police Pursuit 2 ": { 
@@ -108,9 +104,17 @@ window.PAGES = {
     "url": "https://newnewnewnewtab.github.io/RL3D/",
     "cover": "rocketleague.jpg"
   },
+
+  "Color Tunnel 2": { 
+    "url": "https://newnewnewnewtab.github.io/ColorTunnel2/",
+    "ribbon": "New",
+    "ribbonColor": "#00FFFF"
+  },
   
   "Slots": { 
-    "url": "https://newnewnewnewtab.github.io/Slot-Machine/"
+    "url": "https://newnewnewnewtab.github.io/Slot-Machine/",
+    "ribbon": "First Version",
+    "ribbonColor": "#00FFFF"
   },
     
   "Slope 2": { 
@@ -125,9 +129,7 @@ window.PAGES = {
   
   "Basket Random": { 
     "url": "https://newnewnewnewtab.github.io/basket-random/",
-    "cover": "basketrandom.jpeg",
-    "ribbon": "Fixed",
-    "ribbonColor": "#FF69B4"
+    "cover": "basketrandom.jpeg"
   },
   
   "Eggy Car": { 
