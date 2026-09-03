@@ -17,6 +17,16 @@
 const WHATS_NEW = [
   {
     date: "Sep 3, 2026",
+    title: "Minor Tweaks",
+    tags: ["new", "improved"],
+    items: [
+      "Added Color Tunnel 2 <No thumbnail yet>",
+      "Changed ribbons on many games",
+      "Slots back to old version"
+    ]
+  },
+  {
+    date: "Sep 3, 2026",
     title: "All ads removed",
     tags: ["removed"],
     items: [
