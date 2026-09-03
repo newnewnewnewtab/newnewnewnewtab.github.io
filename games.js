@@ -43,9 +43,7 @@ window.PAGES = {
   },
 
   "Skyblock 2D": { 
-    "url": "https://script.google.com/macros/s/AKfycbzGxfKS5Uv4MC2N__iKoytC7F5HxVSH3GBPkkqKc0WLf7aIOFkZr3AMsN03VbEPKMGQ/exec",
-    "ribbon": "New",
-    "ribbonColor": "#FF77FF"
+    "url": "https://script.google.com/macros/s/AKfycbzGxfKS5Uv4MC2N__iKoytC7F5HxVSH3GBPkkqKc0WLf7aIOFkZr3AMsN03VbEPKMGQ/exec"
   },
 
   "There is No Game": { 
@@ -108,7 +106,8 @@ window.PAGES = {
   "Color Tunnel 2": { 
     "url": "https://newnewnewnewtab.github.io/ColorTunnel2/",
     "ribbon": "New",
-    "ribbonColor": "#00FFFF"
+    "ribbonColor": "#00FFFF",
+    "cover": "colortunnel2.jpeg"
   },
   
   "Slots": { 
@@ -116,7 +115,14 @@ window.PAGES = {
     "ribbon": "First Version",
     "ribbonColor": "#00FFFF"
   },
-    
+
+  "Block Blast": { 
+    "url": "https://classroomlesson.com/games/2024/unity3/block-blast/index.html",
+    "ribbon": "New",
+    "ribbonColor": "#00FFFF",
+    "cover": "blockblast.jpeg"
+  },
+  
   "Slope 2": { 
     "url": "https://newnewnewnewtab.github.io/Slope2/",
     "cover": "slope2.jpeg"
