@@ -27,11 +27,20 @@ window.PAGES = {
   
   "Basket Bros": { 
     "url": "https://newnewnewnewtab.github.io/basketbros/",
-    "cover": "basketbros.png",
-    "ribbon": "Fixed",
+    "cover": "basketbros.png"
+  },
+   "Smash Kartz": { 
+    "url": "https://script.google.com/macros/s/AKfycbyE1C_kxeomVoOLjpaXc2uAI7JdNgVhdQdePTZu9Sizwzj_imhaWnNmPSXm4w1v-SFs/exec",
+    "cover": "smashkartz.jpeg",
+    "ribbon": "New",
     "ribbonColor": "#FF77FF"
   },
-
+   "Drifting Mania": { 
+    "url": "https://script.google.com/macros/s/AKfycbyeu9ceTp-vGIdgE6lRcDWtyPrkB6jxYEUfTV8NwmFQhX5tLVcQM4v2-BNHXEbkVkq3/exec",
+    "cover": "driftingmania.png",
+    "ribbon": "New",
+    "ribbonColor": "#FF77FF"
+  },
   "Paper.io": { 
     "url": "https://script.google.com/macros/s/AKfycbwNxCzUuQVmLRWTwYK2D4yTqpWg2O-qge8BwCkxhLmqWd1DtXynwJXPEDClPt7ERZr-/exec",
     "cover": "paperio.jpg"
