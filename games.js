@@ -30,12 +30,6 @@ window.PAGES = {
     "ribbon": "New",
     "ribbonColor": "#00FF00"
   },
-"Angry Birds": { 
-    "url": "https://newnewnewnewtab.github.io/Angry-Birds/",
-    "cover": "angrybirds.png",
-    "ribbon": "New",
-    "ribbonColor": "#00FF00"
-  },
   "Basket Bros": { 
     "url": "https://newnewnewnewtab.github.io/basketbros/",
     "cover": "basketbros.png"
