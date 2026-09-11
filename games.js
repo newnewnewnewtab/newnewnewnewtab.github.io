@@ -101,7 +101,14 @@ window.PAGES = {
     "ribbonColor": "#FF77FF",
     "cover": "run3.jpeg"
   },
-  
+
+  "Angry Birds": { 
+    "url": "//newnewnewnewtab.github.io/Angry-Birds/",
+    "cover": "angrybirds.png",
+    "ribbon": "Fixed",
+    "ribbonColor": "#00FFFF"
+  },
+
   "Dig Out Of Prison": { 
     "url": "https://script.google.com/macros/s/AKfycby-5VSTOBeep9g9GU9un8CLFOo4TvTSmahbVEGqze-hX-iVmuLUtIyx6WAj2wvOYQeb/exec",
     "cover": "digoutofprison.png"
@@ -169,12 +176,6 @@ window.PAGES = {
   "Retro Bowl": { 
     "url": "https://newnewnewnewtab.github.io/rb/",
     "cover": "retrobowl.jpg"
-  },
-  
-  "Angry Birds": { 
-    "url": "https://newnewnewnewtab.github.io/Angry-Birds/",
-    "ribbon": "Test",
-    "ribbonColor": "#D2042D"
   }
   
 };
