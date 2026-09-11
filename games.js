@@ -169,6 +169,12 @@ window.PAGES = {
   "Retro Bowl": { 
     "url": "https://newnewnewnewtab.github.io/rb/",
     "cover": "retrobowl.jpg"
+  },
+  
+  "Angry Birds": { 
+    "url": "https://newnewnewnewtab.github.io/Angry-Birds/",
+    "ribbon": "Test",
+    "ribbonColor": "#D2042D"
   }
   
 };
