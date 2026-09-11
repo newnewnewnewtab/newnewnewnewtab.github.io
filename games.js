@@ -86,7 +86,10 @@ window.PAGES = {
     "url": "https://script.google.com/macros/s/AKfycbzZJhJIeHFv_-I9PXF5xA-MA115srBLxJu4hxtMP4z0hGHSBcMzBNydUT5UxfmhSNQq/exec",
     "cover": "fishingio.jpg"
   },
-  
+  "Moto X3M": { 
+    "url": "https://newnewnewnewtab.github.io/MotoX3M/",
+    "ribbon": "New",
+    "ribbonColor": "#FF77FF"
   "Moto X3M 2": { 
     "url": "https://newnewnewnewtab.github.io/Moto-X3M-2/",
     "cover": "motox3m2.png"
