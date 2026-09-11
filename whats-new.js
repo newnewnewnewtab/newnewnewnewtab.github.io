@@ -43,6 +43,16 @@
 
 const WHATS_NEW = [
   {
+    date: "Sep 11, 2026",
+    title: "MotoX3M+Huge bugfix,
+    type: "patch",
+    items: [
+      "Removed Angry Birds",
+      "Added Moto X3M",
+      "Fixed all games not loading issue"
+    ]
+  },
+  {
     date: "Sep 7, 2026",
     title: "Overhaul",
     type: "major",
