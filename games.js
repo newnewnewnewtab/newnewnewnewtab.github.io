@@ -102,6 +102,12 @@ window.PAGES = {
     "cover": "gunspin.png"
   },
 
+   "Run 3": { 
+    "url": "https://newnewnewnewtab.github.io/Run3/",
+    "ribbon": "New",
+    "ribbonColor": "#FF77FF"
+  },
+  
   "Dig Out Of Prison": { 
     "url": "https://script.google.com/macros/s/AKfycby-5VSTOBeep9g9GU9un8CLFOo4TvTSmahbVEGqze-hX-iVmuLUtIyx6WAj2wvOYQeb/exec",
     "cover": "digoutofprison.png"
