@@ -44,6 +44,17 @@
 const WHATS_NEW = [
   {
     date: "Sep 11, 2026",
+    title: "Minor Changes",
+    type: "patch",
+    items: [
+      "Removed Five Nights At Epsitens",
+      "Added Run3",
+      "Added cover for Moto X3M",
+      "Removed a bunch of New banners on games"
+    ]
+  },
+  {
+    date: "Sep 11, 2026",
     title: "MotoX3M+Huge bugfix",
     type: "patch",
     items: [
