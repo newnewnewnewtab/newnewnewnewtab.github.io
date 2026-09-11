@@ -20,15 +20,11 @@ window.PAGES = {
   
   "OJ Simpson Simulator": { 
     "url": "https://fdfdsfadf.github.io/All-escape-road-games/escape-road/index.html",
-    "cover": "escaperoad.jpeg",
-    "ribbon": "New",
-    "ribbonColor": "#00FF00"
+    "cover": "escaperoad.jpeg"
   },
   "Cookie Clicker": { 
     "url": "https://script.google.com/macros/s/AKfycbxGM35J29NkO-2LYjxWj_cA9IUaaXypkUy-LqXyLRbGTz0R6lXmAEapz1STN1jlTIRavw/exec",
-    "cover": "cookieclicker.png",
-    "ribbon": "New",
-    "ribbonColor": "#00FF00"
+    "cover": "cookieclicker.png"
   },
   "Basket Bros": { 
     "url": "https://newnewnewnewtab.github.io/basketbros/",
@@ -36,15 +32,11 @@ window.PAGES = {
   },
    "Smash Karts": { 
     "url": "https://script.google.com/macros/s/AKfycbyE1C_kxeomVoOLjpaXc2uAI7JdNgVhdQdePTZu9Sizwzj_imhaWnNmPSXm4w1v-SFs/exec",
-    "cover": "smashkartz.jpeg",
-    "ribbon": "New",
-    "ribbonColor": "#FF77FF"
+    "cover": "smashkartz.jpeg"
   },
    "Drifting Mania": { 
     "url": "https://script.google.com/macros/s/AKfycbyeu9ceTp-vGIdgE6lRcDWtyPrkB6jxYEUfTV8NwmFQhX5tLVcQM4v2-BNHXEbkVkq3/exec",
-    "cover": "driftingmania.png",
-    "ribbon": "New",
-    "ribbonColor": "#FF77FF"
+    "cover": "driftingmania.png"
   },
   "Paper.io": { 
     "url": "https://script.google.com/macros/s/AKfycbwNxCzUuQVmLRWTwYK2D4yTqpWg2O-qge8BwCkxhLmqWd1DtXynwJXPEDClPt7ERZr-/exec",
@@ -89,7 +81,8 @@ window.PAGES = {
   "Moto X3M": { 
     "url": "https://newnewnewnewtab.github.io/MotoX3M/",
     "ribbon": "New",
-    "ribbonColor": "#FF77FF"
+    "ribbonColor": "#FF77FF",
+    "cover": "motox3m.jpg"
     
   },
   "Moto X3M 2": { 
@@ -105,7 +98,8 @@ window.PAGES = {
    "Run 3": { 
     "url": "https://newnewnewnewtab.github.io/Run3/",
     "ribbon": "New",
-    "ribbonColor": "#FF77FF"
+    "ribbonColor": "#FF77FF",
+    "cover": "run3.jpeg"
   },
   
   "Dig Out Of Prison": { 
@@ -130,8 +124,6 @@ window.PAGES = {
 
   "Color Tunnel 2": { 
     "url": "https://newnewnewnewtab.github.io/ColorTunnel2/",
-    "ribbon": "New",
-    "ribbonColor": "#00FFFF",
     "cover": "colortunnel2.jpeg"
   },
   
@@ -143,14 +135,10 @@ window.PAGES = {
 
   "Block Blast": { 
     "url": "https://classroomlesson.com/games/2024/unity3/block-blast/index.html",
-    "ribbon": "New",
-    "ribbonColor": "#00FFFF",
     "cover": "blockblast.jpeg"
   },
   "Emoji Crates": { 
-    "url": "https://newnewnewnewtab.github.io/Cases/",
-    "ribbon": "New",
-    "ribbonColor": "#00FFFF"
+    "url": "https://newnewnewnewtab.github.io/Cases/"
   },
   
   "Slope 2": { 
@@ -181,11 +169,6 @@ window.PAGES = {
   "Retro Bowl": { 
     "url": "https://newnewnewnewtab.github.io/rb/",
     "cover": "retrobowl.jpg"
-  },
-
-  "Five Nights at Epsteins": { 
-    "url": "https://newnewnewnewtab.github.io/FNAE-4-1-26/",
-    "cover": "fnae.png"
   }
   
 };
