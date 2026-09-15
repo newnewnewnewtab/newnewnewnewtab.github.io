@@ -48,7 +48,7 @@ const RANDOM_USERNAMES = [
   "SwiftWolf", "GoldenSpark", "ShadowMeteor", "TurboKnight", "BlueStorm", "SolarPhoenix", "WildFalcon", "EchoNova", "IronTiger", "VoltPhoenix",
   "RocketMeteor", "PixelWolf", "GhostStorm", "BrightNova", "CyberFalcon", "CrystalOrbit", "NightSparkle", "QuantumPhoenix", "StormNova", "FrozenWolf",
   "SkyMeteor", "RapidFalcon", "MysticStorm", "LunarPhoenix", "SteelTiger", "ThunderNova", "ShadowWolf", "GoldenMeteor", "NeonOrbit", "SwiftNova",
-  "PixelComet", "EchoTiger", "GhostPhoenix", "BlueNova", "RocketOrbit"
+  "PixelComet", "EchoTiger", "GhostPhoenix", "BlueNova", "RocketOrbit","Eli Milton Estabrook"
 ];
 
 const CHAT_ROOMS = {
