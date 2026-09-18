@@ -79,7 +79,7 @@ window.PAGES = {
     "cover": "fishingio.jpg"
   },
   "Moto X3M": { 
-    "url": "https://newnewnewnewtab.github.io/MotoX3M/"
+    "url": "https://newnewnewnewtab.github.io/MotoX3M/",
     "cover": "motox3m.jpg"
     
   },
