@@ -79,9 +79,7 @@ window.PAGES = {
     "cover": "fishingio.jpg"
   },
   "Moto X3M": { 
-    "url": "https://newnewnewnewtab.github.io/MotoX3M/",
-    "ribbon": "New",
-    "ribbonColor": "#FF77FF",
+    "url": "https://newnewnewnewtab.github.io/MotoX3M/"
     "cover": "motox3m.jpg"
     
   },
@@ -97,16 +95,14 @@ window.PAGES = {
 
    "Run 3": { 
     "url": "https://newnewnewnewtab.github.io/Run3/",
-    "ribbon": "New",
-    "ribbonColor": "#FF77FF",
+    "ribbon": "Popular",
+    "ribbonColor": "#EFBF04",
     "cover": "run3.jpeg"
   },
 
   "Angry Birds": { 
     "url": "//newnewnewnewtab.github.io/Angry-Birds/",
-    "cover": "angrybirds.png",
-    "ribbon": "Fixed",
-    "ribbonColor": "#00FFFF"
+    "cover": "angrybirds.png"
   },
 
   "Dig Out Of Prison": { 
@@ -135,13 +131,11 @@ window.PAGES = {
   },
   
   "Slots": { 
-    "url": "https://newnewnewnewtab.github.io/Slot-Machine/",
-    "ribbon": "First Version",
-    "ribbonColor": "#00FFFF"
+    "url": "https://newnewnewnewtab.github.io/Slot-Machine/"
   },
 
   "Block Blast": { 
-    "url": "https://classroomlesson.com/games/2024/unity3/block-blast/index.html",
+    "url": "https://newnewnewnewtab.github.io/Embed-Failed/",
     "cover": "blockblast.jpeg"
   },
   "Emoji Crates": { 
