@@ -12,6 +12,7 @@
 </script>
 <meta charset="UTF-8" />
 <title>New Tab 2</title>
+<link rel="icon" type="image/png" href="favicon.png" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
@@ -90,12 +91,10 @@ body {
 }
 .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; margin-bottom: 30px; }
 .sidebar-logo-mark {
-  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  width: 32px; height: 32px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(145deg, var(--accent), #4a3fd6);
-  color: #fff; font-size: 12px; font-weight: 900; letter-spacing: -0.5px;
-  box-shadow: 0 4px 14px rgba(109,94,248,0.35);
 }
+.sidebar-logo-mark img { width: 100%; height: 100%; object-fit: contain; }
 .sidebar-brand-text { min-width: 0; }
 .sidebar-title { font-size: 14px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); line-height: 1.2; white-space: nowrap; }
 .sidebar-title span { color: var(--accent); }
@@ -122,8 +121,6 @@ body {
 
 .home-chat-unread { position: absolute; top: 9px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; border: 2px solid var(--bg-elevated); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
 .sidebar-link.has-unread .home-chat-unread { opacity: 1; transform: scale(1); }
-.home-whatsnew-dot { position: absolute; top: 9px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: #facc15; border: 2px solid var(--bg-elevated); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
-.home-whatsnew-dot.show { opacity: 1; transform: scale(1); animation: unreadPulse 1.8s ease-out infinite; }
 
 /* ---------- main content ---------- */
 .app-main { flex: 1; min-width: 0; height: 100%; overflow-y: auto; position: relative; scrollbar-width: thin; scrollbar-color: rgba(109,94,248,0.15) transparent; }
@@ -249,12 +246,7 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
   cursor: default;
   user-select: none;
 }
-.hud-logo-text {
-  font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.75);
-  letter-spacing: -0.4px; white-space: nowrap;
-  line-height: 1;
-}
-.hud-logo-text span { color: var(--accent); }
+.hud-logo img { height: 22px; width: auto; display: block; }
 
 .hud-home-btn {
   display: flex; align-items: center; justify-content: center;
@@ -366,105 +358,6 @@ body.game-active .float-btn-ai { display: none; }
 .ai-chat-close:hover { background: rgba(255,90,110,0.85); border-color: transparent; }
 @media (max-width: 760px) {
   .ai-chat-panel { height: 92vh; border-radius: 16px; }
-}
-
-/* ---------- What's New ---------- */
-#whatsNewModal {
-  position: fixed; inset: 0; z-index: 9600;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(2,4,10,0.78);
-  backdrop-filter: blur(10px);
-  opacity: 0; visibility: hidden;
-  transition: opacity 0.25s ease;
-  padding: 20px;
-}
-#whatsNewModal.active { opacity: 1; visibility: visible; }
-.whatsnew-panel {
-  position: relative;
-  width: min(560px, 100%);
-  max-height: min(82vh, 760px);
-  background: linear-gradient(180deg, var(--bg-card), #0a1120);
-  border: 1px solid rgba(250,204,21,0.22);
-  border-radius: 20px;
-  box-shadow: 0 50px 100px -30px rgba(0,0,0,0.75);
-  transform: scale(0.97) translateY(10px);
-  transition: transform 0.3s var(--ease-spring);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
-#whatsNewModal.active .whatsnew-panel { transform: scale(1) translateY(0); }
-.whatsnew-header {
-  padding: 22px 26px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; flex-shrink: 0;
-  background: radial-gradient(ellipse at top left, rgba(250,204,21,0.09), transparent 60%);
-}
-.whatsnew-header-text .home-eyebrow { color: #facc15; }
-.whatsnew-header-text .home-eyebrow::before { background: #facc15; }
-.whatsnew-title { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.5px; margin-top: 4px; }
-.whatsnew-subtitle { margin-top: 4px; font-size: 11.5px; color: var(--muted); }
-.whatsnew-close {
-  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-  color: #f8fafc; cursor: pointer; font-size: 14px; line-height: 1;
-  transition: background 0.18s, color 0.18s;
-}
-.whatsnew-close:hover { background: rgba(255,90,110,0.85); border-color: transparent; }
-.whatsnew-body { overflow-y: auto; padding: 22px 26px 28px; scrollbar-width: thin; scrollbar-color: rgba(250,204,21,0.2) transparent; }
-.whatsnew-body::-webkit-scrollbar { width: 5px; }
-.whatsnew-body::-webkit-scrollbar-thumb { background: rgba(250,204,21,0.22); border-radius: 99px; }
-/* ---- timeline shared rail ---- */
-.whatsnew-entry { position: relative; padding-left: 24px; border-left: 2px solid rgba(255,255,255,0.08); }
-.whatsnew-entry:last-child { border-left-color: transparent; }
-
-/* ---- major release entries: full card ---- */
-.whatsnew-entry.major { padding-bottom: 28px; }
-.whatsnew-entry.major::before {
-  content: ''; position: absolute; left: -7px; top: 2px;
-  width: 12px; height: 12px; border-radius: 50%;
-  background: var(--accent); box-shadow: 0 0 0 4px rgba(109,94,248,0.16), 0 0 0 2px var(--bg-card);
-}
-.whatsnew-entry.major.is-latest::before { background: #facc15; box-shadow: 0 0 0 4px rgba(250,204,21,0.18), 0 0 0 2px var(--bg-card); }
-.whatsnew-entry-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
-.whatsnew-date { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.whatsnew-entry-title { font-size: 1rem; font-weight: 800; color: var(--text); }
-.whatsnew-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.whatsnew-tag { font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 9px; border-radius: 100px; }
-.whatsnew-tag.new { background: rgba(74,222,128,0.14); color: #86efac; border: 1px solid rgba(74,222,128,0.3); }
-.whatsnew-tag.improved { background: rgba(109,94,248,0.14); color: #a5b4fc; border: 1px solid rgba(109,94,248,0.3); }
-.whatsnew-tag.fixed { background: rgba(248,113,113,0.14); color: #fca5a5; border: 1px solid rgba(248,113,113,0.3); }
-.whatsnew-tag.removed { background: rgba(148,163,184,0.14); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.3); }
-.whatsnew-items { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.whatsnew-items li { font-size: 0.85rem; color: var(--muted-light); line-height: 1.5; padding-left: 16px; position: relative; }
-.whatsnew-items li::before { content: '–'; position: absolute; left: 0; color: var(--muted); }
-
-/* ---- patch entries: compact tick between major releases ---- */
-.whatsnew-entry.patch { padding-bottom: 16px; padding-left: 24px; }
-.whatsnew-entry.patch::before {
-  content: ''; position: absolute; left: -4px; top: 7px;
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--muted-light); opacity: 0.65;
-}
-.whatsnew-entry.patch.is-latest::before { background: #facc15; opacity: 1; }
-.whatsnew-patch-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
-.whatsnew-patch-badge {
-  font-size: 8.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em;
-  color: var(--muted); background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-  padding: 1.5px 7px; border-radius: 100px; flex-shrink: 0;
-}
-.whatsnew-patch-title { font-size: 0.82rem; font-weight: 700; color: var(--muted-light); }
-.whatsnew-patch-date { font-size: 9px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-left: auto; flex-shrink: 0; }
-.whatsnew-patch-items { margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
-.whatsnew-patch-items li { font-size: 0.76rem; color: var(--muted); line-height: 1.45; padding-left: 12px; position: relative; }
-.whatsnew-patch-items li::before { content: '·'; position: absolute; left: 0; color: var(--muted); }
-
-.whatsnew-empty { text-align: center; color: var(--muted); padding: 40px 10px; font-size: 0.9rem; }
-@media (max-width: 600px) {
-  .whatsnew-panel { max-height: 88vh; }
-  .whatsnew-header { padding: 18px 18px 14px; }
-  .whatsnew-body { padding: 18px 18px 22px; }
 }
 
 #gameLauncher { position: fixed; left: 0; top: 0; bottom: 0; z-index: 900; display: flex; pointer-events: none; }
@@ -583,7 +476,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 }
 @media (max-width: 480px) {
   .game-grid { grid-template-columns: repeat(2,1fr); }
-  .hud-logo-text { display: none; }
   .sidebar-link .link-label { display: none; }
 }
 </style>
@@ -603,7 +495,7 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 <div id="homepage">
   <aside class="app-sidebar">
     <div class="sidebar-brand">
-      <div class="sidebar-logo-mark">NT</div>
+      <div class="sidebar-logo-mark"><img src="logo.png" alt="New Tab 2 logo" /></div>
       <div class="sidebar-brand-text">
         <div class="sidebar-title">New Tab<span> 2</span></div>
         <div class="sidebar-sub">NewTabGmail@Gmail.com</div>
@@ -615,11 +507,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
       <button class="sidebar-link active" type="button">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12L12 4L21 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10V20C5 20.55 5.45 21 6 21H10V16H14V21H18C18.55 21 19 20.55 19 20V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="link-label">Home</span>
-      </button>
-      <button class="sidebar-link" id="homeWhatsNewBtn" type="button">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5l1.9 4.6 4.9.5-3.7 3.4 1 4.9-4.1-2.5-4.1 2.5 1-4.9-3.7-3.4 4.9-.5L12 2.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-        <span class="link-label">What's New</span>
-        <span class="home-whatsnew-dot" id="homeWhatsNewDot"></span>
       </button>
       <button class="sidebar-link" id="homeAiBtn" type="button">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.8"/></svg>
@@ -692,7 +579,7 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   <div class="hud-shell">
     
     <div class="hud-logo" title="New Tab 2">
-      <span class="hud-logo-text">NT<span>2</span></span>
+      <img src="logo.png" alt="New Tab 2" />
     </div>
     
     <button class="hud-home-btn" id="hudHomeBtn" type="button" title="Go home">
@@ -743,20 +630,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   </div>
 </div>
 
-<div id="whatsNewModal" aria-hidden="true">
-  <div class="whatsnew-panel">
-    <div class="whatsnew-header">
-      <div class="whatsnew-header-text">
-        <div class="home-eyebrow">Changelog</div>
-        <div class="whatsnew-title">What's New</div>
-        <div class="whatsnew-subtitle">Major releases, plus the small tweaks in between.</div>
-      </div>
-      <button class="whatsnew-close" id="whatsNewCloseBtn" type="button" aria-label="Close What's New">&#x2715;</button>
-    </div>
-    <div id="whatsNewBody" class="whatsnew-body"></div>
-  </div>
-</div>
-
 <aside id="siteChat" class="site-chat" aria-label="Site chat">
   <header class="chat-header">
     <div class="chat-title-row">
@@ -792,7 +665,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 <div id="chatToastStack" class="chat-toast-stack" aria-live="polite"></div>
 
 <script src="games.js"></script>
-<script src="whats-new.js"></script>
 <script>window.CHAT_ENABLED = true;</script>
 <script type="module" src="firebase-presence.js"></script>
 
@@ -1106,132 +978,6 @@ document.getElementById("floatAiBtn")?.addEventListener("click", openAiChat);
 document.getElementById("aiChatCloseBtn")?.addEventListener("click", closeAiChat);
 aiChatModal.addEventListener("click", (e) => { if (e.target === aiChatModal) closeAiChat(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && aiChatModal.classList.contains("active")) closeAiChat(); });
-
-// ---------- What's New ----------
-const WHATS_NEW_SEEN_KEY = "whatsnew_last_seen_date";
-const whatsNewModal = document.getElementById("whatsNewModal");
-const whatsNewBody = document.getElementById("whatsNewBody");
-const whatsNewDot = document.getElementById("homeWhatsNewDot");
-const TAG_LABELS = { new: "New", improved: "Improved", fixed: "Fixed", removed: "Removed" };
-
-function renderWhatsNew() {
-  const entries = Array.isArray(window.WHATS_NEW) ? window.WHATS_NEW : [];
-  whatsNewBody.innerHTML = "";
-
-  if (!entries.length) {
-    whatsNewBody.innerHTML = '<div class="whatsnew-empty">Nothing new to report yet — check back soon.</div>';
-    return;
-  }
-
-  entries.forEach((entry, index) => {
-    // Anything not explicitly marked as a "patch" is treated as a major release,
-    // so existing changelog data keeps working without edits.
-    const isPatch = entry.type === "patch";
-    const item = document.createElement("div");
-    item.className = "whatsnew-entry " + (isPatch ? "patch" : "major") + (index === 0 ? " is-latest" : "");
-
-    if (isPatch) {
-      const row = document.createElement("div");
-      row.className = "whatsnew-patch-row";
-
-      const badge = document.createElement("span");
-      badge.className = "whatsnew-patch-badge";
-      badge.textContent = "Patch";
-      row.appendChild(badge);
-
-      const title = document.createElement("span");
-      title.className = "whatsnew-patch-title";
-      title.textContent = entry.title || "Small update";
-      row.appendChild(title);
-
-      const date = document.createElement("span");
-      date.className = "whatsnew-patch-date";
-      date.textContent = entry.date || "";
-      row.appendChild(date);
-
-      item.appendChild(row);
-
-      if (Array.isArray(entry.items) && entry.items.length) {
-        const list = document.createElement("ul");
-        list.className = "whatsnew-patch-items";
-        entry.items.forEach((line) => {
-          const li = document.createElement("li");
-          li.textContent = line;
-          list.appendChild(li);
-        });
-        item.appendChild(list);
-      }
-    } else {
-      const top = document.createElement("div");
-      top.className = "whatsnew-entry-top";
-      const title = document.createElement("div");
-      title.className = "whatsnew-entry-title";
-      title.textContent = entry.title || "Update";
-      const date = document.createElement("div");
-      date.className = "whatsnew-date";
-      date.textContent = entry.date || "";
-      top.append(title, date);
-      item.appendChild(top);
-
-      if (Array.isArray(entry.tags) && entry.tags.length) {
-        const tagRow = document.createElement("div");
-        tagRow.className = "whatsnew-tags";
-        entry.tags.forEach((tagKey) => {
-          const tag = document.createElement("span");
-          const known = TAG_LABELS[tagKey] ? tagKey : "improved";
-          tag.className = "whatsnew-tag " + known;
-          tag.textContent = TAG_LABELS[tagKey] || tagKey;
-          tagRow.appendChild(tag);
-        });
-        item.appendChild(tagRow);
-      }
-
-      if (Array.isArray(entry.items) && entry.items.length) {
-        const list = document.createElement("ul");
-        list.className = "whatsnew-items";
-        entry.items.forEach((line) => {
-          const li = document.createElement("li");
-          li.textContent = line;
-          list.appendChild(li);
-        });
-        item.appendChild(list);
-      }
-    }
-
-    whatsNewBody.appendChild(item);
-  });
-}
-
-function latestWhatsNewDate() {
-  const entries = Array.isArray(window.WHATS_NEW) ? window.WHATS_NEW : [];
-  return entries.length ? String(entries[0].date || "") : "";
-}
-
-function refreshWhatsNewDot() {
-  if (!whatsNewDot) return;
-  const latest = latestWhatsNewDate();
-  const seen = localStorage.getItem(WHATS_NEW_SEEN_KEY);
-  whatsNewDot.classList.toggle("show", Boolean(latest) && latest !== seen);
-}
-
-function openWhatsNew() {
-  renderWhatsNew();
-  whatsNewModal.classList.add("active");
-  whatsNewModal.setAttribute("aria-hidden", "false");
-  const latest = latestWhatsNewDate();
-  if (latest) localStorage.setItem(WHATS_NEW_SEEN_KEY, latest);
-  refreshWhatsNewDot();
-}
-function closeWhatsNew() {
-  whatsNewModal.classList.remove("active");
-  whatsNewModal.setAttribute("aria-hidden", "true");
-}
-
-document.getElementById("homeWhatsNewBtn")?.addEventListener("click", openWhatsNew);
-document.getElementById("whatsNewCloseBtn")?.addEventListener("click", closeWhatsNew);
-whatsNewModal.addEventListener("click", (e) => { if (e.target === whatsNewModal) closeWhatsNew(); });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && whatsNewModal.classList.contains("active")) closeWhatsNew(); });
-refreshWhatsNewDot();
 
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
