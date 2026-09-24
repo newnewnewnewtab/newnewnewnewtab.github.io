@@ -400,24 +400,35 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 .chat-header-actions { display: flex; align-items: center; gap: 8px; }
 .chat-close-btn { width: 28px; height: 28px; border: none; background: rgba(255,255,255,0.07); color: var(--text); font-size: 16px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .chat-close-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
-.chat-room-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; padding: 4px; border: 1px solid rgba(125,211,252,0.12); border-radius: 13px; background: rgba(2,6,23,0.48); }
-.chat-room-tab { min-width: 0; height: 36px; border: 1px solid transparent; border-radius: 10px; background: transparent; color: #94a3b8; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s; }
-.chat-room-tab:hover { color: #eef2ff; background: rgba(109,94,248,0.08); }
-.chat-room-tab.active { color: #ffffff; background: linear-gradient(135deg,#a5b4fc,#5eead4); border-color: rgba(255,255,255,0.18); box-shadow: 0 6px 16px rgba(109,94,248,0.14); }
-.chat-profile { margin-top: 10px; }
+.chat-profile { margin-top: 12px; }
 .identity-summary { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid rgba(125,211,252,0.13); border-radius: 11px; background: linear-gradient(135deg,rgba(8,47,73,0.24),rgba(15,23,42,0.66)); }
-.identity-main { min-width: 0; }
+.identity-main { min-width: 0; display: flex; align-items: center; gap: 9px; }
+.identity-avatar { width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; color: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
 .identity-label { color: var(--muted); font-size: 9px; font-weight: 900; text-transform: uppercase; }
 .identity-name { color: #f8fafc; font-size: 13px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.identity-room { border: 1px solid rgba(45,212,191,0.28); border-radius: 100px; padding: 3px 9px; color: #ccfbf1; background: var(--accent2-soft); font-size: 10px; font-weight: 900; white-space: nowrap; }
+
+/* ---------- online player count badge ---------- */
+.online-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 100px; border: 1px solid rgba(45,212,191,0.22); background: linear-gradient(135deg,rgba(45,212,191,0.1),rgba(15,23,42,0.5)); white-space: nowrap; }
+.online-badge .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,0.6); animation: onlinePulse 2s ease-out infinite; flex-shrink: 0; }
+.online-badge .online-count { font-size: 12px; font-weight: 900; color: #ecfeff; }
+.online-badge .online-label { font-size: 10px; font-weight: 700; color: #a7f3d0; text-transform: uppercase; letter-spacing: 0.04em; }
+@keyframes onlinePulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.55); } 70% { box-shadow: 0 0 0 7px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
+.sidebar-online { margin: 4px 8px 16px; }
+.chat-online-badge { padding: 4px 10px 4px 8px; }
+.chat-online-badge .online-count { font-size: 11px; }
+.chat-online-badge .online-label { font-size: 9px; }
+.hud-online-badge { padding: 5px 11px 5px 9px; }
 .chat-messages { min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: rgba(109,94,248,0.1) transparent; }
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-thumb { background: rgba(109,94,248,0.14); border-radius: 99px; }
 .chat-empty { color: var(--muted); margin: auto; text-align: center; line-height: 1.5; max-width: 240px; font-size: 13px; }
 .chat-disabled-notice { margin: auto; max-width: 280px; text-align: center; color: #fecaca; font-size: 24px; font-weight: 900; line-height: 1.12; text-transform: uppercase; }
-.chat-message { display: grid; gap: 5px; max-width: 92%; padding: 9px 12px; border: 1px solid rgba(148,163,184,0.09); border-radius: 13px 13px 13px 5px; background: rgba(30,41,59,0.62); box-shadow: 0 5px 16px rgba(0,0,0,0.1); animation: messageIn 0.22s ease-out; transition: transform 0.2s, box-shadow 0.2s; }
-.chat-message:hover { transform: translateY(-1px); box-shadow: 0 9px 22px rgba(0,0,0,0.16); }
-.chat-message.own { align-self: flex-end; border-color: rgba(109,94,248,0.18); border-radius: 13px 13px 5px 13px; background: linear-gradient(135deg,rgba(14,116,144,0.32),rgba(8,47,73,0.45)); }
+.chat-message { display: flex; gap: 8px; max-width: 94%; align-items: flex-start; animation: messageIn 0.22s ease-out; }
+.chat-message.own { align-self: flex-end; flex-direction: row-reverse; }
+.message-avatar { width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: #fff; margin-top: 2px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.message-bubble { display: grid; gap: 5px; min-width: 0; padding: 9px 12px; border: 1px solid rgba(148,163,184,0.09); border-radius: 13px 13px 13px 5px; background: rgba(30,41,59,0.62); box-shadow: 0 5px 16px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
+.chat-message:hover .message-bubble { transform: translateY(-1px); box-shadow: 0 9px 22px rgba(0,0,0,0.16); }
+.chat-message.own .message-bubble { border-color: rgba(109,94,248,0.18); border-radius: 13px 13px 5px 13px; background: linear-gradient(135deg,rgba(14,116,144,0.32),rgba(8,47,73,0.45)); }
 .message-meta { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 10px; font-weight: 700; }
 .message-author { display: inline-flex; align-items: center; min-width: 0; gap: 6px; flex-wrap: wrap; }
 .message-name { color: #c7d2fe; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -469,7 +480,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
   .game-grid { grid-template-columns: repeat(auto-fill,minmax(148px,1fr)); gap: 8px; }
   .site-chat { width: min(94vw,420px); min-width: 0; }
   .identity-summary { grid-template-columns: 1fr; }
-  .chat-room-tabs { grid-template-columns: 1fr; }
   .chat-form { grid-template-columns: 1fr auto; }
   #gameHud { top: 10px; left: 10px; }
   #floatActions { bottom: 14px; right: 14px; }
@@ -500,6 +510,12 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
         <div class="sidebar-title">New Tab<span> 2</span></div>
         <div class="sidebar-sub">NewTabGmail@Gmail.com</div>
       </div>
+    </div>
+
+    <div class="online-badge sidebar-online" id="onlineBadgeHome">
+      <span class="online-dot"></span>
+      <span class="online-count" id="onlineCountHome">—</span>
+      <span class="online-label">online</span>
     </div>
 
     <div class="sidebar-section-label">Menu</div>
@@ -593,7 +609,13 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
       <span class="hud-dot"></span>
       <span id="hudGameName" class="hud-game-name">&#8212;</span>
     </div>
-    
+
+    <div class="online-badge hud-online-badge" id="onlineBadgeHud" title="Players with the site open right now">
+      <span class="online-dot"></span>
+      <span class="online-count" id="onlineCountHud">—</span>
+      <span class="online-label">online</span>
+    </div>
+
     <button class="hud-chat-btn" id="hudChatBtn" type="button" title="Open chat">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
@@ -635,21 +657,23 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
     <div class="chat-title-row">
       <div class="chat-title">Live Chat</div>
       <div class="chat-header-actions">
+        <div class="online-badge chat-online-badge" id="onlineBadgeChat">
+          <span class="online-dot"></span>
+          <span class="online-count" id="onlineCountChat">—</span>
+          <span class="online-label">online</span>
+        </div>
         <button id="chatCloseBtn" class="chat-close-btn" type="button" aria-label="Close chat">&#x2715;</button>
       </div>
-    </div>
-    <div id="chatRoomTabs" class="chat-room-tabs" role="tablist" aria-label="Chat room">
-      <button class="chat-room-tab" type="button" data-chat-room="elementary" role="tab">Elementary</button>
-      <button class="chat-room-tab" type="button" data-chat-room="middle" role="tab">Middle</button>
-      <button class="chat-room-tab" type="button" data-chat-room="high" role="tab">High</button>
     </div>
     <div class="chat-profile">
       <div class="identity-summary">
         <div class="identity-main">
-          <div class="identity-label">Username</div>
-          <div id="chatLockedName" class="identity-name">Loading...</div>
+          <div id="chatLockedAvatar" class="identity-avatar">?</div>
+          <div>
+            <div class="identity-label">You are</div>
+            <div id="chatLockedName" class="identity-name">Loading...</div>
+          </div>
         </div>
-        <div id="chatLockedRoom" class="identity-room">Elementary School</div>
       </div>
     </div>
   </header>
@@ -685,8 +709,10 @@ const chatForm = document.getElementById("chatForm");
 const chatMessages = document.getElementById("chatMessages");
 const chatSend = document.getElementById("chatSend");
 const chatLockedName = document.getElementById("chatLockedName");
-const chatLockedRoom = document.getElementById("chatLockedRoom");
-const chatRoomTabs = [...document.querySelectorAll("[data-chat-room]")];
+const chatLockedAvatar = document.getElementById("chatLockedAvatar");
+const onlineCountHome = document.getElementById("onlineCountHome");
+const onlineCountChat = document.getElementById("onlineCountChat");
+const onlineCountHud = document.getElementById("onlineCountHud");
 const navActiveGame = document.getElementById("navActiveGame");
 const navActiveGameName = document.getElementById("navActiveGameName");
 const homepage = document.getElementById("homepage");
@@ -700,16 +726,14 @@ const homeChatBtn = document.getElementById("homeChatBtn");
 
 const MAX_VISIBLE = 10;
 const CHAT_NAME_KEY = "site_chat_random_name";
-const CHAT_ROOM_KEY = "site_chat_room";
 const CHAT_ENABLED = window.CHAT_ENABLED !== false;
 let currentChatName = localStorage.getItem(CHAT_NAME_KEY) || "Loading...";
-let currentChatRoomId = localStorage.getItem(CHAT_ROOM_KEY) || "elementary";
 
-const CHAT_ROOMS = {
-  elementary: "Elementary School",
-  middle: "Middle School",
-  high: "High School"
-};
+function avatarColorFor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  return `hsl(${hash % 360}, 68%, 46%)`;
+}
 
 const SWATCH_PALETTES = [
   ["#1e3a5f","#38bdf8"],["#1a3326","#34d399"],["#2d1b4e","#a78bfa"],
@@ -985,10 +1009,6 @@ chatForm.addEventListener("submit", (event) => {
   document.dispatchEvent(new CustomEvent("siteChatSubmit"));
 });
 
-chatRoomTabs.forEach((button) => {
-  button.addEventListener("click", () => setChatRoom(button.dataset.chatRoom));
-});
-
 document.addEventListener("siteChatNewMessage", () => {
   if (!siteChat.classList.contains("open")) {
     floatChatBtn.classList.add("has-unread");
@@ -1000,17 +1020,18 @@ document.addEventListener("siteChatNewMessage", () => {
 
 document.addEventListener("siteChatIdentityChanged", (event) => {
   currentChatName = cleanChatName(event.detail?.name) || currentChatName;
-  currentChatRoomId = event.detail?.roomId || currentChatRoomId;
-  renderChatChrome();
-});
-
-document.addEventListener("siteChatRoomSynced", (event) => {
-  currentChatRoomId = event.detail?.roomId || currentChatRoomId;
   renderChatChrome();
 });
 
 document.addEventListener("siteChatNotify", (event) => {
   showChatToast(event.detail?.name, event.detail?.text, event.detail?.room);
+});
+
+document.addEventListener("sitePlayersOnline", (event) => {
+  const count = event.detail?.count ?? "—";
+  if (onlineCountHome) onlineCountHome.textContent = count;
+  if (onlineCountChat) onlineCountChat.textContent = count;
+  if (onlineCountHud) onlineCountHud.textContent = count;
 });
 
 function updateChatPanelState() {
@@ -1021,31 +1042,20 @@ function updateChatPanelState() {
     chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming september (maybe)</div>';
     return;
   }
-  chatInput.placeholder = "Message " + roomNameFromId(currentChatRoomId) + "...";
+  chatInput.placeholder = "Message everyone...";
 }
 
 function cleanChatName(value) { return String(value || "").replace(/\s+/g," ").trim().slice(0,24); }
 
 function renderChatChrome() {
-  chatLockedName.textContent = currentChatName || "Guest";
-  chatLockedRoom.textContent = roomNameFromId(currentChatRoomId);
-  chatRoomTabs.forEach((button) => {
-    const active = button.dataset.chatRoom === currentChatRoomId;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-selected", active ? "true" : "false");
-  });
+  const name = currentChatName || "Guest";
+  chatLockedName.textContent = name;
+  if (chatLockedAvatar) {
+    chatLockedAvatar.textContent = name.slice(0, 1).toUpperCase();
+    chatLockedAvatar.style.background = avatarColorFor(name);
+  }
   updateChatPanelState();
 }
-
-function setChatRoom(roomId) {
-  if (!CHAT_ROOMS[roomId]) return;
-  currentChatRoomId = roomId;
-  localStorage.setItem(CHAT_ROOM_KEY, roomId);
-  renderChatChrome();
-  document.dispatchEvent(new CustomEvent("siteChatRoomChanged", { detail: { roomId, room: roomNameFromId(roomId) } }));
-}
-
-function roomNameFromId(roomId) { return CHAT_ROOMS[roomId] || "Chat"; }
 
 function showChatToast(name, text, room) {
   const stack = document.getElementById("chatToastStack");
