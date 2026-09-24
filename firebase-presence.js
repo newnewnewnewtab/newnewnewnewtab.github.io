@@ -4,6 +4,8 @@ import {
   getDatabase,
   ref,
   onValue,
+  onDisconnect,
+  set,
   push,
   query,
   limitToLast,
@@ -48,22 +50,20 @@ const RANDOM_USERNAMES = [
   "SwiftWolf", "GoldenSpark", "ShadowMeteor", "TurboKnight", "BlueStorm", "SolarPhoenix", "WildFalcon", "EchoNova", "IronTiger", "VoltPhoenix",
   "RocketMeteor", "PixelWolf", "GhostStorm", "BrightNova", "CyberFalcon", "CrystalOrbit", "NightSparkle", "QuantumPhoenix", "StormNova", "FrozenWolf",
   "SkyMeteor", "RapidFalcon", "MysticStorm", "LunarPhoenix", "SteelTiger", "ThunderNova", "ShadowWolf", "GoldenMeteor", "NeonOrbit", "SwiftNova",
-  "PixelComet", "EchoTiger", "GhostPhoenix", "BlueNova", "RocketOrbit","Eli Milton Estabrook"
+  "PixelComet", "EchoTiger", "GhostPhoenix", "BlueNova", "RocketOrbit", "Eli Milton Estabrook"
 ];
 
-const CHAT_ROOMS = {
-  elementary: "Elementary School",
-  middle: "Middle School",
-  high: "High School"
-};
+// Chat is now a single, unified room for everyone.
+const CHAT_ROOM_ID = "general";
+const CHAT_ROOM_LABEL = "General Chat";
 
 const SESSION_ID_KEY = "game_hoster_session_id";
 const CHAT_USER_ID_KEY = "site_chat_user_id";
 const CHAT_NAME_KEY = "site_chat_random_name";
-const CHAT_ROOM_KEY = "site_chat_room";
-const CHAT_MESSAGE_LIMIT = 40;
+const CHAT_MESSAGE_LIMIT = 60;
 const MAX_MESSAGE_LENGTH = 180;
 const MAX_NAME_LENGTH = 24;
+const CHAT_SEND_COOLDOWN_MS = 3000;
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
@@ -73,11 +73,10 @@ const CHAT_USER_ID = getPersistentId();
 const CHAT_NAME = getSavedChatName();
 
 let currentGameName = null;
-let unsubscribeChat = null;
 let isOnline = false;
 let isChatOpen = false;
 let hasLoadedChat = false;
-let activeChatRoomId = getSavedRoomId();
+let lastChatSendAt = 0;
 const seenChatMessages = new Set();
 
 const chatMessages = document.getElementById("chatMessages");
@@ -116,11 +115,6 @@ function getSavedChatName() {
   return name;
 }
 
-function getSavedRoomId() {
-  const roomId = localStorage.getItem(CHAT_ROOM_KEY);
-  return CHAT_ROOMS[roomId] ? roomId : "elementary";
-}
-
 function connectDatabase() {
   if (isOnline) return;
   goOnline(database);
@@ -128,31 +122,43 @@ function connectDatabase() {
 }
 
 // Tracks which game the player currently has open so outgoing chat messages
-// can be tagged with it. This is purely local state now -- it no longer
-// writes anything to Firebase (the old live player-count/presence system
-// has been removed).
+// can be tagged with it. This is purely local state -- it doesn't write
+// anything to Firebase on its own.
 function setActiveGame(name) {
   currentGameName = name || null;
 }
 
+// ---------- Live "players online" count ----------
+// Every open tab registers itself under presence/{uid} while connected and
+// Firebase automatically removes that entry the moment the tab disconnects
+// (closed, refreshed, lost network, etc). The total number of children under
+// "presence" is broadcast to the page as the live online count.
+function setupPresence() {
+  const myPresenceRef = ref(database, `presence/${CHAT_USER_ID}`);
+  const connectedRef = ref(database, ".info/connected");
+
+  onValue(connectedRef, (snapshot) => {
+    if (snapshot.val() !== true) return;
+    onDisconnect(myPresenceRef).remove();
+    set(myPresenceRef, Date.now());
+  });
+
+  onValue(ref(database, "presence"), (snapshot) => {
+    const count = snapshot.exists() ? Object.keys(snapshot.val() || {}).length : 0;
+    document.dispatchEvent(new CustomEvent("sitePlayersOnline", { detail: { count } }));
+  }, (error) => {
+    console.warn("Firebase presence read failed:", error);
+  });
+}
+
 function setupChat() {
   if (!chatForm || !chatInput) return;
-  connectDatabase();
   announceIdentity();
-  watchChatMessages(activeChatRoomId);
+  watchChatMessages();
 
   document.addEventListener("siteChatToggled", (event) => {
     isChatOpen = Boolean(event.detail?.open);
     if (isChatOpen) document.getElementById("chatToggle")?.classList.remove("has-unread");
-  });
-
-  document.addEventListener("siteChatRoomChanged", (event) => {
-    const roomId = cleanRoomId(event.detail?.roomId);
-    if (!roomId || roomId === activeChatRoomId) return;
-    activeChatRoomId = roomId;
-    localStorage.setItem(CHAT_ROOM_KEY, roomId);
-    document.dispatchEvent(new CustomEvent("siteChatRoomSynced", { detail: { roomId, room: roomLabel(roomId) } }));
-    watchChatMessages(roomId);
   });
 
   document.addEventListener("siteChatSubmit", () => sendChatMessage());
@@ -166,29 +172,26 @@ function setupChat() {
 
 function announceIdentity() {
   document.dispatchEvent(new CustomEvent("siteChatIdentityChanged", {
-    detail: { uid: CHAT_USER_ID, name: CHAT_NAME, roomId: activeChatRoomId, room: roomLabel(activeChatRoomId) }
+    detail: { uid: CHAT_USER_ID, name: CHAT_NAME, roomId: CHAT_ROOM_ID, room: CHAT_ROOM_LABEL }
   }));
 }
 
-function watchChatMessages(roomId) {
-  clearChatSubscription();
-  const safeRoomId = cleanRoomId(roomId);
-  if (!safeRoomId || !chatMessages) return;
-  activeChatRoomId = safeRoomId;
+function watchChatMessages() {
+  if (!chatMessages) return;
   seenChatMessages.clear();
   hasLoadedChat = false;
-  chatMessages.innerHTML = '<div class="chat-empty">Loading ' + roomLabel(safeRoomId) + '...</div>';
+  chatMessages.innerHTML = '<div class="chat-empty">Loading chat...</div>';
 
   const messagesRef = query(
-    ref(database, `siteChat/rooms/${safeRoomId}/messages`),
+    ref(database, `siteChat/rooms/${CHAT_ROOM_ID}/messages`),
     orderByChild("createdAt"),
     limitToLast(CHAT_MESSAGE_LIMIT)
   );
 
-  unsubscribeChat = onValue(messagesRef, (snapshot) => {
+  onValue(messagesRef, (snapshot) => {
     chatMessages.innerHTML = "";
     if (!snapshot.exists()) {
-      chatMessages.innerHTML = '<div class="chat-empty">No messages in this room yet.</div>';
+      chatMessages.innerHTML = '<div class="chat-empty">No messages yet. Say hi!</div>';
       hasLoadedChat = true;
       return;
     }
@@ -196,20 +199,14 @@ function watchChatMessages(roomId) {
       const key = messageSnapshot.key;
       const message = messageSnapshot.val();
       renderMessage(key, message);
-      maybeNotifyChatMessage(key, message, safeRoomId);
+      maybeNotifyChatMessage(key, message);
     });
     hasLoadedChat = true;
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }, (error) => {
     console.warn("Firebase chat read failed:", error);
-    showChatStatus("Chat could not load. Check the Firebase database rules for this room.");
+    showChatStatus("Chat could not load. Check the Firebase database rules.");
   });
-}
-
-function clearChatSubscription() {
-  if (!unsubscribeChat) return;
-  unsubscribeChat();
-  unsubscribeChat = null;
 }
 
 function renderMessage(key, message) {
@@ -218,13 +215,22 @@ function renderMessage(key, message) {
   item.className = "chat-message";
   if (message.uid === CHAT_USER_ID || message.sid === SESSION_ID) item.classList.add("own");
 
+  const avatar = document.createElement("div");
+  avatar.className = "message-avatar";
+  const displayName = cleanName(message.name) || "Guest";
+  avatar.textContent = displayName.slice(0, 1).toUpperCase();
+  avatar.style.background = avatarColor(displayName);
+
+  const bubble = document.createElement("div");
+  bubble.className = "message-bubble";
+
   const meta = document.createElement("div");
   meta.className = "message-meta";
   const author = document.createElement("div");
   author.className = "message-author";
   const name = document.createElement("span");
   name.className = "message-name";
-  name.textContent = cleanName(message.name) || "Guest";
+  name.textContent = displayName;
   const time = document.createElement("span");
   time.className = "message-time";
   time.textContent = formatMessageTime(message.createdAt);
@@ -247,40 +253,72 @@ function renderMessage(key, message) {
     author.append(gameTag);
   }
   meta.append(author, time);
-  item.append(meta, text);
+  bubble.append(meta, text);
+  item.append(avatar, bubble);
   chatMessages.appendChild(item);
+}
+
+// Deterministic, pleasant-looking color per username so avatars stay
+// consistent for the same person across messages.
+function avatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  const hue = hash % 360;
+  return `hsl(${hue}, 68%, 46%)`;
 }
 
 function sendChatMessage() {
   const rawText = chatInput.value.trim();
   if (!rawText) return;
-  const roomId = cleanRoomId(activeChatRoomId);
-  if (!roomId) return;
   const text = cleanMessageText(rawText);
   if (!text) return;
+
+  const now = Date.now();
+  const elapsed = now - lastChatSendAt;
+  if (elapsed < CHAT_SEND_COOLDOWN_MS) {
+    const secondsLeft = Math.ceil((CHAT_SEND_COOLDOWN_MS - elapsed) / 1000);
+    flashChatCooldown(secondsLeft);
+    return;
+  }
+  lastChatSendAt = now;
+
   chatInput.value = "";
 
-  push(ref(database, `siteChat/rooms/${roomId}/messages`), {
+  push(ref(database, `siteChat/rooms/${CHAT_ROOM_ID}/messages`), {
     uid: CHAT_USER_ID,
     sid: SESSION_ID,
     name: CHAT_NAME,
     text,
-    room: roomId,
+    room: CHAT_ROOM_ID,
     createdAt: Date.now(),
     ...(currentGameName ? { game: currentGameName } : {})
   }).catch((error) => {
     console.warn("Firebase chat write failed:", error);
-    showChatStatus("Message was not sent. Check the Firebase database rules for this room.");
+    lastChatSendAt = 0;
+    showChatStatus("Message was not sent. Check the Firebase database rules.");
   });
 }
 
-function maybeNotifyChatMessage(key, message, roomId) {
+// Briefly shows a "slow down" hint near the input without disturbing the
+// message list, then clears itself once the cooldown window passes.
+function flashChatCooldown(secondsLeft) {
+  if (!chatInput) return;
+  const previousPlaceholder = chatInput.dataset.originalPlaceholder || chatInput.placeholder;
+  chatInput.dataset.originalPlaceholder = previousPlaceholder;
+  chatInput.placeholder = `Wait ${secondsLeft}s before sending again...`;
+  clearTimeout(flashChatCooldown._resetTimer);
+  flashChatCooldown._resetTimer = setTimeout(() => {
+    chatInput.placeholder = previousPlaceholder;
+  }, secondsLeft * 1000);
+}
+
+function maybeNotifyChatMessage(key, message) {
   if (!key || seenChatMessages.has(key)) return;
   seenChatMessages.add(key);
   if (!hasLoadedChat || isChatOpen || message?.uid === CHAT_USER_ID) return;
   document.dispatchEvent(new CustomEvent("siteChatNewMessage"));
   document.dispatchEvent(new CustomEvent("siteChatNotify", {
-    detail: { name: cleanName(message.name) || "Guest", text: cleanMessageText(message.text), room: roomLabel(roomId), roomId }
+    detail: { name: cleanName(message.name) || "Guest", text: cleanMessageText(message.text), room: CHAT_ROOM_LABEL, roomId: CHAT_ROOM_ID }
   }));
 }
 
@@ -291,15 +329,6 @@ function showChatStatus(message) {
   empty.className = "chat-empty";
   empty.textContent = message;
   chatMessages.appendChild(empty);
-}
-
-function cleanRoomId(value) {
-  const roomId = String(value || "").trim();
-  return CHAT_ROOMS[roomId] ? roomId : "";
-}
-
-function roomLabel(roomId) {
-  return CHAT_ROOMS[roomId] || "Chat";
 }
 
 function cleanMessageText(value) {
@@ -333,4 +362,6 @@ function formatMessageTimeFull(timestamp) {
 
 window.gamePresence = { setActiveGame };
 
+connectDatabase();
+setupPresence();
 setupChat();
