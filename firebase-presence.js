@@ -32,16 +32,16 @@ const firebaseConfig = {
 // so collisions between two people online at once are effectively a
 // non-issue (the old fixed list of ~250 names collided constantly).
 const USERNAME_VERBS = [
-  "Dash","Sprint","Blaze","Storm","Drift","Surge","Charge","Strike","Flash","Glide",
-  "Vault","Blitz","Rush","Soar","Dive","Climb","Roam","Wander","Chase","Hunt",
-  "Stalk","Prowl","Lurk","Creep","Sneak","Dodge","Duck","Leap","Jump","Bound",
-  "Spring","Flip","Spin","Twist","Roll","Tumble","Slide","Skid","Coast","Cruise",
-  "Zoom","Race","Bolt","Dart","Flee","Break","Crash","Smash","Slam","Crush",
-  "Shatter","Blast","Boom","Ignite","Spark","Flare","Glow","Shine","Gleam","Shimmer",
-  "Sparkle","Flicker","Pulse","Throb","Echo","Whisper","Shout","Roar","Growl","Snarl",
-  "Howl","Wail","Chant","Hum","Buzz","Hover","Float","Fly","Ride","Steer",
-  "Pilot","Guide","Lead","Track","Trace","Scan","Seek","Probe","Explore","Discover",
-  "Unlock","Forge","Craft","Build","Shape","Carve","Weave","Bind","Summon","Conjure"
+  "Dashing","Sprinting","Blazing","Storming","Drifting","Surging","Charging","Striking","Flashing","Gliding",
+  "Vaulting","Blitzing","Rushing","Soaring","Diving","Climbing","Roaming","Wandering","Chasing","Hunting",
+  "Stalking","Prowling","Lurking","Creeping","Sneaking","Dodging","Ducking","Leaping","Jumping","Bounding",
+  "Springing","Flipping","Spinning","Twisting","Rolling","Tumbling","Sliding","Skidding","Coasting","Cruising",
+  "Zooming","Racing","Bolting","Darting","Fleeing","Breaking","Crashing","Smashing","Slamming","Crushing",
+  "Shattering","Blasting","Booming","Igniting","Sparking","Flaring","Glowing","Shining","Gleaming","Shimmering",
+  "Sparkling","Flickering","Pulsing","Throbbing","Echoing","Whispering","Shouting","Roaring","Growling","Snarling",
+  "Howling","Wailing","Chanting","Humming","Buzzing","Hovering","Floating","Flying","Riding","Steering",
+  "Piloting","Guiding","Leading","Tracking","Tracing","Scanning","Seeking","Probing","Exploring","Discovering",
+  "Unlocking","Forging","Crafting","Building","Shaping","Carving","Weaving","Binding","Summoning","Conjuring"
 ];
 
 const USERNAME_NOUNS = [
@@ -75,10 +75,6 @@ const USERNAME_NOUNS = [
 
 const USERNAME_SEPARATORS = ["", "-", "_"];
 
-// Matches exactly what generateUsername() produces: CapitalWord + optional
-// separator + CapitalWord + a 1-2 digit number with no leading zero.
-// Anything that doesn't match this shape is a legacy/old-style name (from
-// the old fixed word list, or anything else) and gets swapped out.
 const GENERATED_USERNAME_PATTERN = /^[A-Z][a-z]+[-_]?[A-Z][a-z]+[1-9][0-9]?$/;
 
 function isGeneratedUsername(name) {
@@ -97,27 +93,20 @@ function generateUsername() {
   const verb = capitalizeWord(pickRandom(USERNAME_VERBS));
   const noun = capitalizeWord(pickRandom(USERNAME_NOUNS));
   const separator = pickRandom(USERNAME_SEPARATORS);
-  const number = 1 + Math.floor(Math.random() * 99); // 1-99
+  const number = 1 + Math.floor(Math.random() * 99);
   return `${verb}${separator}${noun}${number}`;
 }
 
-// Chat is now a single, unified room for everyone.
 const CHAT_ROOM_ID = "general";
 const CHAT_ROOM_LABEL = "General Chat";
 
 const SESSION_ID_KEY = "game_hoster_session_id";
 const CHAT_USER_ID_KEY = "site_chat_user_id";
-// Bumped to v2: forces everyone to get a freshly generated name from the new
-// Verb+Noun system, instead of reusing whatever was cached under the old key
-// (clearing cookies alone does not clear localStorage, so old names would
-// otherwise stick around indefinitely).
 const CHAT_NAME_KEY = "site_chat_name_v2";
-const CHAT_MESSAGE_LIMIT = 60;
+const CHAT_MESSAGE_LIMIT = 150;
 const MAX_MESSAGE_LENGTH = 180;
 const MAX_NAME_LENGTH = 24;
 const CHAT_SEND_COOLDOWN_MS = 4000;
-// Once a room has more than this many stored messages, the oldest ones are
-// permanently deleted from Firebase (not just hidden from the visible list).
 const MAX_STORED_MESSAGES = 200;
 
 const app = initializeApp(firebaseConfig);
@@ -164,9 +153,6 @@ function getPersistentId() {
 
 function getSavedChatName() {
   const saved = cleanName(localStorage.getItem(CHAT_NAME_KEY));
-  // No name yet, or it's an old-style name (from the old fixed list, or
-  // anything not matching the current generator's format) -- issue a fresh
-  // one automatically instead of keeping the stale name around.
   if (!saved || !isGeneratedUsername(saved)) {
     const name = generateUsername();
     localStorage.setItem(CHAT_NAME_KEY, name);
@@ -181,18 +167,10 @@ function connectDatabase() {
   isOnline = true;
 }
 
-// Tracks which game the player currently has open so outgoing chat messages
-// can be tagged with it. This is purely local state -- it doesn't write
-// anything to Firebase on its own.
 function setActiveGame(name) {
   currentGameName = name || null;
 }
 
-// ---------- Live "players online" count ----------
-// Every open tab registers itself under presence/{uid} while connected and
-// Firebase automatically removes that entry the moment the tab disconnects
-// (closed, refreshed, lost network, etc). The total number of children under
-// "presence" is broadcast to the page as the live online count.
 function setupPresence() {
   const myPresenceRef = ref(database, `presence/${CHAT_USER_ID}`);
   const connectedRef = ref(database, ".info/connected");
