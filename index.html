@@ -496,10 +496,10 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 
 <div id="emailPopup" class="overlay">
   <div class="overlay-content">
-    <h1>Want the new URL when this site gets blocked?</h1>
+    <h1>Would you like to be emailed the new URL when the site is blocked? (HIGHLY RECOMMENDED)</h1>
     <div class="overlay-btns">
-      <button id="yesBtn" class="btn-yes">Yes, send it</button>
-      <button id="noBtn" class="btn-no" disabled>No thanks (5)</button>
+      <button id="yesBtn" class="btn-yes">Yes, I will fill out this form</button>
+      <button id="noBtn" class="btn-no" disabled>No (5)</button>
     </div>
   </div>
 </div>
@@ -552,7 +552,7 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
       <div class="main-hero">
         <div class="home-eyebrow">Home</div>
         <h1 class="home-title">All Games</h1>
-        <p class="home-sub">Email the account listed above to get a game unblocked.</p>
+        <p class="home-sub">Email the account listed above for any requests/complaints.</p>
       </div>
       <div id="gameGrid" class="game-grid"></div>
     </div>
@@ -670,7 +670,7 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
     <div class="chat-profile">
       <div class="identity-summary">
         <div class="identity-main">
-          <span class="identity-label">You are</span>
+          <span class="identity-label">username</span>
           <div id="chatLockedName" class="identity-name">Loading...</div>
         </div>
       </div>
@@ -974,14 +974,13 @@ const hudChatBtn = document.getElementById("hudChatBtn");
 hudChatBtn.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
 chatCloseBtn.addEventListener("click", () => setChatOpen(false));
 
-// ---------- AI Chat (newtabai.html) ----------
 const aiChatModal = document.getElementById("aiChatModal");
 const aiChatFrame = document.getElementById("aiChatFrame");
 const AI_CHAT_SRC = "newtabai.html";
 
 let aiChatLoaded = false;
 function openAiChat() {
-  if (!aiChatLoaded) { aiChatFrame.src = AI_CHAT_SRC; aiChatLoaded = true; } // lazy-load on first open
+  if (!aiChatLoaded) { aiChatFrame.src = AI_CHAT_SRC; aiChatLoaded = true; }
   aiChatModal.classList.add("active");
   aiChatModal.setAttribute("aria-hidden", "false");
 }
@@ -1071,7 +1070,7 @@ const FORM_LINK = "https://docs.google.com/forms/d/e/1FAIpQLSc_Z4B0MP1d0rs0b_KwG
 if (!localStorage.getItem("email_prompt_dismissed")) {
   setTimeout(() => {
     emailPopup.classList.add("active");
-    let count = 5;
+    let count = 3;
     const timer = setInterval(() => {
       count--;
       if (count > 0) { noBtn.textContent = "No thanks (" + count + ")"; }
