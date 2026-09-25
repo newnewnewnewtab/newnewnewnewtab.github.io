@@ -25,6 +25,12 @@ const firebaseConfig = {
   appId: "1:347559506222:web:e854997d9048686b988abf"
 };
 
+// ---------- Username generation ----------
+// Names are built on the fly as Verb(+separator+)Noun(+number 1-99), e.g.
+// "BlazeFalcon42", "Drift-Comet7", "Surge_Wolf88". With 100 verbs, 200 nouns,
+// 3 separator styles and 99 numbers, that's nearly 6 million combinations,
+// so collisions between two people online at once are effectively a
+// non-issue (the old fixed list of ~250 names collided constantly).
 const USERNAME_VERBS = [
   "Dash","Sprint","Blaze","Storm","Drift","Surge","Charge","Strike","Flash","Glide",
   "Vault","Blitz","Rush","Soar","Dive","Climb","Roam","Wander","Chase","Hunt",
@@ -69,6 +75,16 @@ const USERNAME_NOUNS = [
 
 const USERNAME_SEPARATORS = ["", "-", "_"];
 
+// Matches exactly what generateUsername() produces: CapitalWord + optional
+// separator + CapitalWord + a 1-2 digit number with no leading zero.
+// Anything that doesn't match this shape is a legacy/old-style name (from
+// the old fixed word list, or anything else) and gets swapped out.
+const GENERATED_USERNAME_PATTERN = /^[A-Z][a-z]+[-_]?[A-Z][a-z]+[1-9][0-9]?$/;
+
+function isGeneratedUsername(name) {
+  return GENERATED_USERNAME_PATTERN.test(name);
+}
+
 function capitalizeWord(word) {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 }
@@ -85,17 +101,24 @@ function generateUsername() {
   return `${verb}${separator}${noun}${number}`;
 }
 
+// Chat is now a single, unified room for everyone.
 const CHAT_ROOM_ID = "general";
 const CHAT_ROOM_LABEL = "General Chat";
 
 const SESSION_ID_KEY = "game_hoster_session_id";
 const CHAT_USER_ID_KEY = "site_chat_user_id";
-const CHAT_NAME_KEY = "site_chat_random_name";
-const CHAT_MESSAGE_LIMIT = 100;
-const MAX_MESSAGE_LENGTH = 200;
-const MAX_NAME_LENGTH = 100;
+// Bumped to v2: forces everyone to get a freshly generated name from the new
+// Verb+Noun system, instead of reusing whatever was cached under the old key
+// (clearing cookies alone does not clear localStorage, so old names would
+// otherwise stick around indefinitely).
+const CHAT_NAME_KEY = "site_chat_name_v2";
+const CHAT_MESSAGE_LIMIT = 60;
+const MAX_MESSAGE_LENGTH = 180;
+const MAX_NAME_LENGTH = 24;
 const CHAT_SEND_COOLDOWN_MS = 4000;
-const MAX_STORED_MESSAGES = CHAT_MESSAGE_LIMIT * 2;
+// Once a room has more than this many stored messages, the oldest ones are
+// permanently deleted from Firebase (not just hidden from the visible list).
+const MAX_STORED_MESSAGES = 200;
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
@@ -140,12 +163,16 @@ function getPersistentId() {
 }
 
 function getSavedChatName() {
-  let name = cleanName(localStorage.getItem(CHAT_NAME_KEY));
-  if (!name) {
-    name = generateUsername() || "Guest";
+  const saved = cleanName(localStorage.getItem(CHAT_NAME_KEY));
+  // No name yet, or it's an old-style name (from the old fixed list, or
+  // anything not matching the current generator's format) -- issue a fresh
+  // one automatically instead of keeping the stale name around.
+  if (!saved || !isGeneratedUsername(saved)) {
+    const name = generateUsername();
     localStorage.setItem(CHAT_NAME_KEY, name);
+    return name;
   }
-  return name;
+  return saved;
 }
 
 function connectDatabase() {
@@ -154,10 +181,18 @@ function connectDatabase() {
   isOnline = true;
 }
 
+// Tracks which game the player currently has open so outgoing chat messages
+// can be tagged with it. This is purely local state -- it doesn't write
+// anything to Firebase on its own.
 function setActiveGame(name) {
   currentGameName = name || null;
 }
 
+// ---------- Live "players online" count ----------
+// Every open tab registers itself under presence/{uid} while connected and
+// Firebase automatically removes that entry the moment the tab disconnects
+// (closed, refreshed, lost network, etc). The total number of children under
+// "presence" is broadcast to the page as the live online count.
 function setupPresence() {
   const myPresenceRef = ref(database, `presence/${CHAT_USER_ID}`);
   const connectedRef = ref(database, ".info/connected");
@@ -313,6 +348,13 @@ function sendChatMessage() {
   });
 }
 
+// ---------- Storage retention ----------
+// Keeps only the newest MAX_STORED_MESSAGES messages in the database. Older
+// messages aren't just hidden client-side -- they're actually removed from
+// Firebase so the room doesn't grow forever. Every client that sends a
+// message triggers this check, so cleanup happens naturally without needing
+// a server function. Deleting the same already-gone message twice is
+// harmless, so overlapping cleanups from multiple tabs are not a problem.
 async function trimOldMessages() {
   try {
     const messagesRef = ref(database, `siteChat/rooms/${CHAT_ROOM_ID}/messages`);
@@ -338,6 +380,8 @@ async function trimOldMessages() {
   }
 }
 
+// Shows a visible "slow down" notice under the input with a live countdown,
+// then clears itself once the cooldown window passes.
 function flashChatCooldown(secondsLeft) {
   if (!chatCooldownNotice) return;
 
