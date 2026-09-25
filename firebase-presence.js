@@ -7,6 +7,8 @@ import {
   onDisconnect,
   set,
   push,
+  get,
+  remove,
   query,
   limitToLast,
   orderByChild,
@@ -23,47 +25,77 @@ const firebaseConfig = {
   appId: "1:347559506222:web:e854997d9048686b988abf"
 };
 
-const RANDOM_USERNAMES = [
-  "PixelPilot", "StudySpark", "NovaNote", "QuizRunner", "EchoByte", "ShadowVortex", "LunarQuest", "CrimsonFox", "SilentStorm", "FrostNova",
-  "BlazeHunter", "CyberRaven", "IronFalcon", "MysticWolf", "RapidBolt", "NeonKnight", "SolarStrike", "CosmicDrift", "GhostArrow", "ThunderPulse",
-  "NightGlider", "CrystalEdge", "WildComet", "SkyBreaker", "QuantumLeaf", "AquaPhantom", "StealthFlame", "PixelWizard", "RocketBloom", "StormCrafter",
-  "IceRanger", "TurboFalcon", "NovaBlitz", "ShadowPixel", "LavaDrifter", "CloudSeeker", "BrightComet", "FireNimbus", "SteelVoyager", "GoldenFrost",
-  "EchoRider", "StarPhantom", "SwiftJaguar", "VoltCrusher", "TurboViper", "FrostTiger", "NightSpark", "CrystalRogue", "SkyVortex", "RapidNova",
-  "BlazeDrift", "CyberStorm", "SolarRunner", "IronShadow", "PixelStorm", "StormRaven", "FlameVortex", "NeonDrifter", "EchoKnight", "ShadowRider",
-  "QuantumWolf", "SilverPhoenix", "BlueMeteor", "GhostFalcon", "BrightTiger", "WildNova", "SwiftOrbit", "SkyHunter", "MysticBlade", "CrystalFox",
-  "LunarBolt", "ThunderWolf", "NovaSpark", "FrozenEcho", "TurboBlaze", "PixelOrbit", "RapidFox", "GoldenStorm", "AquaKnight", "SilentNova",
-  "RocketWolf", "SteelArrow", "CosmicTiger", "FireRogue", "ShadowOrbit", "StormBlade", "CyberGlider", "EchoStorm", "VoltRider", "LavaHunter",
-  "NightWolf", "CrystalBolt", "IronComet", "SolarTiger", "SwiftBlaze", "NovaFalcon", "GhostRunner", "BlueVortex", "NeonFox", "WildArrow",
-  "QuantumSpark", "BrightKnight", "PixelTiger", "FrostVoyager", "ShadowComet", "RapidKnight", "EchoGlider", "SteelVortex", "ThunderRogue", "NightFalcon",
-  "MysticSpark", "LunarTiger", "RocketStorm", "GoldenWolf", "BlazeRider", "StormOrbit", "IcePhoenix", "SwiftPhantom", "CyberKnight", "CrystalMeteor",
-  "VoltNova", "SkyFox", "SilentArrow", "PixelCrusher", "SolarWolf", "GhostSpark", "WildBlade", "NovaGlider", "RapidMeteor", "EchoFalcon",
-  "SteelBlaze", "QuantumRider", "BrightOrbit", "ShadowPhoenix", "FrostComet", "NightBolt", "TurboTiger", "BlueKnight", "StormHunter", "LavaWolf",
-  "IronNova", "CrystalRunner", "NeonStorm", "GhostBlade", "SwiftFox", "RocketKnight", "MysticOrbit", "ThunderTiger", "GoldenArrow", "CyberMeteor",
-  "SolarRider", "PixelNova", "RapidVortex", "EchoWolf", "NightRogue", "FrostRunner", "ShadowBlaze", "VoltFalcon", "SkyNova", "WildPhantom",
-  "SteelSpark", "CrystalHunter", "TurboOrbit", "BlueFox", "NovaPhoenix", "GhostTiger", "IronStorm", "LunarRider", "BrightBlade", "SilentFalcon",
-  "RocketSpark", "QuantumKnight", "StormMeteor", "BlazeOrbit", "CyberWolf", "EchoPhoenix", "RapidArrow", "PixelFalcon", "NightMeteor", "SolarComet",
-  "ShadowTiger", "VoltOrbit", "WildKnight", "FrozenBlade", "GoldenNova", "SteelFox", "MysticRunner", "ThunderFalcon", "CrystalStorm", "NeonPhoenix",
-  "SwiftSpark", "GhostOrbit", "LavaKnight", "SkyTiger", "RocketNova", "EchoBlade", "QuantumFalcon", "RapidStorm", "BlueWolf", "PixelMeteor",
-  "NightPhoenix", "ShadowRunner", "FrostKnight", "VoltTiger", "IronOrbit", "CrystalPhoenix", "SolarFox", "TurboStorm", "WildSpark", "GoldenFalcon",
-  "CyberNova", "BlazeMeteor", "SilentTiger", "RocketFalcon", "BrightWolf", "EchoComet", "MysticNova", "ThunderOrbit", "PixelPhoenix", "RapidSpark",
-  "StormFox", "GhostNova", "QuantumMeteor", "CrystalKnight", "SkyPhoenix", "LunarStorm", "FrozenFalcon", "SteelNova", "NightOrbit", "NeonMeteor",
-  "SwiftWolf", "GoldenSpark", "ShadowMeteor", "TurboKnight", "BlueStorm", "SolarPhoenix", "WildFalcon", "EchoNova", "IronTiger", "VoltPhoenix",
-  "RocketMeteor", "PixelWolf", "GhostStorm", "BrightNova", "CyberFalcon", "CrystalOrbit", "NightSparkle", "QuantumPhoenix", "StormNova", "FrozenWolf",
-  "SkyMeteor", "RapidFalcon", "MysticStorm", "LunarPhoenix", "SteelTiger", "ThunderNova", "ShadowWolf", "GoldenMeteor", "NeonOrbit", "SwiftNova",
-  "PixelComet", "EchoTiger", "GhostPhoenix", "BlueNova", "RocketOrbit", "Eli Milton Estabrook"
+const USERNAME_VERBS = [
+  "Dash","Sprint","Blaze","Storm","Drift","Surge","Charge","Strike","Flash","Glide",
+  "Vault","Blitz","Rush","Soar","Dive","Climb","Roam","Wander","Chase","Hunt",
+  "Stalk","Prowl","Lurk","Creep","Sneak","Dodge","Duck","Leap","Jump","Bound",
+  "Spring","Flip","Spin","Twist","Roll","Tumble","Slide","Skid","Coast","Cruise",
+  "Zoom","Race","Bolt","Dart","Flee","Break","Crash","Smash","Slam","Crush",
+  "Shatter","Blast","Boom","Ignite","Spark","Flare","Glow","Shine","Gleam","Shimmer",
+  "Sparkle","Flicker","Pulse","Throb","Echo","Whisper","Shout","Roar","Growl","Snarl",
+  "Howl","Wail","Chant","Hum","Buzz","Hover","Float","Fly","Ride","Steer",
+  "Pilot","Guide","Lead","Track","Trace","Scan","Seek","Probe","Explore","Discover",
+  "Unlock","Forge","Craft","Build","Shape","Carve","Weave","Bind","Summon","Conjure"
 ];
 
-// Chat is now a single, unified room for everyone.
+const USERNAME_NOUNS = [
+  // Animals
+  "Wolf","Fox","Hawk","Falcon","Eagle","Tiger","Lion","Panther","Jaguar","Cobra",
+  "Viper","Raven","Owl","Bear","Lynx","Puma","Cheetah","Leopard","Bison","Stallion",
+  "Mustang","Shark","Orca","Dolphin","Heron","Osprey","Kestrel","Badger","Wolverine","Otter",
+  "Scorpion","Mantis","Hornet","Wasp","Spider","Serpent","Python","Condor","Vulture","Stingray",
+  // Nature & elements
+  "Storm","Thunder","Lightning","Blaze","Flame","Ember","Frost","Ice","Glacier","Blizzard",
+  "Cyclone","Tornado","Hurricane","Tempest","Monsoon","Tide","Wave","Current","River","Cascade",
+  "Waterfall","Canyon","Cliff","Summit","Peak","Ridge","Valley","Meadow","Forest","Jungle",
+  "Desert","Dune","Oasis","Mist","Fog","Cloud","Horizon","Aurora","Eclipse","Sunrise",
+  // Space & cosmic
+  "Comet","Meteor","Nebula","Galaxy","Nova","Supernova","Quasar","Pulsar","Asteroid","Orbit",
+  "Satellite","Cosmos","Star","Starlight","Moonlight","Meteorite","Vortex","Void","Portal","Dimension",
+  "Photon","Quantum","Plasma","Ion","Gravity","Singularity","Blackhole","Constellation","Zenith","Solstice",
+  // Fantasy & mythical
+  "Phoenix","Dragon","Griffin","Wraith","Specter","Phantom","Shadow","Spirit","Ghost","Demon",
+  "Titan","Golem","Sphinx","Hydra","Chimera","Kraken","Basilisk","Wyvern","Behemoth","Leviathan",
+  "Oracle","Sorcerer","Wizard","Warlock","Paladin","Knight","Templar","Ranger","Rogue","Assassin",
+  // Objects & weapons
+  "Blade","Sword","Dagger","Arrow","Bow","Spear","Shield","Hammer","Axe","Katana",
+  "Saber","Lance","Cannon","Rifle","Pistol","Bullet","Rocket","Missile","Bomb","Grenade",
+  "Armor","Helmet","Gauntlet","Talisman","Amulet","Relic","Rune","Compass","Anchor","Beacon",
+  // Abstract & misc
+  "Legend","Legacy","Destiny","Fate","Fortune","Glory","Honor","Valor","Victory","Triumph",
+  "Champion","Warrior","Hero","Outlaw","Renegade","Maverick","Nomad","Drifter","Wanderer","Voyager",
+  "Pioneer","Pathfinder","Vanguard","Sentinel","Guardian","Watcher","Hunter","Stalker","Reaper","Nightfall"
+];
+
+const USERNAME_SEPARATORS = ["", "-", "_"];
+
+function capitalizeWord(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function generateUsername() {
+  const verb = capitalizeWord(pickRandom(USERNAME_VERBS));
+  const noun = capitalizeWord(pickRandom(USERNAME_NOUNS));
+  const separator = pickRandom(USERNAME_SEPARATORS);
+  const number = 1 + Math.floor(Math.random() * 99); // 1-99
+  return `${verb}${separator}${noun}${number}`;
+}
+
 const CHAT_ROOM_ID = "general";
 const CHAT_ROOM_LABEL = "General Chat";
 
 const SESSION_ID_KEY = "game_hoster_session_id";
 const CHAT_USER_ID_KEY = "site_chat_user_id";
 const CHAT_NAME_KEY = "site_chat_random_name";
-const CHAT_MESSAGE_LIMIT = 60;
-const MAX_MESSAGE_LENGTH = 180;
-const MAX_NAME_LENGTH = 24;
-const CHAT_SEND_COOLDOWN_MS = 3000;
+const CHAT_MESSAGE_LIMIT = 100;
+const MAX_MESSAGE_LENGTH = 200;
+const MAX_NAME_LENGTH = 100;
+const CHAT_SEND_COOLDOWN_MS = 4000;
+const MAX_STORED_MESSAGES = CHAT_MESSAGE_LIMIT * 2;
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
@@ -82,6 +114,7 @@ const seenChatMessages = new Set();
 const chatMessages = document.getElementById("chatMessages");
 const chatForm = document.getElementById("chatForm");
 const chatInput = document.getElementById("chatInput");
+const chatCooldownNotice = document.getElementById("chatCooldownNotice");
 
 function getRandomId() {
   if (crypto?.randomUUID) return crypto.randomUUID();
@@ -109,7 +142,7 @@ function getPersistentId() {
 function getSavedChatName() {
   let name = cleanName(localStorage.getItem(CHAT_NAME_KEY));
   if (!name) {
-    name = RANDOM_USERNAMES[Math.floor(Math.random() * RANDOM_USERNAMES.length)] || "Guest";
+    name = generateUsername() || "Guest";
     localStorage.setItem(CHAT_NAME_KEY, name);
   }
   return name;
@@ -121,18 +154,10 @@ function connectDatabase() {
   isOnline = true;
 }
 
-// Tracks which game the player currently has open so outgoing chat messages
-// can be tagged with it. This is purely local state -- it doesn't write
-// anything to Firebase on its own.
 function setActiveGame(name) {
   currentGameName = name || null;
 }
 
-// ---------- Live "players online" count ----------
-// Every open tab registers itself under presence/{uid} while connected and
-// Firebase automatically removes that entry the moment the tab disconnects
-// (closed, refreshed, lost network, etc). The total number of children under
-// "presence" is broadcast to the page as the live online count.
 function setupPresence() {
   const myPresenceRef = ref(database, `presence/${CHAT_USER_ID}`);
   const connectedRef = ref(database, ".info/connected");
@@ -215,11 +240,7 @@ function renderMessage(key, message) {
   item.className = "chat-message";
   if (message.uid === CHAT_USER_ID || message.sid === SESSION_ID) item.classList.add("own");
 
-  const avatar = document.createElement("div");
-  avatar.className = "message-avatar";
   const displayName = cleanName(message.name) || "Guest";
-  avatar.textContent = displayName.slice(0, 1).toUpperCase();
-  avatar.style.background = avatarColor(displayName);
 
   const bubble = document.createElement("div");
   bubble.className = "message-bubble";
@@ -254,17 +275,8 @@ function renderMessage(key, message) {
   }
   meta.append(author, time);
   bubble.append(meta, text);
-  item.append(avatar, bubble);
+  item.append(bubble);
   chatMessages.appendChild(item);
-}
-
-// Deterministic, pleasant-looking color per username so avatars stay
-// consistent for the same person across messages.
-function avatarColor(name) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
-  const hue = hash % 360;
-  return `hsl(${hue}, 68%, 46%)`;
 }
 
 function sendChatMessage() {
@@ -292,6 +304,8 @@ function sendChatMessage() {
     room: CHAT_ROOM_ID,
     createdAt: Date.now(),
     ...(currentGameName ? { game: currentGameName } : {})
+  }).then(() => {
+    trimOldMessages();
   }).catch((error) => {
     console.warn("Firebase chat write failed:", error);
     lastChatSendAt = 0;
@@ -299,17 +313,52 @@ function sendChatMessage() {
   });
 }
 
-// Briefly shows a "slow down" hint near the input without disturbing the
-// message list, then clears itself once the cooldown window passes.
+async function trimOldMessages() {
+  try {
+    const messagesRef = ref(database, `siteChat/rooms/${CHAT_ROOM_ID}/messages`);
+    const snapshot = await get(query(messagesRef, orderByChild("createdAt")));
+    if (!snapshot.exists()) return;
+
+    const keysOldestFirst = [];
+    snapshot.forEach((child) => {
+      keysOldestFirst.push(child.key);
+    });
+
+    const excess = keysOldestFirst.length - MAX_STORED_MESSAGES;
+    if (excess <= 0) return;
+
+    const keysToDelete = keysOldestFirst.slice(0, excess);
+    await Promise.all(
+      keysToDelete.map((key) =>
+        remove(ref(database, `siteChat/rooms/${CHAT_ROOM_ID}/messages/${key}`)).catch(() => {})
+      )
+    );
+  } catch (error) {
+    console.warn("Firebase chat trim failed:", error);
+  }
+}
+
 function flashChatCooldown(secondsLeft) {
-  if (!chatInput) return;
-  const previousPlaceholder = chatInput.dataset.originalPlaceholder || chatInput.placeholder;
-  chatInput.dataset.originalPlaceholder = previousPlaceholder;
-  chatInput.placeholder = `Wait ${secondsLeft}s before sending again...`;
-  clearTimeout(flashChatCooldown._resetTimer);
-  flashChatCooldown._resetTimer = setTimeout(() => {
-    chatInput.placeholder = previousPlaceholder;
-  }, secondsLeft * 1000);
+  if (!chatCooldownNotice) return;
+
+  clearInterval(flashChatCooldown._tickTimer);
+
+  let remainingSeconds = secondsLeft;
+  const render = () => {
+    chatCooldownNotice.textContent = `Slow down — wait ${remainingSeconds}s before sending again`;
+  };
+  render();
+  chatCooldownNotice.classList.add("visible");
+
+  flashChatCooldown._tickTimer = setInterval(() => {
+    remainingSeconds -= 1;
+    if (remainingSeconds <= 0) {
+      clearInterval(flashChatCooldown._tickTimer);
+      chatCooldownNotice.classList.remove("visible");
+      return;
+    }
+    render();
+  }, 1000);
 }
 
 function maybeNotifyChatMessage(key, message) {
