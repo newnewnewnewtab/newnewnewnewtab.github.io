@@ -25,12 +25,6 @@ const firebaseConfig = {
   appId: "1:347559506222:web:e854997d9048686b988abf"
 };
 
-// ---------- Username generation ----------
-// Names are built on the fly as Verb(+separator+)Noun(+number 1-99), e.g.
-// "BlazeFalcon42", "Drift-Comet7", "Surge_Wolf88". With 100 verbs, 200 nouns,
-// 3 separator styles and 99 numbers, that's nearly 6 million combinations,
-// so collisions between two people online at once are effectively a
-// non-issue (the old fixed list of ~250 names collided constantly).
 const USERNAME_VERBS = [
   "Dashing","Sprinting","Blazing","Storming","Drifting","Surging","Charging","Striking","Flashing","Gliding",
   "Vaulting","Blitzing","Rushing","Soaring","Diving","Climbing","Roaming","Wandering","Chasing","Hunting",
@@ -45,29 +39,23 @@ const USERNAME_VERBS = [
 ];
 
 const USERNAME_NOUNS = [
-  // Animals
   "Wolf","Fox","Hawk","Falcon","Eagle","Tiger","Lion","Panther","Jaguar","Cobra",
   "Viper","Raven","Owl","Bear","Lynx","Puma","Cheetah","Leopard","Bison","Stallion",
   "Mustang","Shark","Orca","Dolphin","Heron","Osprey","Kestrel","Badger","Wolverine","Otter",
   "Scorpion","Mantis","Hornet","Wasp","Spider","Serpent","Python","Condor","Vulture","Stingray",
-  // Nature & elements
   "Storm","Thunder","Lightning","Blaze","Flame","Ember","Frost","Ice","Glacier","Blizzard",
   "Cyclone","Tornado","Hurricane","Tempest","Monsoon","Tide","Wave","Current","River","Cascade",
   "Waterfall","Canyon","Cliff","Summit","Peak","Ridge","Valley","Meadow","Forest","Jungle",
   "Desert","Dune","Oasis","Mist","Fog","Cloud","Horizon","Aurora","Eclipse","Sunrise",
-  // Space & cosmic
   "Comet","Meteor","Nebula","Galaxy","Nova","Supernova","Quasar","Pulsar","Asteroid","Orbit",
   "Satellite","Cosmos","Star","Starlight","Moonlight","Meteorite","Vortex","Void","Portal","Dimension",
   "Photon","Quantum","Plasma","Ion","Gravity","Singularity","Blackhole","Constellation","Zenith","Solstice",
-  // Fantasy & mythical
   "Phoenix","Dragon","Griffin","Wraith","Specter","Phantom","Shadow","Spirit","Ghost","Demon",
   "Titan","Golem","Sphinx","Hydra","Chimera","Kraken","Basilisk","Wyvern","Behemoth","Leviathan",
   "Oracle","Sorcerer","Wizard","Warlock","Paladin","Knight","Templar","Ranger","Rogue","Assassin",
-  // Objects & weapons
   "Blade","Sword","Dagger","Arrow","Bow","Spear","Shield","Hammer","Axe","Katana",
   "Saber","Lance","Cannon","Rifle","Pistol","Bullet","Rocket","Missile","Bomb","Grenade",
   "Armor","Helmet","Gauntlet","Talisman","Amulet","Relic","Rune","Compass","Anchor","Beacon",
-  // Abstract & misc
   "Legend","Legacy","Destiny","Fate","Fortune","Glory","Honor","Valor","Victory","Triumph",
   "Champion","Warrior","Hero","Outlaw","Renegade","Maverick","Nomad","Drifter","Wanderer","Voyager",
   "Pioneer","Pathfinder","Vanguard","Sentinel","Guardian","Watcher","Hunter","Stalker","Reaper","Nightfall"
@@ -229,7 +217,7 @@ function watchChatMessages() {
   onValue(messagesRef, (snapshot) => {
     chatMessages.innerHTML = "";
     if (!snapshot.exists()) {
-      chatMessages.innerHTML = '<div class="chat-empty">No messages yet. Say hi!</div>';
+      chatMessages.innerHTML = '<div class="chat-empty">No messages yet.</div>';
       hasLoadedChat = true;
       return;
     }
@@ -243,7 +231,7 @@ function watchChatMessages() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }, (error) => {
     console.warn("Firebase chat read failed:", error);
-    showChatStatus("Chat could not load. Check the Firebase database rules.");
+    showChatStatus("Chat database disabled");
   });
 }
 
@@ -326,13 +314,6 @@ function sendChatMessage() {
   });
 }
 
-// ---------- Storage retention ----------
-// Keeps only the newest MAX_STORED_MESSAGES messages in the database. Older
-// messages aren't just hidden client-side -- they're actually removed from
-// Firebase so the room doesn't grow forever. Every client that sends a
-// message triggers this check, so cleanup happens naturally without needing
-// a server function. Deleting the same already-gone message twice is
-// harmless, so overlapping cleanups from multiple tabs are not a problem.
 async function trimOldMessages() {
   try {
     const messagesRef = ref(database, `siteChat/rooms/${CHAT_ROOM_ID}/messages`);
@@ -358,8 +339,6 @@ async function trimOldMessages() {
   }
 }
 
-// Shows a visible "slow down" notice under the input with a live countdown,
-// then clears itself once the cooldown window passes.
 function flashChatCooldown(secondsLeft) {
   if (!chatCooldownNotice) return;
 
