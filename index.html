@@ -68,7 +68,7 @@ body {
 
 .tabs-wrapper, .tab, .ribbon { display: none !important; }
 .nav-active-game, .nav-active-game-dot, .nav-active-game-name { display: none !important; }
-.chat-button, .chat-button-icon, .chat-button-text, .chat-unread-dot { display: none !important; }
+
 
 #homepage {
   position: fixed; inset: 0;
@@ -119,8 +119,6 @@ body {
 .sidebar-nav-spacer { flex: 1; min-height: 12px; }
 .sidebar-footer { padding: 12px 10px 2px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.home-chat-unread { position: absolute; top: 9px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; border: 2px solid var(--bg-elevated); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
-.sidebar-link.has-unread .home-chat-unread { opacity: 1; transform: scale(1); }
 
 /* ---------- main content ---------- */
 .app-main { flex: 1; min-width: 0; height: 100%; overflow-y: auto; position: relative; scrollbar-width: thin; scrollbar-color: rgba(109,94,248,0.15) transparent; }
@@ -142,6 +140,24 @@ body {
 .home-search:focus { border-color: var(--border-accent); background: rgba(109,94,248,0.05); }
 .home-search::placeholder { color: var(--muted); }
 .home-game-count { font-size: 11px; font-weight: 700; color: var(--muted); white-space: nowrap; padding: 0 4px; }
+
+.apology-banner {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: rgba(251,191,36,0.08);
+  border: 1px solid rgba(251,191,36,0.28);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 22px;
+}
+.apology-banner-icon {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(251,191,36,0.18); color: #fbbf24;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900;
+}
+.apology-banner-text { min-width: 0; }
+.apology-banner-title { font-size: 12.5px; font-weight: 800; color: #fde68a; margin-bottom: 3px; }
+.apology-banner-body { font-size: 12.5px; color: var(--muted-light); line-height: 1.5; }
 
 .main-hero { margin-bottom: 26px; }
 .home-eyebrow {
@@ -281,29 +297,6 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
   overflow: hidden; text-overflow: ellipsis;
 }
 
-.hud-chat-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 38px; height: 100%;
-  border: none; background: transparent;
-  color: rgba(255,255,255,0.38);
-  cursor: pointer;
-  position: relative;
-  transition: color 0.18s, background 0.18s;
-  flex-shrink: 0;
-}
-.hud-chat-btn:hover { background: rgba(109,94,248,0.1); color: #a5b4fc; }
-.hud-chat-btn.open { background: rgba(109,94,248,0.15); color: #6d5ef8; }
-.hud-chat-btn svg { width: 14px; height: 14px; }
-.hud-chat-unread {
-  position: absolute; top: 6px; right: 6px;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #22c55e; border: 1.5px solid rgba(5,10,22,0.9);
-  opacity: 0; transform: scale(0.6);
-  transition: opacity 0.18s, transform 0.18s;
-}
-.hud-chat-btn.has-unread .hud-chat-unread { opacity: 1; transform: scale(1); animation: unreadPulse 1.8s ease-out infinite; }
-@keyframes unreadPulse { 0%{box-shadow:0 0 0 0 rgba(34,197,94,0.45)} 100%{box-shadow:0 0 0 7px rgba(34,197,94,0)} }
-
 .hud-brand,.hud-sep { display: none; }
 
 
@@ -311,54 +304,6 @@ body.game-active #gameHud { opacity: 1; pointer-events: all; transform: translat
 .float-btn { display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px; border-radius: 100px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; backdrop-filter: blur(12px); border: 1px solid; }
 .float-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 .float-btn-games { display: none; }
-.float-btn-chat { background: linear-gradient(135deg,rgba(6,182,212,0.25),rgba(15,23,42,0.9)); border-color: rgba(165,180,252,0.32); color: #eef2ff; position: relative; }
-.float-btn-chat:hover { background: linear-gradient(135deg,rgba(34,211,238,0.38),rgba(15,23,42,0.92)); border-color: rgba(165,243,252,0.6); color: #fff; }
-.float-btn-chat.open { background: linear-gradient(135deg,#a5b4fc,#6d5ef8); color: #ffffff; border-color: transparent; }
-body.game-active .float-btn-chat { display: none; }
-.float-chat-unread { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #22c55e; border: 2px solid var(--bg); opacity: 0; transform: scale(0.7); transition: opacity 0.18s, transform 0.18s; }
-.float-btn-chat.has-unread .float-chat-unread { opacity: 1; transform: scale(1); }
-
-/* ---------- AI Chat (newtabai.html) ---------- */
-.float-btn-ai { background: linear-gradient(135deg,rgba(45,212,191,0.28),rgba(15,23,42,0.9)); border-color: rgba(153,246,228,0.32); color: #eef2ff; }
-.float-btn-ai:hover { background: linear-gradient(135deg,rgba(45,212,191,0.42),rgba(15,23,42,0.92)); border-color: rgba(153,246,228,0.6); color: #fff; }
-body.game-active .float-btn-ai { display: none; }
-
-#aiChatModal {
-  position: fixed; inset: 0; z-index: 9500;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(2,4,10,0.78);
-  backdrop-filter: blur(10px);
-  opacity: 0; visibility: hidden;
-  transition: opacity 0.25s ease;
-  padding: 20px;
-}
-#aiChatModal.active { opacity: 1; visibility: visible; }
-.ai-chat-panel {
-  position: relative;
-  width: min(680px, 100%);
-  height: min(88vh, 860px);
-  border-radius: 22px;
-  overflow: hidden;
-  border: 1px solid rgba(45,212,191,0.25);
-  box-shadow: 0 50px 100px -30px rgba(0,0,0,0.75);
-  transform: scale(0.97) translateY(10px);
-  transition: transform 0.3s var(--ease-spring);
-  background: #07080f;
-}
-#aiChatModal.active .ai-chat-panel { transform: scale(1) translateY(0); }
-.ai-chat-panel iframe { width: 100%; height: 100%; border: 0; display: block; background: #07080f; }
-.ai-chat-close {
-  position: absolute; top: 12px; right: 12px; z-index: 2;
-  width: 32px; height: 32px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(5,10,22,0.7); border: 1px solid rgba(255,255,255,0.14);
-  color: #f8fafc; cursor: pointer; font-size: 14px; line-height: 1;
-  transition: background 0.18s, color 0.18s;
-}
-.ai-chat-close:hover { background: rgba(255,90,110,0.85); border-color: transparent; }
-@media (max-width: 760px) {
-  .ai-chat-panel { height: 92vh; border-radius: 16px; }
-}
 
 #gameLauncher { position: fixed; left: 0; top: 0; bottom: 0; z-index: 900; display: flex; pointer-events: none; }
 #launcherTab { display: none; }
@@ -392,20 +337,6 @@ body.game-active .float-btn-ai { display: none; }
 #viewer { position: fixed; inset: 0; width: 100%; height: 100%; border: none; background: #000; opacity: 0; pointer-events: none; z-index: 5; }
 body.game-active #viewer { opacity: 1; pointer-events: all; }
 
-.site-chat { position: fixed; inset: 0 0 0 auto; width: min(34vw,460px); min-width: 330px; max-width: 100vw; background: #10141d; border-left: 1px solid #232b3a; box-shadow: -16px 0 40px rgba(0,0,0,0.35); display: grid; grid-template-rows: auto 1fr auto; transform: translateX(100%); transition: transform 0.32s var(--ease-spring); z-index: 1700; }
-.site-chat.open { transform: translateX(0); }
-.chat-header { padding: 18px 18px 14px; border-bottom: 1px solid #202839; }
-.chat-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.chat-title { font-size: 16px; font-weight: 700; letter-spacing: 0; color: #f1f5f9; }
-.chat-header-actions { display: flex; align-items: center; gap: 8px; }
-.chat-close-btn { width: 28px; height: 28px; border: 1px solid #232b3a; background: #161c28; color: var(--text); font-size: 15px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-.chat-close-btn:hover { background: #1c2333; border-color: #2c3547; color: #fff; }
-.chat-profile { margin-top: 12px; }
-.identity-summary { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid #232b3a; border-radius: 8px; background: #131826; }
-.identity-main { min-width: 0; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
-.identity-label { color: var(--muted); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
-.identity-name { color: #e2e8f0; font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
 /* ---------- online player count badge ---------- */
 .online-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 8px; border: 1px solid #223022; background: #121a15; white-space: nowrap; }
 .online-badge .online-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,0.5); animation: onlinePulse 2s ease-out infinite; flex-shrink: 0; }
@@ -413,55 +344,7 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 .online-badge .online-label { font-size: 10px; font-weight: 600; color: #7dd3a0; text-transform: uppercase; letter-spacing: 0.04em; }
 @keyframes onlinePulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); } 70% { box-shadow: 0 0 0 6px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
 .sidebar-online { margin: 4px 8px 16px; }
-.chat-online-badge { padding: 4px 10px 4px 8px; }
-.chat-online-badge .online-count { font-size: 11px; }
-.chat-online-badge .online-label { font-size: 9px; }
 .hud-online-badge { padding: 5px 11px 5px 9px; }
-.chat-messages { min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: #2c3547 transparent; }
-.chat-messages::-webkit-scrollbar { width: 4px; }
-.chat-messages::-webkit-scrollbar-thumb { background: #2c3547; border-radius: 99px; }
-.chat-empty { color: var(--muted); margin: auto; text-align: center; line-height: 1.5; max-width: 240px; font-size: 13px; }
-.chat-disabled-notice { margin: auto; max-width: 280px; text-align: center; color: #fca5a5; font-size: 22px; font-weight: 700; line-height: 1.2; text-transform: uppercase; }
-.chat-message { display: block; max-width: 92%; animation: messageIn 0.18s ease-out; }
-.chat-message.own { align-self: flex-end; }
-.message-bubble { display: grid; gap: 4px; min-width: 0; padding: 9px 12px; border: 1px solid #232b3a; border-radius: 10px; background: #161c28; transition: border-color 0.15s; }
-.chat-message.own .message-bubble { border-color: #2c5282; background: #16233a; }
-.message-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.message-author { display: inline-flex; align-items: baseline; min-width: 0; gap: 7px; flex-wrap: wrap; }
-.message-name { color: #93c5fd; font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chat-message.own .message-name { color: #7dd3fc; }
-.message-game-tag {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 1px 8px; border-radius: 6px;
-  background: #14251f;
-  border: 1px solid #234438;
-  color: #6ee7b7; font-size: 9px; font-weight: 700;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;
-  cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-.message-game-tag::before { content: '▸'; font-size: 8px; opacity: 0.8; }
-.message-game-tag:hover { background: #1a3329; border-color: #2f5c4a; color: #a7f3d0; }
-.message-time { color: var(--muted); font-size: 10px; white-space: nowrap; flex-shrink: 0; }
-.message-text { color: #e2e8f0; overflow-wrap: anywhere; line-height: 1.42; font-size: 13px; }
-@keyframes messageIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
-.chat-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px 16px 16px; border-top: 1px solid #202839; background: #10141d; }
-.chat-cooldown { grid-column: 1 / -1; padding: 0 2px; max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.2s ease, opacity 0.2s ease, margin 0.2s ease; font-size: 12px; font-weight: 600; color: #fbbf24; text-align: center; margin: 0; }
-.chat-cooldown.visible { max-height: 24px; opacity: 1; margin: 0 0 4px; }
-.chat-input { height: 42px; padding: 0 11px; font-size: 13px; width: 100%; min-width: 0; border: 1px solid #232b3a; border-radius: 8px; background: #131826; color: var(--text); outline: none; font: inherit; transition: border-color 0.15s; }
-.chat-input:focus { border-color: #3b82f6; }
-.chat-input:disabled { opacity: 0.6; }
-.chat-send { width: 44px; height: 42px; border: 1px solid #2563eb; border-radius: 8px; background: #2563eb; color: #ffffff; font-size: 19px; font-weight: 700; cursor: pointer; transition: background 0.15s, transform 0.1s; }
-.chat-send:hover { background: #3b82f6; }
-.chat-send:active { transform: translateY(1px); }
-.chat-send:disabled { cursor: not-allowed; opacity: 0.5; transform: none; background: #2563eb; }
-
-.chat-toast-stack { position: fixed; right: 16px; bottom: 72px; z-index: 1900; display: grid; gap: 8px; width: min(310px,calc(100vw - 32px)); pointer-events: none; }
-.chat-toast { border: 1px solid #232b3a; border-radius: 10px; padding: 10px 13px; background: #131826; box-shadow: 0 12px 32px rgba(0,0,0,0.3); animation: toastIn 0.22s var(--ease-spring); }
-.chat-toast.hide { animation: toastOut 0.18s ease forwards; }
-.toast-name { color: #e2e8f0; font-size: 11px; font-weight: 700; }
-.toast-text { margin-top: 2px; color: #cbd5e1; font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
-@keyframes toastIn { from{opacity:0;transform:translate(12px,6px) scale(0.97)} to{opacity:1;transform:translate(0,0) scale(1)} }
-@keyframes toastOut { to{opacity:0;transform:translate(8px,4px) scale(0.98)} }
 
 @media (max-width: 860px) {
   #homepage { flex-direction: column; }
@@ -480,9 +363,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 }
 @media (max-width: 760px) {
   .game-grid { grid-template-columns: repeat(auto-fill,minmax(148px,1fr)); gap: 8px; }
-  .site-chat { width: min(94vw,420px); min-width: 0; }
-  .identity-summary { grid-template-columns: 1fr; }
-  .chat-form { grid-template-columns: 1fr auto; }
   #gameHud { top: 10px; left: 10px; }
   #floatActions { bottom: 14px; right: 14px; }
 }
@@ -526,15 +406,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12L12 4L21 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10V20C5 20.55 5.45 21 6 21H10V16H14V21H18C18.55 21 19 20.55 19 20V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="link-label">Home</span>
       </button>
-      <button class="sidebar-link" id="homeAiBtn" type="button">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.8"/></svg>
-        <span class="link-label">AI Chat</span>
-      </button>
-      <button class="sidebar-link" id="homeChatBtn" type="button">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-        <span class="link-label">Live Chat</span>
-        <span class="home-chat-unread"></span>
-      </button>
     </nav>
 
     <div class="sidebar-nav-spacer"></div>
@@ -543,6 +414,13 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
 
   <main class="app-main">
     <div class="main-inner">
+      <div id="apologyBanner" class="apology-banner" role="status">
+        <div class="apology-banner-icon">!</div>
+        <div class="apology-banner-text">
+          <div class="apology-banner-title">Where is chat?</div>
+          <div class="apology-banner-body">I'm very sorry about the whole chat situation, it went further than I had thought that it would. It will most likely never return to New Tab.</div>
+        </div>
+      </div>
       <div class="main-topbar">
         <div class="home-search-wrap">
           <svg class="home-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -570,10 +448,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
     </div>
   </div>
   <div class="nav-spacer"></div>
-  <button id="chatToggle" class="chat-button" type="button" style="display:none">
-    <span class="chat-button-text">Chat</span>
-    <span class="chat-unread-dot"></span>
-  </button>
 </nav>
 
 <div id="gameLauncher">
@@ -617,13 +491,6 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
       <span class="online-count" id="onlineCountHud">—</span>
       <span class="online-label">online</span>
     </div>
-
-    <button class="hud-chat-btn" id="hudChatBtn" type="button" title="Open chat">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-      </svg>
-      <span class="hud-chat-unread"></span>
-    </button>
   </div>
 
   <span class="hud-brand" style="display:none">New Tab 2</span>
@@ -636,60 +503,9 @@ body.game-active #viewer { opacity: 1; pointer-events: all; }
     <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/></svg>
     Games
   </button>
-  <button id="floatChatBtn" class="float-btn float-btn-chat" type="button">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.75 6.75C4.75 5.65 5.65 4.75 6.75 4.75H17.25C18.35 4.75 19.25 5.65 19.25 6.75V13.25C19.25 14.35 18.35 15.25 17.25 15.25H12.75L8.25 19V15.25H6.75C5.65 15.25 4.75 14.35 4.75 13.25V6.75Z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>
-    Chat
-    <span class="float-chat-unread"></span>
-  </button>
-  <button id="floatAiBtn" class="float-btn float-btn-ai" type="button">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.8"/></svg>
-    AI Chat
-  </button>
 </div>
-
-<div id="aiChatModal" aria-hidden="true">
-  <div class="ai-chat-panel">
-    <button class="ai-chat-close" id="aiChatCloseBtn" type="button" aria-label="Close AI chat">&#x2715;</button>
-    <iframe id="aiChatFrame" title="AI Chat" loading="lazy"></iframe>
-  </div>
-</div>
-
-<aside id="siteChat" class="site-chat" aria-label="Site chat">
-  <header class="chat-header">
-    <div class="chat-title-row">
-      <div class="chat-title">Live Chat</div>
-      <div class="chat-header-actions">
-        <div class="online-badge chat-online-badge" id="onlineBadgeChat">
-          <span class="online-dot"></span>
-          <span class="online-count" id="onlineCountChat">—</span>
-          <span class="online-label">online</span>
-        </div>
-        <button id="chatCloseBtn" class="chat-close-btn" type="button" aria-label="Close chat">&#x2715;</button>
-      </div>
-    </div>
-    <div class="chat-profile">
-      <div class="identity-summary">
-        <div class="identity-main">
-          <span class="identity-label">username</span>
-          <div id="chatLockedName" class="identity-name">Loading...</div>
-        </div>
-      </div>
-    </div>
-  </header>
-  <div id="chatMessages" class="chat-messages">
-    <div class="chat-empty">Open chat to load the latest messages.</div>
-  </div>
-  <form id="chatForm" class="chat-form">
-    <div id="chatCooldownNotice" class="chat-cooldown" aria-live="polite"></div>
-    <input id="chatInput" class="chat-input" maxlength="240" autocomplete="off" placeholder="Message everyone..." />
-    <button id="chatSend" class="chat-send" type="submit" aria-label="Send">&#x203A;</button>
-  </form>
-</aside>
-
-<div id="chatToastStack" class="chat-toast-stack" aria-live="polite"></div>
 
 <script src="games.js"></script>
-<script>window.CHAT_ENABLED = true;</script>
 <script type="module" src="firebase-presence.js"></script>
 
 <script>
@@ -701,16 +517,7 @@ const dropdownTriggerBtn = document.getElementById("dropdownTriggerBtn");
 const statusText = document.getElementById("status");
 const iframe = document.getElementById("viewer");
 const siteNav = document.getElementById("siteNav");
-const chatToggle = document.getElementById("chatToggle");
-const chatCloseBtn = document.getElementById("chatCloseBtn");
-const siteChat = document.getElementById("siteChat");
-const chatInput = document.getElementById("chatInput");
-const chatForm = document.getElementById("chatForm");
-const chatMessages = document.getElementById("chatMessages");
-const chatSend = document.getElementById("chatSend");
-const chatLockedName = document.getElementById("chatLockedName");
 const onlineCountHome = document.getElementById("onlineCountHome");
-const onlineCountChat = document.getElementById("onlineCountChat");
 const onlineCountHud = document.getElementById("onlineCountHud");
 const navActiveGame = document.getElementById("navActiveGame");
 const navActiveGameName = document.getElementById("navActiveGameName");
@@ -720,13 +527,8 @@ const homeSearch = document.getElementById("homeSearch");
 const homeGameCount = document.getElementById("homeGameCount");
 const hudGameName = document.getElementById("hudGameName");
 const hudHomeBtn = document.getElementById("hudHomeBtn");
-const floatChatBtn = document.getElementById("floatChatBtn");
-const homeChatBtn = document.getElementById("homeChatBtn");
 
 const MAX_VISIBLE = 10;
-const CHAT_NAME_KEY = "site_chat_random_name";
-const CHAT_ENABLED = window.CHAT_ENABLED !== false;
-let currentChatName = localStorage.getItem(CHAT_NAME_KEY) || "Loading...";
 
 const SWATCH_PALETTES = [
   ["#1e3a5f","#38bdf8"],["#1a3326","#34d399"],["#2d1b4e","#a78bfa"],
@@ -919,7 +721,6 @@ function switchToGame(name) {
   if (!el) return;
   loadGame(name, data.url, el);
   closeLauncher();
-  setChatOpen(false);
 }
 window.switchToGame = switchToGame;
 
@@ -940,7 +741,6 @@ function loadGame(name, url, element) {
   navActiveGame.classList.add("visible");
   currentActive = name;
   closeLauncher();
-  window.gamePresence?.setActiveGame(name);
 }
 
 hudHomeBtn.addEventListener("click", () => {
@@ -949,118 +749,11 @@ hudHomeBtn.addEventListener("click", () => {
   siteNav.classList.remove("game-active");
 });
 
-function setChatOpen(isOpen) {
-  siteChat.classList.toggle("open", isOpen);
-  floatChatBtn.classList.toggle("open", isOpen);
-  homeChatBtn.classList.toggle("open", isOpen);
-  chatToggle.classList.toggle("open", isOpen);
-  hudChatBtn.classList.toggle("open", isOpen);
-  chatToggle.setAttribute("aria-label", isOpen ? "Close chat" : "Open chat");
-  document.dispatchEvent(new CustomEvent("siteChatToggled", { detail: { open: isOpen } }));
-  if (isOpen) {
-    floatChatBtn.classList.remove("has-unread");
-    homeChatBtn.classList.remove("has-unread");
-    chatToggle.classList.remove("has-unread");
-    hudChatBtn.classList.remove("has-unread");
-    updateChatPanelState();
-    chatInput.focus();
-  }
-}
-
-floatChatBtn.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
-homeChatBtn.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
-chatToggle.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
-const hudChatBtn = document.getElementById("hudChatBtn");
-hudChatBtn.addEventListener("click", () => setChatOpen(!siteChat.classList.contains("open")));
-chatCloseBtn.addEventListener("click", () => setChatOpen(false));
-
-const aiChatModal = document.getElementById("aiChatModal");
-const aiChatFrame = document.getElementById("aiChatFrame");
-const AI_CHAT_SRC = "newtabai.html";
-
-let aiChatLoaded = false;
-function openAiChat() {
-  if (!aiChatLoaded) { aiChatFrame.src = AI_CHAT_SRC; aiChatLoaded = true; }
-  aiChatModal.classList.add("active");
-  aiChatModal.setAttribute("aria-hidden", "false");
-}
-function closeAiChat() {
-  aiChatModal.classList.remove("active");
-  aiChatModal.setAttribute("aria-hidden", "true");
-}
-
-document.getElementById("homeAiBtn")?.addEventListener("click", openAiChat);
-document.getElementById("floatAiBtn")?.addEventListener("click", openAiChat);
-document.getElementById("aiChatCloseBtn")?.addEventListener("click", closeAiChat);
-aiChatModal.addEventListener("click", (e) => { if (e.target === aiChatModal) closeAiChat(); });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && aiChatModal.classList.contains("active")) closeAiChat(); });
-
-chatForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  if (!CHAT_ENABLED) { updateChatPanelState(); return; }
-  document.dispatchEvent(new CustomEvent("siteChatSubmit"));
-});
-
-document.addEventListener("siteChatNewMessage", () => {
-  if (!siteChat.classList.contains("open")) {
-    floatChatBtn.classList.add("has-unread");
-    homeChatBtn.classList.add("has-unread");
-    chatToggle.classList.add("has-unread");
-    hudChatBtn.classList.add("has-unread");
-  }
-});
-
-document.addEventListener("siteChatIdentityChanged", (event) => {
-  currentChatName = cleanChatName(event.detail?.name) || currentChatName;
-  renderChatChrome();
-});
-
-document.addEventListener("siteChatNotify", (event) => {
-  showChatToast(event.detail?.name, event.detail?.text, event.detail?.room);
-});
-
 document.addEventListener("sitePlayersOnline", (event) => {
   const count = event.detail?.count ?? "—";
   if (onlineCountHome) onlineCountHome.textContent = count;
-  if (onlineCountChat) onlineCountChat.textContent = count;
   if (onlineCountHud) onlineCountHud.textContent = count;
 });
-
-function updateChatPanelState() {
-  chatInput.disabled = !CHAT_ENABLED;
-  chatSend.disabled = !CHAT_ENABLED;
-  if (!CHAT_ENABLED) {
-    chatInput.placeholder = "Chat Disabled";
-    chatMessages.innerHTML = '<div class="chat-disabled-notice">Coming september (maybe)</div>';
-    return;
-  }
-  chatInput.placeholder = "Message everyone...";
-}
-
-function cleanChatName(value) { return String(value || "").replace(/\s+/g," ").trim().slice(0,24); }
-
-function renderChatChrome() {
-  const name = currentChatName || "Guest";
-  chatLockedName.textContent = name;
-  updateChatPanelState();
-}
-
-function showChatToast(name, text, room) {
-  const stack = document.getElementById("chatToastStack");
-  if (!stack || siteChat.classList.contains("open")) return;
-  const toast = document.createElement("div");
-  toast.className = "chat-toast";
-  const toastName = document.createElement("div");
-  toastName.className = "toast-name";
-  toastName.textContent = (cleanChatName(name) || "Someone") + " \u2014 " + (room || "Chat");
-  const toastText = document.createElement("div");
-  toastText.className = "toast-text";
-  toastText.textContent = String(text || "").slice(0,120);
-  toast.append(toastName, toastText);
-  stack.appendChild(toast);
-  while (stack.children.length > 3) stack.firstElementChild.remove();
-  setTimeout(() => { toast.classList.add("hide"); setTimeout(() => toast.remove(), 220); }, 4200);
-}
 
 const emailPopup = document.getElementById("emailPopup");
 const yesBtn = document.getElementById("yesBtn");
@@ -1082,7 +775,6 @@ function dismiss() { emailPopup.classList.remove("active"); localStorage.setItem
 yesBtn.onclick = () => { window.open(FORM_LINK,"_blank"); dismiss(); };
 noBtn.onclick = dismiss;
 
-renderChatChrome();
 build();
 </script>
 </body>
